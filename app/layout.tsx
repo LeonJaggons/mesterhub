@@ -1,23 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Darker_Grotesque } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "./components/Header";
 import FeedbackFab from "./components/FeedbackFab";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const darkerGrotesque = Darker_Grotesque({
-  variable: "--font-darker-grotesque",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"],
+const googleSansFlex = localFont({
+  src: "../public/GoogleSansFlex.ttf",
+  variable: "--font-google-sans-flex",
+  display: "swap",
+  declarations: [
+    { prop: "size-adjust", value: "88%" },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -33,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${darkerGrotesque.variable} h-full antialiased`}
+      className={`${googleSansFlex.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col root">
           <Header />
