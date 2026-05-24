@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { collection, query, where, getDocs } from 'firebase/firestore'
@@ -191,7 +191,7 @@ function RequestCard({ req }: { req: EnrichedRequest }) {
   )
 }
 
-export default function RequestsPage() {
+function RequestsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const projectId = searchParams.get('projectId') ?? ''
@@ -339,5 +339,25 @@ export default function RequestsPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function RequestsPage() {
+  return (
+    <Suspense fallback={(
+      <main className="bg-gray-50 min-h-screen flex-1">
+        <div className="max-w-3xl mx-auto px-4 py-10">
+          <h1 className={styles.title}>My requests</h1>
+          <p className={styles.subtitle}>Track quotes and projects with the pros you&apos;ve contacted.</p>
+          <div className="space-y-3 animate-pulse">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-40 bg-white rounded-2xl border border-gray-200" />
+            ))}
+          </div>
+        </div>
+      </main>
+    )}>
+      <RequestsPageContent />
+    </Suspense>
   )
 }
