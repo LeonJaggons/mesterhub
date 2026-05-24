@@ -1032,6 +1032,12 @@ export async function PATCH(
       const conv = convSnap.data() as ConversationDoc
       if (conv.customerUid !== user.uid && conv.proUid !== user.uid) throw new Error('FORBIDDEN')
 
+      const recipientRole = senderRole === 'pro' ? 'customer' : 'pro'
+      const recipientUid = recipientRole === 'pro' ? req.proUid : req.customerUid
+      const recipientEmail = recipientRole === 'pro' ? await proEmail(req.proUid) : cleanString(req.customerEmail)
+      const senderName = senderRole === 'pro'
+        ? cleanString(req.proName, 'Your pro')
+        : cleanString(req.customerName, 'The customer')
       const batch = adminDb.batch()
       batch.set(convRef.collection('messages').doc(), {
         senderUid: user.uid,
@@ -1043,15 +1049,26 @@ export async function PATCH(
         lastMessage: text,
         lastMessageAt: FieldValue.serverTimestamp(),
       })
-      await batch.commit()
-      await sendLifecycleEmail({
-        to: senderRole === 'pro' ? req.customerEmail : await proEmail(req.proUid),
-        event: 'message.sent',
+      batch.set(adminDb.collection('messageDigests').doc(`${requestId}_${recipientUid}`), {
         requestId,
-        subject: `New message about ${req.categoryName}`,
-        text,
-        metadata: { senderUid: user.uid, senderRole, proUid: req.proUid, customerUid: req.customerUid },
-      })
+        recipientUid,
+        recipientRole,
+        recipientEmail,
+        senderName,
+        lastSenderUid: user.uid,
+        lastSenderRole: senderRole,
+        lastMessage: text,
+        lastMessageAt: FieldValue.serverTimestamp(),
+        pendingCount: FieldValue.increment(1),
+        status: 'pending',
+        categoryName: req.categoryName,
+        proUid: req.proUid,
+        customerUid: req.customerUid,
+        proName: req.proName,
+        customerName: req.customerName,
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true })
+      await batch.commit()
       return Response.json({ ok: true })
     }
 
