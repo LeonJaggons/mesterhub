@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createUserWithEmailAndPassword, updateProfile, type User } from 'firebase/auth'
-import { auth } from '@/firebase/index'
+import type { User } from 'firebase/auth'
 import { onAuthChange } from '@/firebase/auth'
 import { save } from '../store'
 import styles from '../signup.module.css'
@@ -65,9 +64,6 @@ export default function AccountPage() {
     setAuthError(null)
     try {
       if (currentUser) {
-        if (fullName.trim() && currentUser.displayName !== fullName.trim()) {
-          await updateProfile(currentUser, { displayName: fullName.trim() })
-        }
         save({
           fullName: fullName.trim(),
           email: currentUser.email ?? email.trim(),
@@ -76,13 +72,11 @@ export default function AccountPage() {
           phoneVerified: DEMO_PHONE_VERIFICATION && otpComplete,
         })
       } else {
-        const credential = await createUserWithEmailAndPassword(auth, email, password)
-        await updateProfile(credential.user, { displayName: fullName })
-        save({ fullName, email, phone, password: '', phoneVerified: DEMO_PHONE_VERIFICATION && otpComplete })
+        save({ fullName: fullName.trim(), email: email.trim(), phone, password, phoneVerified: DEMO_PHONE_VERIFICATION && otpComplete })
       }
       router.push('/pro/signup/trade')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Could not create account.'
+      const msg = err instanceof Error ? err.message : 'Could not save account details.'
       setAuthError(msg.replace('Firebase: ', '').replace(/ \(auth\/.*\)\.?/, ''))
     } finally {
       setSubmitting(false)
@@ -210,7 +204,7 @@ export default function AccountPage() {
         disabled={!canContinue || submitting}
         onClick={handleContinue}
       >
-        {submitting ? (usingExistingAccount ? 'Saving…' : 'Creating account…') : 'Continue'}
+        {submitting ? 'Saving…' : 'Continue'}
       </button>
     </div>
   )

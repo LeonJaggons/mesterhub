@@ -54,6 +54,7 @@ export type PastProject = {
 }
 
 const KEY = 'mh_pro_signup'
+const stagedFiles = new Map<string, File>()
 
 export function load(): SignupData {
   if (typeof window === 'undefined') return {}
@@ -69,4 +70,17 @@ export function save(patch: Partial<SignupData>): void {
 export function clear(): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem(KEY)
+  stagedFiles.clear()
+}
+
+export function stageFile(key: string, file: File): void {
+  stagedFiles.set(key, file)
+}
+
+export function getStagedFile(key: string): File | undefined {
+  return stagedFiles.get(key)
+}
+
+export function getStagedFiles(): Map<string, File> {
+  return stagedFiles
 }

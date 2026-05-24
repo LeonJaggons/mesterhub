@@ -3,9 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdCheckCircle, MdOutlineUploadFile } from 'react-icons/md'
-import { auth } from '@/firebase/index'
-import { uploadProFile } from '@/firebase/storage'
-import { load, save } from '../store'
+import { load, save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
@@ -51,7 +49,6 @@ function UploadBox({ state, fileName, inputRef, onRetry }: {
 export default function CredentialsPage() {
   const router = useRouter()
   const data = load()
-  const uid = auth.currentUser?.uid
   const isRegulated = data.regulated ?? false
   const needsInsurance = data.insuranceRequired ?? false
 
@@ -66,30 +63,20 @@ export default function CredentialsPage() {
 
   async function handleCertChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !uid) return
+    if (!file) return
     setCertFileName(file.name)
-    setCertState('uploading')
-    try {
-      const url = await uploadProFile(uid, 'credentials/certificate', file)
-      save({ certificateUrl: url })
-      setCertState('done')
-    } catch {
-      setCertState('error')
-    }
+    stageFile('certificate', file)
+    save({ certificateUrl: '' })
+    setCertState('done')
   }
 
   async function handleInsuranceChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !uid) return
+    if (!file) return
     setInsuranceFileName(file.name)
-    setInsuranceState('uploading')
-    try {
-      const url = await uploadProFile(uid, 'credentials/insurance', file)
-      save({ insuranceUrl: url })
-      setInsuranceState('done')
-    } catch {
-      setInsuranceState('error')
-    }
+    stageFile('insurance', file)
+    save({ insuranceUrl: '' })
+    setInsuranceState('done')
   }
 
   if (!isRegulated) {

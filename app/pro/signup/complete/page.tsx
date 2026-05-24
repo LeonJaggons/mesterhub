@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { load, clear } from '../store'
+import { useRouter } from 'next/navigation'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { load, clear, getStagedFile, getStagedFiles, type SignupData } from '../store'
 import { auth } from '@/firebase/index'
 import { createProProfile } from '@/firebase/pros'
+import { uploadProFile } from '@/firebase/storage'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
@@ -17,23 +20,76 @@ const CHECKLIST = [
 ]
 
 export default function CompletePage() {
+  const router = useRouter()
   const data = load()
+  const submittedRef = useRef(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const user = auth.currentUser
-    if (!user) return
-    createProProfile(user.uid, data)
+    if (submittedRef.current) return
+    submittedRef.current = true
+
+    async function submitProfile() {
+      const draft: SignupData = { ...data }
+      let user = auth.currentUser
+
+      if (!user) {
+        if (!draft.email || !draft.password) {
+          throw new Error('Account email and password are required. Please return to the account step.')
+        }
+        const credential = await createUserWithEmailAndPassword(auth, draft.email, draft.password)
+        user = credential.user
+      }
+
+      if (draft.fullName?.trim() && user.displayName !== draft.fullName.trim()) {
+        await updateProfile(user, { displayName: draft.fullName.trim() })
+      }
+
+      const avatarFile = getStagedFile('avatar')
+      if (avatarFile) {
+        draft.avatarUrl = await uploadProFile(user.uid, 'avatar', avatarFile)
+        await updateProfile(user, { photoURL: draft.avatarUrl })
+      }
+
+      const idDocumentFile = getStagedFile('idDocument')
+      if (idDocumentFile) draft.idDocumentUrl = await uploadProFile(user.uid, 'id-document', idDocumentFile)
+
+      const selfieFile = getStagedFile('selfie')
+      if (selfieFile) draft.selfieUrl = await uploadProFile(user.uid, 'selfie', selfieFile)
+
+      const certificateFile = getStagedFile('certificate')
+      if (certificateFile) draft.certificateUrl = await uploadProFile(user.uid, 'credentials/certificate', certificateFile)
+
+      const insuranceFile = getStagedFile('insurance')
+      if (insuranceFile) draft.insuranceUrl = await uploadProFile(user.uid, 'credentials/insurance', insuranceFile)
+
+      if (draft.pastProjects?.length) {
+        const staged = getStagedFiles()
+        draft.pastProjects = await Promise.all(draft.pastProjects.map(async project => {
+          const beforeFile = staged.get(`project:${project.id}:before`)
+          const afterFile = staged.get(`project:${project.id}:after`)
+          return {
+            ...project,
+            ...(beforeFile ? { beforeUrl: await uploadProFile(user.uid, `projects/${project.id}-before`, beforeFile) } : {}),
+            ...(afterFile ? { afterUrl: await uploadProFile(user.uid, `projects/${project.id}-after`, afterFile) } : {}),
+          }
+        }))
+      }
+
+      await createProProfile(user.uid, { ...draft, password: '' })
+    }
+
+    submitProfile()
       .then(() => {
         clear()
         setSaved(true)
+        router.refresh()
       })
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : 'Failed to save profile.')
       })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [data, router])
 
   const firstName = data.fullName?.split(' ')[0] ?? 'there'
 

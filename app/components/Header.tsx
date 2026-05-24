@@ -19,7 +19,7 @@ type ProBasic = { uid: string; fullName: string; categoryName: string }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
-function LogoMark() {
+export function LogoMark() {
   return (
     <span className={styles.logoMark}>
       <span className={styles.logoIcon} aria-hidden="true">
@@ -426,6 +426,8 @@ function MobileMenu({
 // ─── Root header ──────────────────────────────────────────────────────────────
 
 export default function Header() {
+  const pathname = usePathname()
+  const isSignupPath = pathname.startsWith('/pro/signup')
   const [user, setUser] = useState<User | null>(null)
   const [pro, setPro] = useState<ProBasic | null>(null)
   const [resolvingAccount, setResolvingAccount] = useState(true)
@@ -436,6 +438,7 @@ export default function Header() {
 
   // Detect auth + pro status (client Firestore first; /api/me when Admin IAM allows)
   useEffect(() => {
+    if (isSignupPath) return
     let cancelled = false
     const unsub = onAuthChange(async u => {
       if (!cancelled) setResolvingAccount(true)
@@ -479,21 +482,21 @@ export default function Header() {
       cancelled = true
       unsub()
     }
-  }, [])
+  }, [isSignupPath])
 
   // Fetch pending job count for the badge
   useEffect(() => {
-    if (!pro) return
+    if (isSignupPath || !pro) return
     getDocs(
       query(collection(db, 'serviceRequests'), where('proUid', '==', pro.uid), where('status', '==', 'pending'))
     )
       .then(snap => setPendingJobs(snap.size))
       .catch(() => setPendingJobs(0))
-  }, [pro])
+  }, [isSignupPath, pro])
 
   // Fetch confirmed pro appointment count for the My Work badge
   useEffect(() => {
-    if (!pro) return
+    if (isSignupPath || !pro) return
     let cancelled = false
     getDocs(
       query(collection(db, 'serviceRequests'), where('proUid', '==', pro.uid), where('status', '==', 'accepted'))
@@ -508,11 +511,11 @@ export default function Header() {
     return () => {
       cancelled = true
     }
-  }, [pro])
+  }, [isSignupPath, pro])
 
   // Fetch active customer appointment count for the badge
   useEffect(() => {
-    if (resolvingAccount || !user || pro) return
+    if (isSignupPath || resolvingAccount || !user || pro) return
     let cancelled = false
     getDocs(
       query(collection(db, 'serviceRequests'), where('customerUid', '==', user.uid), where('status', '==', 'accepted'))
@@ -527,13 +530,15 @@ export default function Header() {
     return () => {
       cancelled = true
     }
-  }, [pro, resolvingAccount, user])
+  }, [isSignupPath, pro, resolvingAccount, user])
 
   // Only fetch customer categories when NOT a pro
   useEffect(() => {
-    if (resolvingAccount || pro) return
+    if (isSignupPath || resolvingAccount || pro) return
     fetch('/api/categories').then(r => r.json()).then(d => setCategories(d.categories)).catch(() => {})
-  }, [pro, resolvingAccount])
+  }, [isSignupPath, pro, resolvingAccount])
+
+  if (isSignupPath) return null
 
   return (
     <header className={styles.headerRoot}>

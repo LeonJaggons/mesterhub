@@ -3,9 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdClose, MdOutlineUploadFile } from 'react-icons/md'
-import { auth } from '@/firebase/index'
-import { uploadProFile } from '@/firebase/storage'
-import { save, type PastProject } from '../store'
+import { save, stageFile, type PastProject } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
@@ -16,7 +14,6 @@ type ImageSlot = 'before' | 'after'
 
 export default function WorkPhotosPage() {
   const router = useRouter()
-  const uid = auth.currentUser?.uid
   const beforeInputRef = useRef<HTMLInputElement>(null)
   const afterInputRef = useRef<HTMLInputElement>(null)
   const [projects, setProjects] = useState<PastProject[]>([])
@@ -30,31 +27,32 @@ export default function WorkPhotosPage() {
     afterUrl: '',
   })
   const [previews, setPreviews] = useState({ before: '', after: '' })
+  const [selectedFiles, setSelectedFiles] = useState<Partial<Record<ImageSlot, File>>>({})
   const [uploadState, setUploadState] = useState<Record<ImageSlot, UploadState>>({ before: 'idle', after: 'idle' })
 
   async function handleImageChange(slot: ImageSlot, e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !uid) return
+    if (!file) return
     setPreviews(prev => ({ ...prev, [slot]: URL.createObjectURL(file) }))
-    setUploadState(prev => ({ ...prev, [slot]: 'uploading' }))
-    try {
-      const url = await uploadProFile(uid, `projects/${Date.now()}-${slot}`, file)
-      setForm(prev => ({ ...prev, [`${slot}Url`]: url }))
-      setUploadState(prev => ({ ...prev, [slot]: 'done' }))
-    } catch {
-      setUploadState(prev => ({ ...prev, [slot]: 'error' }))
-    }
+    setSelectedFiles(prev => ({ ...prev, [slot]: file }))
+    setUploadState(prev => ({ ...prev, [slot]: 'done' }))
   }
 
   function clearImage(slot: ImageSlot) {
     setPreviews(prev => ({ ...prev, [slot]: '' }))
+    setSelectedFiles(prev => {
+      const next = { ...prev }
+      delete next[slot]
+      return next
+    })
     setForm(prev => ({ ...prev, [`${slot}Url`]: '' }))
     setUploadState(prev => ({ ...prev, [slot]: 'idle' }))
   }
 
   function addProject() {
+    const id = String(Date.now())
     const nextProject: PastProject = {
-      id: String(Date.now()),
+      id,
       jobType: form.jobType.trim(),
       location: form.location.trim(),
       duration: form.duration.trim(),
@@ -63,11 +61,14 @@ export default function WorkPhotosPage() {
       ...(form.beforeUrl ? { beforeUrl: form.beforeUrl } : {}),
       ...(form.afterUrl ? { afterUrl: form.afterUrl } : {}),
     }
+    if (selectedFiles.before) stageFile(`project:${id}:before`, selectedFiles.before)
+    if (selectedFiles.after) stageFile(`project:${id}:after`, selectedFiles.after)
     const nextProjects = [...projects, nextProject]
     setProjects(nextProjects)
     save({ pastProjects: nextProjects })
     setForm({ jobType: '', location: '', duration: '', year: '', description: '', beforeUrl: '', afterUrl: '' })
     setPreviews({ before: '', after: '' })
+    setSelectedFiles({})
     setUploadState({ before: 'idle', after: 'idle' })
   }
 

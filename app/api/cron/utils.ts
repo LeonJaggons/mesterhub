@@ -5,7 +5,7 @@ export const CRON_BATCH_LIMIT = 100
 export function requireCron(request: Request): Response | null {
   const secret = process.env.CRON_SECRET
   if (!secret) {
-    return Response.json({ error: 'CRON_SECRET is not configured.' }, { status: 500 })
+    return Response.json({ error: 'CRON_SECRET is not configured.' }, { status: 401 })
   }
 
   const expected = `Bearer ${secret}`

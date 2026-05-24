@@ -3,9 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdOutlineUploadFile, MdOutlineCameraAlt, MdCheckCircle } from 'react-icons/md'
-import { auth } from '@/firebase/index'
-import { uploadProFile } from '@/firebase/storage'
-import { save } from '../store'
+import { save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
@@ -13,7 +11,6 @@ type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 
 export default function VerificationPage() {
   const router = useRouter()
-  const uid = auth.currentUser?.uid
 
   const idInputRef = useRef<HTMLInputElement>(null)
   const selfieInputRef = useRef<HTMLInputElement>(null)
@@ -26,30 +23,20 @@ export default function VerificationPage() {
 
   async function handleIdChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !uid) return
+    if (!file) return
     setIdFileName(file.name)
-    setIdState('uploading')
-    try {
-      const url = await uploadProFile(uid, 'id-document', file)
-      save({ idDocumentUrl: url })
-      setIdState('done')
-    } catch {
-      setIdState('error')
-    }
+    stageFile('idDocument', file)
+    save({ idDocumentUrl: '' })
+    setIdState('done')
   }
 
   async function handleSelfieChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !uid) return
+    if (!file) return
     setSelfiePreview(URL.createObjectURL(file))
-    setSelfieState('uploading')
-    try {
-      const url = await uploadProFile(uid, 'selfie', file)
-      save({ selfieUrl: url })
-      setSelfieState('done')
-    } catch {
-      setSelfieState('error')
-    }
+    stageFile('selfie', file)
+    save({ selfieUrl: '' })
+    setSelfieState('done')
   }
 
   const canContinue = idState === 'done' && selfieState === 'done'

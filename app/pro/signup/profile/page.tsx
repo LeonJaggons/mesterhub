@@ -2,11 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateProfile } from 'firebase/auth'
 import { FaFacebookF, FaGlobe, FaInstagram, FaLinkedinIn, FaTiktok } from 'react-icons/fa'
-import { auth } from '@/firebase/index'
-import { uploadProFile } from '@/firebase/storage'
-import { load, save } from '../store'
+import { load, save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
@@ -27,7 +24,6 @@ type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 export default function ProfilePage() {
   const router = useRouter()
   const data = load()
-  const uid = auth.currentUser?.uid
 
   // Text fields
   const [bio, setBio] = useState('')
@@ -55,19 +51,10 @@ export default function ProfilePage() {
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || !uid) return
+    if (!file) return
     setAvatarPreview(URL.createObjectURL(file))
-    setAvatarState('uploading')
-    try {
-      const url = await uploadProFile(uid, 'avatar', file)
-      save({ avatarUrl: url })
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { photoURL: url })
-      }
-      setAvatarState('done')
-    } catch {
-      setAvatarState('error')
-    }
+    stageFile('avatar', file)
+    setAvatarState('done')
   }
 
   function toggleAvail(a: string) {
