@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { useState, useEffect, useRef, type CSSProperties, type MouseEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Autocomplete } from '@base-ui/react/autocomplete'
 import { Button } from '@base-ui/react/button'
 import styles from './Hero.module.css'
 
-const CAROUSEL_ITEMS = ['Home improvement,', 'Home repair,', 'Home inspection,', 'Home cleaning,']
+const CAROUSEL_ITEMS = ['Cleaning,', 'Repairs,', 'Painting,', 'Moving,']
+const POPULAR_SEARCHES = ['House cleaning', 'Handyman', 'Plumbing', 'Moving']
+type TiltStyle = CSSProperties & { '--tilt-x'?: string; '--tilt-y'?: string }
 
 type District = { id: number; roman: string; name: string }
 
@@ -156,10 +159,11 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const q = query.trim()
-    if (!q) return
-    const params = new URLSearchParams({ q })
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
     if (district) params.set('district', district.roman)
-    router.push(`/instant-results?${params}`)
+    const queryString = params.toString()
+    router.push(queryString ? `/instant-results?${queryString}` : '/instant-results')
   }
 
   return (
@@ -209,6 +213,7 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
 export default function Hero() {
   const searchRef = useRef<HTMLDivElement>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
+  const [tiltStyle, setTiltStyle] = useState<TiltStyle>({ '--tilt-x': '0deg', '--tilt-y': '0deg' })
 
   useEffect(() => {
     const el = searchRef.current
@@ -220,6 +225,21 @@ export default function Hero() {
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  function handleImageMove(event: MouseEvent<HTMLDivElement>) {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / rect.width - 0.5
+    const y = (event.clientY - rect.top) / rect.height - 0.5
+
+    setTiltStyle({
+      '--tilt-x': `${-y * 7}deg`,
+      '--tilt-y': `${x * 9}deg`,
+    })
+  }
+
+  function resetImageTilt() {
+    setTiltStyle({ '--tilt-x': '0deg', '--tilt-y': '0deg' })
+  }
 
   return (
     <>
@@ -240,13 +260,28 @@ export default function Hero() {
             <div ref={searchRef} className={styles.searchBarContainer}>
               <SearchBar />
             </div>
+            <div className={styles.popularRow} aria-label="Popular searches">
+              <span className={styles.popularLabel}>Popular now</span>
+              <div className={styles.popularLinks}>
+                {POPULAR_SEARCHES.map(service => (
+                  <Link key={service} href={`/instant-results?q=${encodeURIComponent(service)}`}>
+                    {service}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <p className={styles.trustText}>
               Trusted by 4.5M+ people &middot; 4.9/5{' '}
               <span className={styles.starGreen}><StarIcon /></span>{' '}
               with over 300k reviews on the App Store
             </p>
           </div>
-          <div className={styles.heroImage}>
+          <div
+            className={styles.heroImage}
+            style={tiltStyle}
+            onMouseMove={handleImageMove}
+            onMouseLeave={resetImageTilt}
+          >
             <img
               src="/hero.avif"
               alt="Professional contractor consulting with homeowners"

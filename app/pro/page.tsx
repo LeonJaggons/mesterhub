@@ -69,8 +69,13 @@ export default function JoinAsProPage() {
   return (
     <main>
       {/* ── Hero ── */}
-      <section className="bg-gray-900 text-white py-24 px-4">
-        <div className="max-w-3xl mx-auto text-center">
+      <section
+        className="relative overflow-hidden bg-gray-950 bg-cover bg-center px-4 py-28 text-white"
+        style={{ backgroundImage: "url('/img/pro-hero.png')" }}
+      >
+        <div className="absolute inset-0 bg-gray-950/45" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/50 via-gray-950/18 to-gray-950/40" aria-hidden="true" />
+        <div className="relative mx-auto max-w-3xl text-center">
           <p className="text-xs font-bold tracking-widest uppercase text-orange-400 mb-4">For professionals</p>
           <h1
             className="text-5xl md:text-6xl font-black leading-[1.05] mb-6"
@@ -91,7 +96,7 @@ export default function JoinAsProPage() {
             </Link>
             <Link
               href="#how-it-works"
-              className="inline-block border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-semibold rounded-lg px-8 py-3.5 text-base transition-colors"
+              className="inline-block rounded-lg bg-white px-8 py-3.5 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-100"
             >
               See how it works
             </Link>
@@ -198,20 +203,25 @@ export default function JoinAsProPage() {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="py-24 px-4 bg-orange-500 text-white text-center">
-        <div className="max-w-xl mx-auto">
+      <section
+        className="relative overflow-hidden bg-gray-950 bg-cover bg-center px-4 py-24 text-center text-white"
+        style={{ backgroundImage: "url('/img/pro-ready-to-start.png')" }}
+      >
+        <div className="absolute inset-0 bg-gray-950/45" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/60 via-gray-950/20 to-gray-950/45" aria-hidden="true" />
+        <div className="relative mx-auto max-w-xl">
           <h2
             className="text-5xl font-black mb-5 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.03em' }}
           >
             Ready to get started?
           </h2>
-          <p className="text-orange-100 text-base mb-10 leading-relaxed">
+          <p className="text-white/85 text-base mb-10 leading-relaxed">
             Create your free profile today and start receiving job requests from customers across Budapest.
           </p>
           <Link
             href="/pro/signup"
-            className="inline-block bg-white text-orange-600 hover:bg-orange-50 font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
+            className="inline-block bg-orange-500 text-white hover:bg-orange-600 font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
           >
             Create your free profile
           </Link>

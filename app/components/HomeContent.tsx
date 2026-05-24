@@ -1,20 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-  MdHandyman,
-  MdCelebration,
-  MdSelfImprovement,
-  MdSchool,
-  MdDirectionsCar,
-  MdCameraAlt,
-  MdPets,
-  MdBusinessCenter,
   MdVerified,
   MdPriceCheck,
   MdFlashOn,
 } from 'react-icons/md'
-import type { IconType } from 'react-icons'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -25,17 +17,17 @@ const STATS = [
   { value: '4.9★', label: 'Average rating' },
 ]
 
-type Category = { name: string; icon: IconType; count: number }
+type Category = { name: string; image: string }
 
 const CATEGORIES: Category[] = [
-  { name: 'Home Improvement', icon: MdHandyman, count: 238 },
-  { name: 'Events', icon: MdCelebration, count: 88 },
-  { name: 'Wellness', icon: MdSelfImprovement, count: 18 },
-  { name: 'Lessons', icon: MdSchool, count: 57 },
-  { name: 'Auto', icon: MdDirectionsCar, count: 12 },
-  { name: 'Photography', icon: MdCameraAlt, count: 10 },
-  { name: 'Pets', icon: MdPets, count: 10 },
-  { name: 'Business', icon: MdBusinessCenter, count: 63 },
+  { name: 'Home Improvement', image: '/img/categories/home-improvement.jpeg' },
+  { name: 'Events', image: '/img/categories/events.webp' },
+  { name: 'Wellness', image: '/img/categories/wellness.webp' },
+  { name: 'Lessons', image: '/img/categories/home-improvement.jpeg' },
+  { name: 'Auto', image: '/img/categories/auto.webp' },
+  { name: 'Photography', image: '/img/categories/photo.webp' },
+  { name: 'Pets', image: '/img/categories/pets.webp' },
+  { name: 'Business', image: '/img/categories/business.webp' },
 ]
 
 const FEATURES = [
@@ -138,7 +130,7 @@ export default function HomeContent() {
             Finding a reliable cleaner, handyman, or contractor in Budapest used to mean hours of calls and crossed fingers. Mestermind puts 1,200+ vetted professionals one search away.
           </p>
           <Link
-            href="/"
+            href="/instant-results"
             className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg px-8 py-3.5 text-base transition-colors"
           >
             Find a professional
@@ -199,16 +191,27 @@ export default function HomeContent() {
             550+ services, one platform.
           </h2>
           <p className="text-gray-500 text-base mb-10">From a leaking tap to a corporate event — we have a professional for it.</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.name}
                 href={`/instant-results?q=${encodeURIComponent(cat.name)}`}
-                className="group flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-5 text-center hover:border-orange-300 hover:shadow-md transition-all duration-150"
+                className="group relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-gray-200 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <cat.icon size={32} className="text-orange-500 group-hover:text-orange-600 transition-colors" />
-                <span className="font-semibold text-sm text-gray-800 group-hover:text-orange-600 leading-tight">{cat.name}</span>
-                <span className="text-xs text-gray-400">{cat.count}+ services</span>
+                <Image
+                  src={cat.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 50vw, 220px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+                <span
+                  className="absolute inset-x-0 bottom-0 px-4 pb-4 text-left text-lg font-black leading-tight text-white drop-shadow-sm"
+                  style={dg}
+                >
+                  {cat.name}
+                </span>
               </Link>
             ))}
           </div>
@@ -241,8 +244,13 @@ export default function HomeContent() {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="py-24 px-4 bg-gray-900 text-white text-center">
-        <div className="max-w-xl mx-auto">
+      <section
+        className="relative overflow-hidden bg-gray-950 bg-cover bg-center px-4 py-24 text-center text-white"
+        style={{ backgroundImage: "url('/img/home-bottom-hero.png')" }}
+      >
+        <div className="absolute inset-0 bg-gray-950/55" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/70 via-gray-950/30 to-gray-950/55" aria-hidden="true" />
+        <div className="relative mx-auto max-w-xl">
           <h2
             className="text-5xl md:text-6xl font-black mb-5 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.03em' }}
@@ -253,7 +261,7 @@ export default function HomeContent() {
             Join thousands of residents who find trusted professionals on Mestermind every day.
           </p>
           <Link
-            href="/"
+            href="/instant-results"
             className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
           >
             Get started for free
