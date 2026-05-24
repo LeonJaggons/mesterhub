@@ -1,0 +1,27 @@
+{
+  "districts": [
+    { "id": 1,  "roman": "I",      "name": "Budavár" },
+    { "id": 2,  "roman": "II",     "name": "Budai hegyvidék" },
+    { "id": 3,  "roman": "III",    "name": "Óbuda-Békásmegyer" },
+    { "id": 4,  "roman": "IV",     "name": "Újpest" },
+    { "id": 5,  "roman": "V",      "name": "Belváros-Lipótváros" },
+    { "id": 6,  "roman": "VI",     "name": "Terézváros" },
+    { "id": 7,  "roman": "VII",    "name": "Erzsébetváros" },
+    { "id": 8,  "roman": "VIII",   "name": "Józsefváros" },
+    { "id": 9,  "roman": "IX",     "name": "Ferencváros" },
+    { "id": 10, "roman": "X",      "name": "Kőbánya" },
+    { "id": 11, "roman": "XI",     "name": "Újbuda" },
+    { "id": 12, "roman": "XII",    "name": "Hegyvidék" },
+    { "id": 13, "roman": "XIII",   "name": "Angyalföld" },
+    { "id": 14, "roman": "XIV",    "name": "Zugló" },
+    { "id": 15, "roman": "XV",     "name": "Rákospalota-Pestújhely-Újpalota" },
+    { "id": 16, "roman": "XVI",    "name": "Rákosszentmihály" },
+    { "id": 17, "roman": "XVII",   "name": "Rákosmente" },
+    { "id": 18, "roman": "XVIII",  "name": "Pestszentlőrinc-Pestszentimre" },
+    { "id": 19, "roman": "XIX",    "name": "Kispest" },
+    { "id": 20, "roman": "XX",     "name": "Pesterzsébet" },
+    { "id": 21, "roman": "XXI",    "name": "Csepel" },
+    { "id": 22, "roman": "XXII",   "name": "Budafok-Tétény" },
+    { "id": 23, "roman": "XXIII",  "name": "Soroksár" }
+  ]
+}

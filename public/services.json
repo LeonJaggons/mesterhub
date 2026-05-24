@@ -1,0 +1,159 @@
+{
+  "source": "Mestermind",
+  "total_categories": 12,
+  "grand_total_services": 152,
+  "categories": [
+    {
+      "name": "Cleaning",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["House Cleaning", "Office Cleaning", "Carpet Cleaning", "Move-out Cleaning"],
+      "services": [
+        "House Cleaning", "Office Cleaning", "Carpet Cleaning", "Window Cleaning",
+        "Move-out Cleaning", "Post-Construction Cleaning", "Deep Cleaning",
+        "Upholstery Cleaning", "Bathroom Deep Clean", "Kitchen Cleaning",
+        "Airbnb Cleaning", "Commercial Cleaning", "After Party Cleaning", "Spring Cleaning"
+      ],
+      "total_services": 14
+    },
+    {
+      "name": "Plumbing",
+      "regulated": true,
+      "licenceNote": "OKKJ plumber certificate required",
+      "insuranceRequired": false,
+      "featured": ["Leak Repair", "Drain Cleaning", "Bathroom Fitting", "Water Heater Installation"],
+      "services": [
+        "Pipe Installation", "Pipe Repair", "Leak Detection", "Drain Cleaning",
+        "Bathroom Fitting", "Toilet Installation", "Water Heater Installation",
+        "Water Heater Repair", "Shower Installation", "Tap Replacement",
+        "Radiator Installation", "Emergency Plumbing", "Sewer Line Repair", "Water Softener Installation"
+      ],
+      "total_services": 14
+    },
+    {
+      "name": "Electrical",
+      "regulated": true,
+      "licenceNote": "OKKJ electrician licence required",
+      "insuranceRequired": false,
+      "featured": ["Electrical Wiring", "Socket Installation", "Light Installation", "Panel Upgrade"],
+      "services": [
+        "Electrical Wiring", "Panel Upgrade", "Socket Installation", "Light Installation",
+        "Safety Inspection", "Emergency Electrical", "EV Charger Installation",
+        "Smart Home Wiring", "CCTV Installation", "Alarm System Installation",
+        "Outdoor Lighting", "Electrical Fault Finding", "Fuse Box Replacement"
+      ],
+      "total_services": 13
+    },
+    {
+      "name": "Painting",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["Interior Painting", "Exterior Painting", "Wallpapering", "Cabinet Painting"],
+      "services": [
+        "Interior Painting", "Exterior Painting", "Wallpapering", "Decorative Painting",
+        "Cabinet Painting", "Ceiling Painting", "Staircase Painting", "Feature Wall",
+        "Texture Painting", "Anti-mould Painting", "Varnishing", "Wood Staining"
+      ],
+      "total_services": 12
+    },
+    {
+      "name": "Carpentry",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["Furniture Assembly", "Floor Installation", "Door Installation", "Cabinet Making"],
+      "services": [
+        "Furniture Assembly", "Custom Furniture Building", "Door Installation",
+        "Floor Installation", "Decking", "Cabinet Making", "Wardrobe Installation",
+        "Skirting Board Fitting", "Window Frame Repair", "Staircase Repair",
+        "Shelf Installation", "Kitchen Cabinet Installation"
+      ],
+      "total_services": 12
+    },
+    {
+      "name": "HVAC",
+      "regulated": true,
+      "licenceNote": "Gas engineer certificate required for gas appliances",
+      "insuranceRequired": true,
+      "featured": ["AC Installation", "AC Repair", "Boiler Service", "Heat Pump Installation"],
+      "services": [
+        "AC Installation", "AC Repair", "AC Maintenance", "Boiler Service",
+        "Boiler Repair", "Heat Pump Installation", "Ventilation Installation",
+        "Air Duct Cleaning", "Thermostat Installation", "Central Heating Repair",
+        "Underfloor Heating", "Gas Safety Inspection"
+      ],
+      "total_services": 12
+    },
+    {
+      "name": "Gardening",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["Lawn Mowing", "Garden Design", "Tree Trimming", "Garden Clearance"],
+      "services": [
+        "Lawn Mowing", "Garden Design", "Tree Trimming", "Hedge Trimming",
+        "Planting", "Weeding", "Leaf Removal", "Garden Clearance",
+        "Patio Cleaning", "Irrigation System", "Turf Laying", "Composting"
+      ],
+      "total_services": 12
+    },
+    {
+      "name": "Moving",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["House Moving", "Furniture Moving", "Packing Service", "Office Moving"],
+      "services": [
+        "House Moving", "Office Moving", "Furniture Moving", "Delivery",
+        "Packing Service", "Unpacking", "Piano Moving", "Single Item Moving",
+        "Storage Solutions", "International Moving"
+      ],
+      "total_services": 10
+    },
+    {
+      "name": "Handyman",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["General Repairs", "Furniture Assembly", "Flat Pack Assembly", "Pressure Washing"],
+      "services": [
+        "General Repairs", "Furniture Assembly", "Picture Hanging", "Flat Pack Assembly",
+        "Minor Plumbing", "Gutter Cleaning", "Curtain Fitting", "Blind Installation",
+        "Door Handle Repair", "Lock Repair", "Caulking and Sealing", "Pressure Washing"
+      ],
+      "total_services": 12
+    },
+    {
+      "name": "Photography",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["Event Photography", "Wedding Photography", "Real Estate Photography", "Portrait Photography"],
+      "services": [
+        "Event Photography", "Wedding Photography", "Portrait Photography",
+        "Product Photography", "Real Estate Photography", "Food Photography",
+        "Corporate Photography", "Newborn Photography", "Family Photography", "Photo Editing"
+      ],
+      "total_services": 10
+    },
+    {
+      "name": "Tutoring",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["Mathematics", "Languages", "Music Lessons", "Test Preparation"],
+      "services": [
+        "Mathematics", "Languages", "Science", "Music Lessons",
+        "Art Lessons", "Programming", "History", "Test Preparation",
+        "University Entrance Prep", "Piano Lessons", "Guitar Lessons"
+      ],
+      "total_services": 11
+    },
+    {
+      "name": "Fitness",
+      "regulated": false,
+      "insuranceRequired": false,
+      "featured": ["Personal Training", "Yoga", "Pilates", "Nutrition Coaching"],
+      "services": [
+        "Personal Training", "Group Fitness", "Yoga", "Pilates",
+        "Boxing Training", "Cycling Training", "Swimming Coaching",
+        "Nutrition Coaching", "Weight Loss Program", "Sports Massage"
+      ],
+      "total_services": 10
+    }
+  ]
+}

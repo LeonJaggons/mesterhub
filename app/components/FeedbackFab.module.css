@@ -1,0 +1,268 @@
+.fab {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1900;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(234, 88, 12, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  box-shadow:
+    0 16px 36px rgba(249, 115, 22, 0.28),
+    0 6px 14px rgba(15, 23, 42, 0.12);
+  color: white;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  transition:
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.fab:hover {
+  box-shadow:
+    0 18px 42px rgba(249, 115, 22, 0.34),
+    0 8px 18px rgba(15, 23, 42, 0.14);
+  transform: translateY(-1px);
+}
+
+.fabIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+.panel {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 5rem;
+  z-index: 2201;
+  width: min(24rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(135deg, rgba(255, 247, 237, 0.92), rgba(255, 255, 255, 0) 38%),
+    white;
+  box-shadow:
+    0 24px 64px rgba(15, 23, 42, 0.2),
+    0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.2rem;
+  color: #f97316;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-gray-950);
+  font-family: var(--font-darker-grotesque), sans-serif;
+  font-size: 1.85rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--color-gray-500);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.closeButton:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-900);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  color: var(--color-gray-700);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+.select,
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.875rem;
+  background: white;
+  color: var(--color-gray-900);
+  font-size: 0.9375rem;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.select,
+.input {
+  height: 2.75rem;
+  padding: 0 0.875rem;
+}
+
+.textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+  padding: 0.8rem 0.875rem;
+}
+
+.select:focus,
+.input:focus,
+.textarea:focus {
+  border-color: #fb923c;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.18);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-gray-500);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.status {
+  margin: 0;
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.status[data-tone="error"] {
+  background: var(--color-red-50);
+  color: var(--color-red-700);
+}
+
+.status[data-tone="success"] {
+  background: var(--color-green-50);
+  color: var(--color-green-700);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.secondaryButton,
+.submitButton {
+  min-height: 2.65rem;
+  border-radius: 0.8rem;
+  padding: 0 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 800;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-gray-200);
+  background: white;
+  color: var(--color-gray-700);
+}
+
+.secondaryButton:hover {
+  border-color: var(--color-gray-300);
+  background: var(--color-gray-50);
+  color: var(--color-gray-900);
+}
+
+.submitButton {
+  border: 1px solid #ea580c;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, #fb923c, #f97316);
+}
+
+.submitButton:disabled,
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 640px) {
+  .fab {
+    right: 1rem;
+    bottom: 1rem;
+    width: 3.25rem;
+    height: 3.25rem;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .fabLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .panel {
+    right: 1rem;
+    bottom: 4.75rem;
+  }
+}

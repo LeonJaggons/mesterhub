@@ -1,0 +1,136 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/mesterhub/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function isRequestParticipant() {
+      return signedIn()
+        && (resource.data.proUid == request.auth.uid
+            || resource.data.customerUid == request.auth.uid);
+    }
+
+    match /pros/{proId} {
+      allow read: if resource.data.status == 'active' || isOwner(proId) || isAdmin();
+      allow create: if isOwner(proId)
+        && request.resource.data.uid == proId
+        && request.resource.data.status == 'pending_verification'
+        && !request.resource.data.keys().hasAny([
+          'email',
+          'phone',
+          'payout',
+          'iban',
+          'idDocumentUrl',
+          'selfieUrl',
+          'certificateUrl',
+          'insuranceUrl'
+        ]);
+      allow update: if isOwner(proId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'uid',
+          'status',
+          'email',
+          'phone',
+          'payout',
+          'iban',
+          'idDocumentUrl',
+          'selfieUrl',
+          'certificateUrl',
+          'insuranceUrl',
+          'createdAt'
+        ]);
+      allow delete: if isAdmin();
+
+      match /private/{docId} {
+        allow read, create, update: if isOwner(proId) || isAdmin();
+        allow delete: if false;
+      }
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if signedIn()
+        && (resource.data.customerUid == request.auth.uid
+            || resource.data.invitedProUids.hasAny([request.auth.uid])
+            || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.customerUid == request.auth.uid
+        && request.resource.data.status == 'active'
+        && request.resource.data.keys().hasAll([
+          'customerUid',
+          'categoryName',
+          'answers',
+          'status',
+          'createdAt'
+        ]);
+      allow update: if signedIn()
+        && resource.data.customerUid == request.auth.uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'customerUid',
+          'createdAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /serviceRequests/{requestId} {
+      allow read: if isRequestParticipant();
+      allow create: if signedIn()
+        && request.resource.data.customerUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.keys().hasAll([
+          'proUid',
+          'proName',
+          'categoryName',
+          'answers',
+          'customerUid',
+          'customerName',
+          'customerEmail',
+          'status',
+          'createdAt'
+        ])
+        && !request.resource.data.keys().hasAny([
+          'quote',
+          'acceptance',
+          'declinedBy',
+          'declineReason',
+          'cancelledBy',
+          'cancelReason',
+          'completion',
+          'appointmentRequest'
+        ]);
+      allow update, delete: if false;
+    }
+
+    match /conversations/{conversationId} {
+      allow read: if signedIn()
+        && (resource.data.proUid == request.auth.uid
+            || resource.data.customerUid == request.auth.uid);
+      allow create, update, delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if signedIn()
+          && (get(/databases/$(database)/documents/conversations/$(conversationId)).data.proUid == request.auth.uid
+              || get(/databases/$(database)/documents/conversations/$(conversationId)).data.customerUid == request.auth.uid);
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /mailEvents/{eventId} {
+      allow read, write: if false;
+    }
+  }
+}

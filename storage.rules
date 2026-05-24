@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(proId) {
+      return signedIn() && request.auth.uid == proId;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function activePro(proId) {
+      return firestore.get(/databases/mesterhub/documents/pros/$(proId)).data.status == 'active';
+    }
+
+    function validProUpload() {
+      return request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+
+    function validRequestAttachment() {
+      return request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+
+    match /pros/{proId}/avatar {
+      allow read: if activePro(proId) || isOwner(proId) || isAdmin();
+      allow write: if isOwner(proId) && validProUpload();
+    }
+
+    match /pros/{proId}/work-photos/{allPaths=**} {
+      allow read: if activePro(proId) || isOwner(proId) || isAdmin();
+      allow write: if isOwner(proId) && validProUpload();
+    }
+
+    match /pros/{proId}/{allPaths=**} {
+      allow read: if isOwner(proId) || isAdmin();
+      allow write: if isOwner(proId) && validProUpload();
+    }
+
+    match /users/{userId}/request-attachments/{allPaths=**} {
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if signedIn() && request.auth.uid == userId && validRequestAttachment();
+    }
+  }
+}
