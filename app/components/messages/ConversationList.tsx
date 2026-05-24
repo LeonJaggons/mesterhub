@@ -55,6 +55,7 @@ export default function ConversationList({
         )
         const rows = snap.docs
           .map(d => ({ id: d.id, ...d.data() } as ConversationRow))
+          .filter(row => role !== 'customer' || !('customerDeletedAt' in row))
           .sort((a, b) => (b.lastMessageAt?.toMillis() ?? 0) - (a.lastMessageAt?.toMillis() ?? 0))
         if (role === 'customer') {
           const proUids = [...new Set(rows.map(row => row.proUid).filter(Boolean))]

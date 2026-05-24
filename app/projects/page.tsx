@@ -28,6 +28,7 @@ type ProjectDoc = {
   customerDistrict?: string
   attachmentUrls?: string[]
   invitedProUids?: string[]
+  hasAppointment?: boolean
   status?: string
   createdAt: Timestamp | null
   updatedAt?: Timestamp | null
@@ -50,6 +51,10 @@ function projectTitle(project: ProjectDoc): string {
 
 function shortText(value: string, max = 140): string {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
+}
+
+function requestHasAppointment(data: Record<string, unknown>): boolean {
+  return Boolean(data.appointmentRequest || data.appointmentChangeRequest)
 }
 
 function validAttachment(file: File): boolean {
@@ -142,6 +147,7 @@ function CreateProjectModal({
         customerDistrict: form.customerDistrict,
         attachmentUrls,
         invitedProUids: [],
+        hasAppointment: false,
         status: 'active',
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
@@ -338,7 +344,15 @@ function CreateProjectModal({
   )
 }
 
-function ProjectCard({ project }: { project: ProjectDoc }) {
+function ProjectCard({
+  project,
+  onDelete,
+  isDeleting,
+}: {
+  project: ProjectDoc
+  onDelete: (project: ProjectDoc) => void
+  isDeleting: boolean
+}) {
   const details = formatAnswers(project.answers).filter(item => item.key !== 'Project Details').slice(0, 4)
   const proCount = project.invitedProUids?.length ?? 0
 
@@ -403,6 +417,16 @@ function ProjectCard({ project }: { project: ProjectDoc }) {
         >
           View related requests
         </Link>
+        {!project.hasAppointment && (
+          <button
+            type="button"
+            onClick={() => onDelete(project)}
+            disabled={isDeleting}
+            className="rounded-lg border border-red-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete project'}
+          </button>
+        )}
       </div>
     </article>
   )
@@ -414,6 +438,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectDoc[]>([])
   const [createOpen, setCreateOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     return onAuthChange(async user => {
@@ -451,7 +477,19 @@ export default function ProjectsPage() {
           .filter(project => project.status === 'active' && project.categoryName)
           .sort((a, b) => (b.updatedAt?.toMillis() ?? b.createdAt?.toMillis() ?? 0) - (a.updatedAt?.toMillis() ?? a.createdAt?.toMillis() ?? 0))
 
-        setProjects(activeProjects)
+        const projectsWithRequestState = await Promise.all(
+          activeProjects.map(async project => {
+            const requestsSnap = await getDocs(
+              query(collection(db, 'serviceRequests'), where('projectId', '==', project.id), where('customerUid', '==', user.uid))
+            )
+            return {
+              ...project,
+              hasAppointment: requestsSnap.docs.some(requestDoc => requestHasAppointment(requestDoc.data())),
+            }
+          })
+        )
+
+        setProjects(projectsWithRequestState)
       } catch {
         setProjects([])
       } finally {
@@ -462,6 +500,24 @@ export default function ProjectsPage() {
 
   function handleProjectCreated(project: ProjectDoc) {
     setProjects(prev => [project, ...prev])
+  }
+
+  async function handleDeleteProject(project: ProjectDoc) {
+    const confirmed = window.confirm(
+      'Delete this project? Related requests will be hidden from your account, and any active requests will be cancelled. Projects with completed jobs or appointments cannot be deleted.',
+    )
+    if (!confirmed) return
+
+    setDeleteError(null)
+    setDeletingProjectId(project.id)
+    try {
+      await authenticatedFetch(`/api/projects/${project.id}`, { method: 'DELETE' })
+      setProjects(prev => prev.filter(item => item.id !== project.id))
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete project.')
+    } finally {
+      setDeletingProjectId(null)
+    }
   }
 
   return (
@@ -497,8 +553,18 @@ export default function ProjectsPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
+            {deleteError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {deleteError}
+              </div>
+            )}
             {projects.map(project => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onDelete={handleDeleteProject}
+                isDeleting={deletingProjectId === project.id}
+              />
             ))}
           </div>
         )}

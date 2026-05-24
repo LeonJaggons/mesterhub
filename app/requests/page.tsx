@@ -7,6 +7,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore'
 import { MdLocationOn } from 'react-icons/md'
 import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from '../account/account.module.css'
 import {
   dg,
@@ -99,10 +100,20 @@ function nextAction(req: EnrichedRequest): { label: string; body: string; needsA
   }
 }
 
-function RequestCard({ req }: { req: EnrichedRequest }) {
+function RequestCard({
+  req,
+  onDelete,
+  isDeleting,
+}: {
+  req: EnrichedRequest
+  onDelete: (req: EnrichedRequest) => void
+  isDeleting: boolean
+}) {
   const district = req.customerDistrict ? districtLabel(req.customerDistrict) : null
   const action = nextAction(req)
   const shouldOpenConversation = req.status === 'accepted' && req.appointmentRequest?.status !== 'confirmed'
+  const hasAppointment = Boolean(req.appointmentRequest || req.appointmentChangeRequest)
+  const canDelete = req.status !== 'completed' && !hasAppointment
 
   return (
     <article className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-orange-200">
@@ -181,11 +192,23 @@ function RequestCard({ req }: { req: EnrichedRequest }) {
         <Link href={`/requests/${req.id}`} className="text-orange-600 hover:underline">
           View request details →
         </Link>
-        {shouldOpenConversation && (
-          <Link href={`/messages/${req.id}`} className="rounded-lg bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-900">
-            Open conversation
-          </Link>
-        )}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {shouldOpenConversation && (
+            <Link href={`/messages/${req.id}`} className="rounded-lg bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-900">
+              Open conversation
+            </Link>
+          )}
+          {canDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(req)}
+              disabled={isDeleting}
+              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-center text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
+          )}
+        </div>
       </div>
     </article>
   )
@@ -198,6 +221,8 @@ function RequestsPageContent() {
   const [requests, setRequests] = useState<EnrichedRequest[]>([])
   const [statusFilter, setStatusFilter] = useState<RequestStatusFilter>('all')
   const [loading, setLoading] = useState(true)
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     return onAuthChange(async user => {
@@ -217,7 +242,11 @@ function RequestsPageContent() {
         const pros = await Promise.all(uids.map(uid => fetchProSummary(uid)))
         const proMap = new Map(pros.filter(Boolean).map(p => [p!.uid, p!]))
 
-        setRequests(docs.map(req => ({ ...req, pro: proMap.get(req.proUid) ?? null })))
+        setRequests(
+          docs
+            .filter(req => !('customerDeletedAt' in req))
+            .map(req => ({ ...req, pro: proMap.get(req.proUid) ?? null })),
+        )
       } catch {
         setRequests([])
       } finally {
@@ -246,6 +275,35 @@ function RequestsPageContent() {
     return projectRequests.filter(req => req.status === status).length
   }
 
+  async function handleDeleteRequest(req: EnrichedRequest) {
+    if (req.status === 'completed') {
+      setDeleteError('Completed jobs cannot be deleted.')
+      return
+    }
+    if (req.appointmentRequest || req.appointmentChangeRequest) {
+      setDeleteError('Requests with appointments cannot be deleted.')
+      return
+    }
+    const active = req.status === 'pending' || req.status === 'quoted' || req.status === 'accepted'
+    const confirmed = window.confirm(
+      active
+        ? 'Delete this request? It will be cancelled for the pro and hidden from your account.'
+        : 'Delete this request from your account?',
+    )
+    if (!confirmed) return
+
+    setDeleteError(null)
+    setDeletingRequestId(req.id)
+    try {
+      await authenticatedFetch(`/api/service-requests/${req.id}`, { method: 'DELETE' })
+      setRequests(prev => prev.filter(item => item.id !== req.id))
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete request.')
+    } finally {
+      setDeletingRequestId(null)
+    }
+  }
+
   return (
     <main className="bg-gray-50 min-h-screen flex-1">
       <div className="max-w-3xl mx-auto px-4 py-10">
@@ -268,6 +326,12 @@ function RequestsPageContent() {
           </div>
         ) : (
           <>
+            {deleteError && (
+              <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {deleteError}
+              </div>
+            )}
+
             {projectId && (
               <div className="mb-5 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-orange-800">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -315,7 +379,12 @@ function RequestsPageContent() {
                       <span className="h-px flex-1 bg-orange-100" />
                     </div>
                     {actionRequests.map(req => (
-                      <RequestCard key={req.id} req={req} />
+                      <RequestCard
+                        key={req.id}
+                        req={req}
+                        onDelete={handleDeleteRequest}
+                        isDeleting={deletingRequestId === req.id}
+                      />
                     ))}
                   </>
                 )}
@@ -329,7 +398,12 @@ function RequestsPageContent() {
                       </div>
                     )}
                     {otherRequests.map(req => (
-                      <RequestCard key={req.id} req={req} />
+                      <RequestCard
+                        key={req.id}
+                        req={req}
+                        onDelete={handleDeleteRequest}
+                        isDeleting={deletingRequestId === req.id}
+                      />
                     ))}
                   </>
                 )}

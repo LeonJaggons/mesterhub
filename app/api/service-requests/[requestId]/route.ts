@@ -6,6 +6,7 @@ import type { AppointmentRequestInput } from '@/firebase/conversations'
 import type { QuoteInput } from '@/firebase/serviceRequests'
 
 type RequestDoc = {
+  projectId?: string
   proUid: string
   proName: string
   customerUid: string
@@ -59,6 +60,10 @@ async function proEmail(proUid: string): Promise<string> {
 
 function canCancel(status: RequestDoc['status']): boolean {
   return status === 'pending' || status === 'quoted' || status === 'accepted'
+}
+
+function hasAppointment(req: RequestDoc): boolean {
+  return Boolean(req.appointmentRequest || req.appointmentChangeRequest)
 }
 
 function appointmentMessage(input: AppointmentRequestInput): string {
@@ -1208,5 +1213,105 @@ export async function PATCH(
     }
     console.error('[/api/service-requests/[requestId]]', err)
     return Response.json({ error: 'Could not update request.' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ requestId: string }> },
+) {
+  try {
+    const user = await requireUser(request)
+    const { requestId } = await params
+    const reqRef = adminDb.collection('serviceRequests').doc(requestId)
+    const reqSnap = await reqRef.get()
+    if (!reqSnap.exists) {
+      return Response.json({ error: 'Request not found.' }, { status: 404 })
+    }
+
+    const req = reqSnap.data() as RequestDoc
+    if (req.customerUid !== user.uid) throw new Error('FORBIDDEN')
+    if (req.status === 'completed') {
+      return Response.json({ error: 'Completed jobs cannot be deleted.' }, { status: 409 })
+    }
+    if (hasAppointment(req)) {
+      return Response.json({ error: 'Requests with appointments cannot be deleted.' }, { status: 409 })
+    }
+
+    const batch = adminDb.batch()
+    const update: Record<string, unknown> = {
+      customerDeletedAt: FieldValue.serverTimestamp(),
+      customerDeletedBy: user.uid,
+    }
+    const shouldCancel = canCancel(req.status)
+    const reason = 'Deleted by customer.'
+
+    if (shouldCancel) {
+      update.status = 'cancelled'
+      update.cancelledBy = 'customer'
+      update.cancelReason = reason
+      update.cancelledAt = FieldValue.serverTimestamp()
+      update.statusHistory = FieldValue.arrayUnion(historyEntry('cancelled', user.uid, 'customer'))
+    }
+
+    batch.update(reqRef, update)
+
+    if (req.projectId) {
+      const projectRef = adminDb.collection('projects').doc(req.projectId)
+      const projectSnap = await projectRef.get()
+      if (projectSnap.exists) {
+        batch.update(projectRef, {
+          invitedProUids: FieldValue.arrayRemove(req.proUid),
+          updatedAt: FieldValue.serverTimestamp(),
+        })
+      }
+    }
+
+    const convRef = adminDb.collection('conversations').doc(requestId)
+    const convSnap = await convRef.get()
+    if (convSnap.exists) {
+      batch.update(convRef, {
+        customerDeletedAt: FieldValue.serverTimestamp(),
+        customerDeletedBy: user.uid,
+      })
+    }
+
+    batch.delete(adminDb.collection('messageDigests').doc(`${requestId}_${user.uid}`))
+    await batch.commit()
+
+    if (shouldCancel) {
+      await sendLifecycleEmail({
+        to: await proEmail(req.proUid),
+        event: 'request.cancelled',
+        requestId,
+        subject: `${req.categoryName} request cancelled`,
+        previewText: `The ${req.categoryName} request was cancelled by the customer.`,
+        text: cancelledEmailText({
+          categoryName: req.categoryName,
+          actorRole: 'customer',
+          reason,
+          requestUrl: appUrl(`/pro/jobs/${requestId}`),
+        }),
+        bodyHtml: cancelledEmailHtml({
+          categoryName: req.categoryName,
+          actorRole: 'customer',
+          reason,
+          requestUrl: appUrl(`/pro/jobs/${requestId}`),
+        }),
+        hideSubjectHeading: true,
+        metadata: { proUid: req.proUid, customerUid: req.customerUid, cancelledBy: 'customer', deletedByCustomer: true },
+      })
+    }
+
+    return Response.json({ ok: true, cancelled: shouldCancel })
+  } catch (err) {
+    if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+      return Response.json({ error: 'You must be signed in.' }, { status: 401 })
+    }
+    if (err instanceof Error && err.message === 'FORBIDDEN') {
+      return Response.json({ error: 'Not allowed.' }, { status: 403 })
+    }
+    console.error('[/api/service-requests/[requestId] DELETE]', err)
+    return Response.json({ error: 'Could not delete request.' }, { status: 500 })
   }
 }
