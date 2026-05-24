@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef, type CSSProperties, type MouseEvent } from 'react'
+import { useState, useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Autocomplete } from '@base-ui/react/autocomplete'
 import { Button } from '@base-ui/react/button'
@@ -226,7 +226,7 @@ export default function Hero() {
     return () => observer.disconnect()
   }, [])
 
-  function handleImageMove(event: MouseEvent<HTMLDivElement>) {
+  function handleImageMove(event: ReactMouseEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect()
     const x = (event.clientX - rect.left) / rect.width - 0.5
     const y = (event.clientY - rect.top) / rect.height - 0.5
