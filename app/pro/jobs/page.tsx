@@ -10,6 +10,7 @@ import { declineServiceRequestAsPro, quoteServiceRequest } from '@/firebase/serv
 import { QuoteModal, DeclineModal, type QuoteFormData } from './JobModals'
 import { approximateLocationLabel } from '@/app/requests/shared'
 import type { JobLocation } from '@/firebase/serviceRequests'
+import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
@@ -361,6 +362,8 @@ export default function JobsPage() {
           </section>
 
           <aside className="lg:sticky lg:top-6 flex flex-col gap-4">
+            <ProUpgradeCta />
+
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
               <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Mester brief</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Helpful to know</h2>

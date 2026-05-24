@@ -1,0 +1,29 @@
+.shimmerButton {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(110deg, transparent 0%, transparent 36%, rgba(255, 255, 255, 0.34) 45%, transparent 54%, transparent 100%),
+    linear-gradient(135deg, #f97316, #ea580c);
+  background-size: 220% 100%, 100% 100%;
+  box-shadow: 0 8px 18px rgba(249, 115, 22, 0.16);
+  animation: ctaShimmer 2.8s ease-in-out infinite;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.shimmerButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(249, 115, 22, 0.22);
+}
+
+@keyframes ctaShimmer {
+  0% {
+    background-position: 180% 0, 0 0;
+  }
+
+  45%,
+  100% {
+    background-position: -80% 0, 0 0;
+  }
+}

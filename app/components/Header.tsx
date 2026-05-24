@@ -8,6 +8,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
 import { onAuthChange, signOut } from '@/firebase/auth'
 import { db } from '@/firebase/index'
 import { resolveProClient } from '@/firebase/resolveProClient'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import type { User } from 'firebase/auth'
 import styles from './Header.module.css'
 
@@ -298,6 +299,39 @@ function ProAccountMenu({ user, pro }: { user: User; pro: ProBasic }) {
   )
 }
 
+function ProHeaderUpgradeButton() {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    authenticatedFetch('/api/pro/profile')
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return
+        const status = data.account?.subscriptionStatus ?? data.profile?.subscriptionStatus ?? 'inactive'
+        setVisible(status !== 'active')
+      })
+      .catch(() => {
+        if (active) setVisible(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  if (!visible) return null
+
+  return (
+    <Link href="/pro/settings" className={styles.headerUpgradeButton}>
+      <svg className={styles.headerUpgradeIcon} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8 1.5l1.35 3.8 3.65 1.28-3.65 1.28L8 11.66 6.65 7.86 3 6.58 6.65 5.3 8 1.5z" />
+        <path d="M12.6 10.3l.55 1.55 1.45.5-1.45.5-.55 1.55-.55-1.55-1.45-.5 1.45-.5.55-1.55z" />
+      </svg>
+      Upgrade
+    </Link>
+  )
+}
+
 function ProNav({
   user,
   pro,
@@ -316,6 +350,7 @@ function ProNav({
       <ProNavLink href="/pro/messages" label="Messages" />
       <ProNavLink href="/pro/earnings" label="Earnings" />
       <ProNavLink href={`/pro/${pro.uid}`} label="Profile" />
+      <ProHeaderUpgradeButton />
       <BellButton />
       <div className="ml-1">
         <ProAccountMenu user={user} pro={pro} />

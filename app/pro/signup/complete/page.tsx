@@ -120,7 +120,7 @@ export default function CompletePage() {
           You&apos;re in, {firstName}.
         </h1>
         <p style={{ fontSize: '0.9375rem', color: '#92400e', margin: 0, lineHeight: 1.6 }}>
-          Your profile has been submitted. Once identity verification completes, you&apos;ll go live and start receiving job requests.
+          Your profile has been submitted and your first month of Mestermind Pro is active. Once identity verification completes, you&apos;ll go live with priority placement, visible reviews, and direct inquiries.
         </p>
       </div>
 

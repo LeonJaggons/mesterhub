@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { FaFacebookF, FaGlobe, FaInstagram, FaLinkedinIn, FaTiktok } from 'react-icons/fa'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 import styles from '../../../account/account.module.css'
 
 type PricingType = 'hourly' | 'fixed' | 'quote'
@@ -224,6 +225,7 @@ export default function EditProProfilePage() {
         </Link>
         <h1 className={styles.title}>Edit pro profile</h1>
         <p className={styles.subtitle}>Update the profile information customers see before they request an estimate.</p>
+        <ProUpgradeCta variant="inline" className="mb-4" />
 
         <div className={styles.card}>
           <form onSubmit={handleSubmit}>

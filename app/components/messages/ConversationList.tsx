@@ -7,6 +7,7 @@ import { collection, doc, query, where, getDoc, getDocs } from 'firebase/firesto
 import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
 import type { Conversation } from '@/firebase/conversations'
+import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 import MessageAvatar from './MessageAvatar'
 import {
   formatListTime,
@@ -171,6 +172,7 @@ export default function ConversationList({
         </section>
 
         <aside className={styles.inboxAside}>
+          {role === 'pro' && <ProUpgradeCta className="mb-4" />}
           <div className={styles.asideCard}>
             <p className={styles.asideKicker}>Message smarter</p>
             <h2 className={styles.asideTitle}>{helperTitle}</h2>

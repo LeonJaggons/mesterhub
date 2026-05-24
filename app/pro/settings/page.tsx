@@ -317,46 +317,87 @@ export default function ProSettingsPage() {
           )}
         </div>
 
-        <div className={styles.card} style={{ marginBottom: '1rem' }}>
-          <section className={styles.helpSection} style={{ marginBottom: 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap' }}>
-              <div>
-                <h2>Mestermind Pro</h2>
-                <p style={{ margin: '0.35rem 0 0' }}>
-                  {hasProPlan
-                    ? 'Your paid pro features are active.'
-                    : 'Subscribe to unlock customer-facing growth features.'}
-                </p>
+        <div
+          className={styles.card}
+          style={{
+            marginBottom: '1rem',
+            padding: 0,
+            overflow: 'hidden',
+            borderColor: hasProPlan ? '#bbf7d0' : '#fed7aa',
+            background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 42%, #f8fafc 100%)',
+          }}
+        >
+          <section className={styles.helpSection} style={{ marginBottom: 0, padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '1.1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start', minWidth: 0 }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 14,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                    boxShadow: '0 10px 24px rgba(249, 115, 22, 0.18)',
+                    flexShrink: 0,
+                  }}
+                >
+                  ✦
+                </span>
+                <div>
+                  <p style={{ margin: '0 0 0.25rem', color: '#f97316', fontSize: '0.72rem', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Growth plan
+                  </p>
+                  <h2 style={{ margin: 0 }}>Mestermind Pro</h2>
+                  <p style={{ margin: '0.4rem 0 0', color: '#4b5563', maxWidth: 520 }}>
+                    {hasProPlan
+                      ? 'Your Pro benefits are active across search, reviews, and customer inquiries.'
+                      : 'Turn your profile into a higher-converting listing with priority visibility and trust signals.'}
+                  </p>
+                </div>
               </div>
-              <span style={{ borderRadius: 999, padding: '0.25rem 0.65rem', fontSize: '0.75rem', fontWeight: 900, background: hasProPlan ? '#dcfce7' : '#f3f4f6', color: hasProPlan ? '#166534' : '#6b7280', textTransform: 'capitalize' }}>
+              <span style={{ borderRadius: 999, padding: '0.32rem 0.75rem', fontSize: '0.75rem', fontWeight: 900, background: hasProPlan ? '#dcfce7' : '#fff7ed', border: `1px solid ${hasProPlan ? '#bbf7d0' : '#fed7aa'}`, color: hasProPlan ? '#166534' : '#c2410c', textTransform: 'capitalize' }}>
                 {subscriptionStatus.replaceAll('_', ' ')}
               </span>
             </div>
-            <div style={{ display: 'grid', gap: '0.6rem', marginBottom: '1rem' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.55rem', marginBottom: '1.1rem' }}>
               {[
                 'Unlimited job inquiries',
-                'Priority placement in search',
+                'Priority search placement',
                 'Verified badge',
                 'Reviews visible on profile',
-                'Featured in category pages',
-                'Direct messages from customers',
+                'Featured category placement',
+                'Direct customer messages',
               ].map(feature => (
-                <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', color: '#374151', fontWeight: 700 }}>
-                  <span style={{ width: 18, height: 18, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: hasProPlan ? '#dcfce7' : '#f3f4f6', color: hasProPlan ? '#15803d' : '#9ca3af', fontSize: '0.75rem' }}>
+                <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', color: '#374151', fontWeight: 750, background: 'rgba(255, 255, 255, 0.72)', border: '1px solid rgba(229, 231, 235, 0.85)', borderRadius: 12, padding: '0.55rem 0.65rem' }}>
+                  <span style={{ width: 20, height: 20, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: hasProPlan ? '#dcfce7' : '#ffedd5', color: hasProPlan ? '#15803d' : '#ea580c', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
                     ✓
                   </span>
                   {feature}
                 </div>
               ))}
             </div>
-            <button
-              type="button"
-              disabled={billingLoading}
-              onClick={() => openBilling(canManageBilling ? '/api/stripe/portal' : '/api/stripe/checkout')}
-              style={canManageBilling ? secondaryButton : primaryButton}
-            >
-              {billingLoading ? 'Opening Stripe...' : canManageBilling ? 'Manage billing' : 'Subscribe with Stripe'}
-            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid rgba(229, 231, 235, 0.8)' }}>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>
+                {hasProPlan ? 'Manage your billing any time in Stripe.' : 'Start with your included trial, then keep Pro active through Stripe.'}
+              </p>
+              <button
+                type="button"
+                disabled={billingLoading}
+                onClick={() => openBilling(canManageBilling ? '/api/stripe/portal' : '/api/stripe/checkout')}
+                style={{
+                  ...(canManageBilling ? secondaryButton : primaryButton),
+                  boxShadow: canManageBilling ? 'none' : '0 10px 22px rgba(249, 115, 22, 0.18)',
+                }}
+              >
+                {billingLoading ? 'Opening Stripe...' : canManageBilling ? 'Manage billing' : 'Subscribe with Stripe'}
+              </button>
+            </div>
           </section>
         </div>
 
