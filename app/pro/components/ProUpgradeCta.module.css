@@ -1,6 +1,8 @@
 .shimmerButton {
   position: relative;
+  border: none;
   overflow: hidden;
+  cursor: pointer;
   background:
     linear-gradient(110deg, transparent 0%, transparent 36%, rgba(255, 255, 255, 0.34) 45%, transparent 54%, transparent 100%),
     linear-gradient(135deg, #f97316, #ea580c);
@@ -15,6 +17,11 @@
 .shimmerButton:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(249, 115, 22, 0.22);
+}
+
+.shimmerButton:disabled {
+  cursor: wait;
+  opacity: 0.78;
 }
 
 @keyframes ctaShimmer {

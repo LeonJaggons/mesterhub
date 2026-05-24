@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from './ProUpgradeCta.module.css'
@@ -75,6 +74,7 @@ export default function ProUpgradeCta({
   className?: string
 }) {
   const [state, setState] = useState<BillingState | null>(null)
+  const [billingLoading, setBillingLoading] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -107,6 +107,18 @@ export default function ProUpgradeCta({
     ? 'rounded-xl border border-orange-100 bg-orange-50/70 px-4 py-3'
     : 'rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-5 shadow-sm'
 
+  async function openCheckout() {
+    setBillingLoading(true)
+    try {
+      const res = await authenticatedFetch('/api/stripe/checkout', { method: 'POST' })
+      const data = (await res.json()) as { url?: string }
+      if (!data.url) throw new Error('Stripe did not return a checkout URL.')
+      window.location.href = data.url
+    } catch {
+      setBillingLoading(false)
+    }
+  }
+
   return (
     <div className={`${shell} ${className}`}>
       <div className={isInline ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between' : ''}>
@@ -121,14 +133,16 @@ export default function ProUpgradeCta({
             {copy.body}
           </p>
         </div>
-        <Link
-          href="/pro/settings"
+        <button
+          type="button"
+          disabled={billingLoading}
+          onClick={openCheckout}
           className={isInline
             ? `${styles.shimmerButton} inline-flex shrink-0 items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white`
             : `${styles.shimmerButton} mt-4 inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold text-white`}
         >
-          {copy.action}
-        </Link>
+          {billingLoading ? 'Opening Stripe...' : copy.action}
+        </button>
       </div>
     </div>
   )

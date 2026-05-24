@@ -301,6 +301,7 @@ function ProAccountMenu({ user, pro }: { user: User; pro: ProBasic }) {
 
 function ProHeaderUpgradeButton() {
   const [visible, setVisible] = useState(false)
+  const [billingLoading, setBillingLoading] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -321,14 +322,26 @@ function ProHeaderUpgradeButton() {
 
   if (!visible) return null
 
+  async function openCheckout() {
+    setBillingLoading(true)
+    try {
+      const res = await authenticatedFetch('/api/stripe/checkout', { method: 'POST' })
+      const data = (await res.json()) as { url?: string }
+      if (!data.url) throw new Error('Stripe did not return a checkout URL.')
+      window.location.href = data.url
+    } catch {
+      setBillingLoading(false)
+    }
+  }
+
   return (
-    <Link href="/pro/settings" className={styles.headerUpgradeButton}>
+    <button type="button" className={styles.headerUpgradeButton} disabled={billingLoading} onClick={openCheckout}>
       <svg className={styles.headerUpgradeIcon} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
         <path d="M8 1.5l1.35 3.8 3.65 1.28-3.65 1.28L8 11.66 6.65 7.86 3 6.58 6.65 5.3 8 1.5z" />
         <path d="M12.6 10.3l.55 1.55 1.45.5-1.45.5-.55 1.55-.55-1.55-1.45-.5 1.45-.5.55-1.55z" />
       </svg>
-      Upgrade
-    </Link>
+      {billingLoading ? 'Opening...' : 'Upgrade'}
+    </button>
   )
 }
 

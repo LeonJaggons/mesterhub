@@ -251,7 +251,7 @@ export default function ProSettingsPage() {
   const subscriptionStatus = account.subscriptionStatus ?? profile.subscriptionStatus ?? 'inactive'
   const subscriptionCurrentPeriodEnd = account.subscriptionCurrentPeriodEnd ?? profile.subscriptionCurrentPeriodEnd
   const hasProPlan = hasProFeatures(subscriptionStatus, subscriptionCurrentPeriodEnd)
-  const canManageBilling = Boolean(account.stripeCustomerId) && ['active', 'trialing', 'past_due', 'unpaid'].includes(subscriptionStatus)
+  const canManageBilling = Boolean(account.stripeCustomerId) && ['active', 'past_due', 'unpaid'].includes(subscriptionStatus)
   const verificationItems = [
     ['Identity document', Boolean(verification.idDocumentUrl)],
     ['Selfie match', Boolean(verification.selfieUrl)],
