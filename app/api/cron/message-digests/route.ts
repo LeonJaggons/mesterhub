@@ -7,7 +7,10 @@ import {
   CRON_BATCH_LIMIT,
   emailCardHtml,
   requireCron,
+  toDate,
 } from '../utils'
+
+const MESSAGE_DIGEST_COOLDOWN_MS = 30 * 60 * 1000
 
 type MessageDigest = {
   requestId?: string
@@ -22,6 +25,7 @@ type MessageDigest = {
   categoryName?: string
   proUid?: string
   customerUid?: string
+  lastSentAt?: unknown
 }
 
 function digestSubject(input: { count: number; categoryName: string }): string {
@@ -48,6 +52,9 @@ export async function GET(request: Request) {
     const data = doc.data() as MessageDigest
     const count = Number(data.pendingCount ?? 0)
     if (!data.requestId || !data.recipientUid || count <= 0) continue
+
+    const lastSentAt = toDate(data.lastSentAt)
+    if (lastSentAt && Date.now() - lastSentAt.getTime() < MESSAGE_DIGEST_COOLDOWN_MS) continue
 
     const categoryName = cleanString(data.categoryName, 'your request')
     const senderName = cleanString(data.senderName, 'Someone')
