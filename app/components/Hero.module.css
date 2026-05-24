@@ -42,7 +42,7 @@
 }
 
 .heading {
-  font-size: clamp(2.25rem, 6.8vw, 5.25rem);
+  font-size: clamp(2.15rem, 5.6vw, 4.35rem);
   font-weight: 900;
   line-height: 1.1;
   margin: 0 0 2rem;
@@ -50,7 +50,7 @@
   color: #1b1c1e;
 
   @media (max-width: 479px) {
-    font-size: clamp(2rem, 9.5vw, 2.45rem);
+    font-size: clamp(1.95rem, 8.7vw, 2.35rem);
   }
 
   @media (min-width: 768px) {
