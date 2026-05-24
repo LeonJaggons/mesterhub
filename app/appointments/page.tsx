@@ -168,13 +168,13 @@ export default function AppointmentsPage() {
     })
   }, [router])
 
-  const activeAppointments = appointments.filter(req => req.status !== 'cancelled')
+  const defaultAppointments = appointments.filter(req => req.status === 'accepted')
   const filteredAppointments = statusFilter === 'all'
-    ? activeAppointments
+    ? defaultAppointments
     : appointments.filter(req => req.status === statusFilter)
 
   function countForStatus(status: ServiceStatusFilter): number {
-    if (status === 'all') return activeAppointments.length
+    if (status === 'all') return defaultAppointments.length
     return appointments.filter(req => req.status === status).length
   }
 
