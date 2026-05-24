@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { JobLocation, NewServiceRequest } from '@/firebase/serviceRequests'
+import { hasPaidProFeatures } from '@/lib/billing'
 
 type ProjectDoc = {
   customerUid: string
@@ -186,6 +187,10 @@ export async function POST(request: NextRequest) {
     const proSnap = await adminDb.collection('pros').doc(proUid).get()
     if (!proSnap.exists || proSnap.data()?.status !== 'active') {
       return Response.json({ error: 'This pro is not currently available for new requests.' }, { status: 400 })
+    }
+    const pro = proSnap.data()
+    if (!hasPaidProFeatures(pro?.subscriptionStatus, pro?.subscriptionCurrentPeriodEnd)) {
+      return Response.json({ error: 'This pro is not accepting direct customer inquiries yet.' }, { status: 400 })
     }
 
     const proAccountSnap = await adminDb.collection('pros').doc(proUid).collection('private').doc('account').get()

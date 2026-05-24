@@ -1,4 +1,4 @@
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { db } from './index'
 import type { SignupData } from '@/app/pro/signup/store'
 
@@ -6,6 +6,7 @@ export type ProStatus = 'pending_verification' | 'active' | 'suspended' | 'rejec
 
 export async function createProProfile(uid: string, data: SignupData): Promise<void> {
   const status: ProStatus = 'pending_verification'
+  const trialEndsAt = Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
 
   await setDoc(doc(db, 'pros', uid), {
     uid,
@@ -31,6 +32,9 @@ export async function createProProfile(uid: string, data: SignupData): Promise<v
     workPhotoUrls: data.workPhotoUrls ?? [],
     pastProjects: data.pastProjects ?? [],
     profileVisibility: 'visible',
+    subscriptionStatus: 'trialing',
+    subscriptionActive: true,
+    subscriptionCurrentPeriodEnd: trialEndsAt,
     status,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -47,6 +51,8 @@ export async function createProProfile(uid: string, data: SignupData): Promise<v
       email: true,
       sms: false,
     },
+    subscriptionStatus: 'trialing',
+    subscriptionCurrentPeriodEnd: trialEndsAt,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })

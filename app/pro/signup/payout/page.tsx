@@ -7,17 +7,11 @@ import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
-const COMMISSION = 0.12
 const PAYOUT_COLLECTION_ENABLED = process.env.NEXT_PUBLIC_ENABLE_PAYOUT_COLLECTION === 'true'
 
 export default function PayoutPage() {
   const router = useRouter()
   const [iban, setIban] = useState('')
-  const [jobValue, setJobValue] = useState('15000')
-
-  const gross = Number(jobValue) || 0
-  const fee = Math.round(gross * COMMISSION)
-  const net = gross - fee
 
   function handleContinue() {
     save(PAYOUT_COLLECTION_ENABLED ? { iban } : { iban: '' })
@@ -34,7 +28,7 @@ export default function PayoutPage() {
       <button className={styles.back} onClick={() => router.back()}>← Back</button>
       <h1 className={styles.stepTitle} style={dg}>Pricing & payouts</h1>
       <p className={styles.stepSubtitle}>
-        Review pricing and payout expectations. Bank account collection is launch-gated until the payout provider is connected.
+        Mestermind Pro is a flat-rate subscription. You keep what customers pay you directly, and the subscription unlocks lead and profile features.
       </p>
 
       {PAYOUT_COLLECTION_ENABLED ? (
@@ -60,45 +54,16 @@ export default function PayoutPage() {
 
       <hr className={styles.separator} />
 
-      <div className={styles.field}>
-        <label className={styles.label}>Earnings calculator</label>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-          Enter a job value to see your take-home after commission.
-        </p>
-        <div className={styles.inputGroup}>
-          <input
-            className={styles.input}
-            type="number"
-            placeholder="Job value (Ft)"
-            value={jobValue}
-            onChange={e => setJobValue(e.target.value)}
-          />
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.75rem', background: '#f3f4f6', borderRadius: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap' }}>
-            Ft
-          </div>
-        </div>
-
-        <div className={styles.calcBox}>
-          <div className={styles.calcRow}>
-            <span>Job value</span>
-            <span>{gross.toLocaleString('hu-HU')} Ft</span>
-          </div>
-          <div className={styles.calcRow}>
-            <span>Mestermind commission ({COMMISSION * 100}%)</span>
-            <span>− {fee.toLocaleString('hu-HU')} Ft</span>
-          </div>
-          <div className={styles.calcTotal}>
-            <span>You receive</span>
-            <span style={{ color: '#f97316' }}>{net.toLocaleString('hu-HU')} Ft</span>
-          </div>
-        </div>
+      <div className={styles.infoBox}>
+        <p className={styles.infoBoxTitle}>What the flat rate includes</p>
+        Unlimited job inquiries, priority search placement, a verified badge, visible profile reviews, category featuring, and direct customer messages.
       </div>
 
       <hr className={styles.separator} />
 
       <div className={styles.infoBox}>
-        <p className={styles.infoBoxTitle}>New pro offer</p>
-        For your first 30 days, commission is reduced to 6% — half price — to help you land your first job and first review. That first review is the hardest and most important.
+        <p className={styles.infoBoxTitle}>Subscribe after approval</p>
+        Once your profile is submitted, open Pro settings to subscribe securely through Stripe and activate the paid features.
       </div>
 
       <button

@@ -78,6 +78,9 @@ type ProProfile = {
   idDocumentUrl?: string | null
   selfieUrl?: string | null
   status: string
+  subscriptionActive?: boolean
+  subscriptionStatus?: string
+  subscriptionCurrentPeriodEnd?: { toDate?: () => Date; toMillis?: () => number } | Date | string | number | null
   rating?: number
   reviewCount?: number
 }
@@ -147,6 +150,26 @@ function statusLabel(status: string): string {
   return 'Profile under review'
 }
 
+function periodEndMillis(value: ProProfile['subscriptionCurrentPeriodEnd']): number | null {
+  if (!value) return null
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const parsed = new Date(value).getTime()
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  if (typeof value.toMillis === 'function') return value.toMillis()
+  if (typeof value.toDate === 'function') return value.toDate().getTime()
+  return null
+}
+
+function hasPaidProFeatures(pro: Pick<ProProfile, 'subscriptionStatus' | 'subscriptionCurrentPeriodEnd'>): boolean {
+  if (pro.subscriptionStatus === 'active') return true
+  if (pro.subscriptionStatus !== 'trialing') return false
+  const end = periodEndMillis(pro.subscriptionCurrentPeriodEnd)
+  return end === null || end > Date.now()
+}
+
 function serviceSupportText(service: string, categoryName: string): string {
   const lower = service.toLowerCase()
   if (lower.includes('emergency')) return 'Urgent requests welcome when available'
@@ -198,7 +221,7 @@ function whyThisPro(pro: ProProfile): string {
   const services = pro.services?.slice(0, 3).join(', ')
   const experience = pro.yearsExp ? `has been in business for ${pro.yearsExp} ${pro.yearsExp === '1' ? 'year' : 'years'}` : 'has professional experience'
   const serviceCopy = services ? ` and offers ${services.toLowerCase()} services` : ''
-  const trustCopy = pro.backgroundCheck || pro.status === 'active' ? ' Verified profile details help customers book with confidence.' : ''
+  const trustCopy = hasPaidProFeatures(pro) ? ' Verified profile details help customers book with confidence.' : ''
   return `${pro.fullName} ${experience}${serviceCopy}. Customers can review pricing, photos, credentials, and FAQs before requesting an estimate.${trustCopy}`
 }
 
@@ -775,6 +798,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
   const [signupError, setSignupError] = useState<string | null>(null)
 
   const hasPrice = pro.pricingType !== 'quote' && pro.hourlyRate
+  const paidPro = hasPaidProFeatures(pro)
   const reusableProjects = projects
     .filter(project => !project.invitedProUids?.includes(pro.uid))
     .sort((a, b) => Number(b.categoryName === pro.categoryName) - Number(a.categoryName === pro.categoryName))
@@ -994,6 +1018,24 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
         <p className="text-sm text-gray-500">
           {pro.fullName} will get back to you shortly.
         </p>
+      </div>
+    )
+  }
+
+  if (!paidPro) {
+    return (
+      <div className="bg-white border border-gray-200 shadow-sm rounded-sm p-5 border-t-4 border-t-gray-300">
+        <h2 className="text-2xl font-black leading-none text-gray-900 mb-2" style={dg}>Requests unavailable</h2>
+        <p className="text-sm leading-relaxed text-gray-500">
+          {pro.fullName} has not activated direct customer inquiries yet. Choose another verified pro from search to send your job details.
+        </p>
+        <Link
+          href={`/instant-results?q=${encodeURIComponent(pro.categoryName || '')}`}
+          className="mt-4 block w-full rounded-sm bg-orange-500 py-3 text-center text-base font-black text-white transition-colors hover:bg-orange-600"
+          style={dg}
+        >
+          Find available pros
+        </Link>
       </div>
     )
   }
@@ -1366,6 +1408,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
   const topDistricts = pro.districts?.slice(0, 4) ?? []
   const moreDistricts = (pro.districts?.length ?? 0) - topDistricts.length
   const isOwnProfile = currentUid === pro.uid
+  const paidPro = hasPaidProFeatures(pro)
   const profileSocialLinks = socialEntries(pro)
   const profileFaqs = faqEntries(pro)
   const categoryHref = `/instant-results?q=${encodeURIComponent(pro.categoryName || '')}`
@@ -1395,8 +1438,12 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
             <div className="min-w-0">
               <h1 className="text-3xl font-black leading-none text-gray-900" style={dg}>{pro.fullName}</h1>
               <div className="mt-3">
-                {pro.rating && pro.reviewCount ? (
+                {paidPro && pro.rating && pro.reviewCount ? (
                   <StarRating rating={pro.rating} count={pro.reviewCount} />
+                ) : !paidPro ? (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-bold text-gray-500">Reviews unavailable</span>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-bold text-emerald-600">New pro</span>
@@ -1406,7 +1453,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                 )}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                {pro.status === 'active' && <span className="inline-flex items-center gap-1 font-semibold text-orange-600"><MdVerified size={16} /> Top Pro</span>}
+                {paidPro && <span className="inline-flex items-center gap-1 font-semibold text-orange-600"><MdVerified size={16} /> Verified Pro</span>}
                 {pro.categoryName && <span>{pro.categoryName}</span>}
                 {pro.yearsExp && <span>{pro.yearsExp} years in business</span>}
               </div>
@@ -1520,7 +1567,11 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
 
             <section id="reviews" className="scroll-mt-6">
               <h2 className="mb-3 text-2xl font-black leading-none text-gray-900" style={dg}>Reviews</h2>
-              <ReviewSection reviews={reviews} rating={pro.rating} reviewCount={pro.reviewCount} />
+              {paidPro ? (
+                <ReviewSection reviews={reviews} rating={pro.rating} reviewCount={pro.reviewCount} />
+              ) : (
+                <p className="text-sm text-gray-500">Reviews are visible after this pro activates Mestermind Pro.</p>
+              )}
             </section>
 
             <section id="credentials" className="scroll-mt-6">

@@ -40,6 +40,9 @@ export function ProAvatar({ pro, size = 56 }: { pro: ProSummary; size?: number }
 export function ProRating({ pro }: { pro: ProSummary }) {
   const rating = pro.rating
   const count = pro.reviewCount ?? 0
+  if (!pro.subscriptionActive) {
+    return <p className="text-xs font-semibold text-gray-400">Reviews available with Pro</p>
+  }
   if (!rating || count === 0) {
     return <p className="text-xs font-semibold text-gray-400">No reviews yet</p>
   }
@@ -85,7 +88,7 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
         </div>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
-          {pro.backgroundCheck && (
+          {pro.subscriptionActive && (
             <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">
               <MdVerified size={14} /> Verified
             </span>

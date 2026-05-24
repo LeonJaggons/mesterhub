@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { serializeDoc } from '@/app/api/admin/utils'
+import { hasPaidProFeatures } from '@/lib/billing'
 
 type SerializedReview = ReturnType<typeof serializeReview>
 
@@ -28,6 +29,15 @@ export async function GET(
 ) {
   try {
     const { uid } = await params
+    const proSnap = await adminDb.collection('pros').doc(uid).get()
+    if (!proSnap.exists) {
+      return Response.json({ reviews: [] }, { status: 404 })
+    }
+    const pro = proSnap.data()
+    if (!hasPaidProFeatures(pro?.subscriptionStatus, pro?.subscriptionCurrentPeriodEnd)) {
+      return Response.json({ reviews: [] })
+    }
+
     const snap = await adminDb
       .collection('reviews')
       .where('proUid', '==', uid)

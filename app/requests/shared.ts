@@ -91,8 +91,34 @@ export type ProSummary = {
   avatarUrl: string | null
   backgroundCheck: boolean
   regulated: boolean
+  subscriptionActive?: boolean
+  subscriptionStatus?: string
   rating?: number
   reviewCount?: number
+}
+
+function periodEndMillis(value: unknown): number | null {
+  if (!value) return null
+  if (value instanceof Timestamp) return value.toMillis()
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const parsed = new Date(value).getTime()
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  if (typeof value === 'object') {
+    const maybeTimestamp = value as { toMillis?: () => number; toDate?: () => Date }
+    if (typeof maybeTimestamp.toMillis === 'function') return maybeTimestamp.toMillis()
+    if (typeof maybeTimestamp.toDate === 'function') return maybeTimestamp.toDate().getTime()
+  }
+  return null
+}
+
+function hasProFeatures(status: unknown, currentPeriodEnd: unknown): boolean {
+  if (status === 'active') return true
+  if (status !== 'trialing') return false
+  const end = periodEndMillis(currentPeriodEnd)
+  return end === null || end > Date.now()
 }
 
 export const STATUS_LABELS: Record<ServiceRequestStatus, string> = {
@@ -205,6 +231,7 @@ export async function fetchProSummary(uid: string): Promise<ProSummary | null> {
     const snap = await getDoc(doc(db, 'pros', uid))
     if (!snap.exists()) return null
     const d = snap.data()
+    const subscriptionActive = hasProFeatures(d.subscriptionStatus, d.subscriptionCurrentPeriodEnd)
     return {
       uid: snap.id,
       fullName: (d.fullName as string) ?? '',
@@ -219,8 +246,10 @@ export async function fetchProSummary(uid: string): Promise<ProSummary | null> {
       avatarUrl: (d.avatarUrl as string | null) ?? null,
       backgroundCheck: Boolean(d.backgroundCheck),
       regulated: Boolean(d.regulated),
-      rating: d.rating as number | undefined,
-      reviewCount: d.reviewCount as number | undefined,
+      subscriptionActive,
+      subscriptionStatus: (d.subscriptionStatus as string) ?? 'inactive',
+      rating: subscriptionActive ? d.rating as number | undefined : undefined,
+      reviewCount: subscriptionActive ? d.reviewCount as number | undefined : undefined,
     }
   } catch {
     return null

@@ -23,7 +23,7 @@ export function LogoMark() {
   return (
     <span className={styles.logoMark}>
       <span className={styles.logoIcon} aria-hidden="true">
-        <svg viewBox="0 0 16 16" width="18" height="18" focusable="false">
+        <svg viewBox="0 0 16 16" width="15" height="15" focusable="false">
           <path fill="#FFF" d="M8.973 10.385a3.71 3.71 0 01-.564 1.957L8 13l-.409-.658a3.704 3.704 0 01-.564-1.957v-3.14C7.51 6.62 8.231 6.4 8.973 6.4v3.985zM4 5.69V4h8v1.69H4z" />
         </svg>
       </span>
@@ -148,7 +148,7 @@ function ServicesMenu({ categories }: { categories: Category[] }) {
       onMouseLeave={() => { closeTimer.current = setTimeout(() => setOpen(false), 100) }}
     >
       <button
-        className={`${styles.headerMenuText} ${styles.headerNavItem} flex cursor-pointer items-center gap-1 rounded-lg px-3 py-2 font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors`}
+        className={`${styles.headerMenuText} ${styles.headerNavItem} flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors`}
         aria-expanded={open}
       >
         Explore Services
@@ -167,7 +167,7 @@ function CustomerNavLink({ href, label, badge = 0 }: { href: string; label: stri
   return (
     <Link
       href={href}
-      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-3 py-2 font-normal rounded-lg transition-colors ${
+      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded-lg transition-colors ${
         active ? 'text-orange-600 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
@@ -241,7 +241,7 @@ function ProNavLink({ href, label, badge = 0 }: { href: string; label: string; b
   return (
     <Link
       href={href}
-      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-3 py-2 font-normal rounded-lg transition-colors ${
+      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded-lg transition-colors ${
         active ? 'text-orange-600 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
@@ -253,8 +253,8 @@ function ProNavLink({ href, label, badge = 0 }: { href: string; label: string; b
 
 function BellButton() {
   return (
-    <button className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer border-none bg-transparent">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <button className="relative p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer border-none bg-transparent">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
       </svg>
     </button>
@@ -565,7 +565,7 @@ export default function Header() {
         <nav className={styles.desktopNav}>
           <ServicesMenu categories={categories} />
           {user && <CustomerNav activeAppointments={activeAppointments} />}
-          <Link href="/pro" className={`${styles.headerMenuText} ${styles.headerNavItem} px-3 py-2 font-normal text-gray-600 hover:text-gray-900 transition-colors`}>
+          <Link href="/pro" className={`${styles.headerMenuText} ${styles.headerNavItem} px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 transition-colors`}>
             Join as a pro
           </Link>
           {user ? (
@@ -575,11 +575,11 @@ export default function Header() {
           ) : (
             <>
               <Link href="/register">
-                <Button className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 px-5 py-2 text-sm font-semibold text-white cursor-pointer shadow-sm transition-all">
+                <Button className={`${styles.headerMenuText} rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 px-5 py-2 font-semibold text-white cursor-pointer shadow-sm transition-all`}>
                   Sign up
                 </Button>
               </Link>
-              <Link href="/login" className={`${styles.headerMenuText} ${styles.headerNavItem} px-4 py-2 font-normal text-gray-700 hover:bg-gray-100 rounded-lg transition-colors`}>
+              <Link href="/login" className={`${styles.headerMenuText} ${styles.headerNavItem} px-3 py-1.5 font-normal text-gray-700 hover:bg-gray-100 rounded-lg transition-colors`}>
                 Log in
               </Link>
             </>

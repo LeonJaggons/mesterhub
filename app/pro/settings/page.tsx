@@ -25,11 +25,23 @@ type ProProfile = {
   backgroundCheck?: boolean
   certificateUrl?: string | null
   insuranceUrl?: string | null
+  subscriptionStatus?: string
+  subscriptionActive?: boolean
+  subscriptionCurrentPeriodEnd?: SubscriptionPeriodEnd
 }
 
 type AccountData = {
   phone?: string
   notificationPreferences?: NotificationPreferences
+  subscriptionStatus?: string
+  subscriptionCurrentPeriodEnd?: SubscriptionPeriodEnd
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
+}
+
+type SubscriptionPeriodEnd = Date | string | number | null | undefined | {
+  toDate?: () => Date
+  toMillis?: () => number
 }
 
 type VerificationData = {
@@ -85,6 +97,26 @@ function completionScore(profile: ProProfile, account: AccountData, verification
   return Math.round((checks.filter(Boolean).length / checks.length) * 100)
 }
 
+function periodEndMillis(value: SubscriptionPeriodEnd): number | null {
+  if (!value) return null
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const parsed = new Date(value).getTime()
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  if (typeof value.toMillis === 'function') return value.toMillis()
+  if (typeof value.toDate === 'function') return value.toDate().getTime()
+  return null
+}
+
+function hasProFeatures(status: string, currentPeriodEnd: SubscriptionPeriodEnd): boolean {
+  if (status === 'active') return true
+  if (status !== 'trialing') return false
+  const end = periodEndMillis(currentPeriodEnd)
+  return end === null || end > Date.now()
+}
+
 const buttonBase = {
   display: 'inline-flex',
   alignItems: 'center',
@@ -127,6 +159,7 @@ export default function ProSettingsPage() {
   const [notifications, setNotifications] = useState<NotificationPreferences>(DEFAULT_NOTIFICATIONS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [billingLoading, setBillingLoading] = useState(false)
   const [saved, setSaved] = useState('')
   const [error, setError] = useState('')
 
@@ -162,6 +195,21 @@ export default function ProSettingsPage() {
     saveSettings({ notificationPreferences: next }, 'Notification preferences saved.')
   }
 
+  async function openBilling(path: '/api/stripe/checkout' | '/api/stripe/portal') {
+    setBillingLoading(true)
+    setSaved('')
+    setError('')
+    try {
+      const res = await authenticatedFetch(path, { method: 'POST' })
+      const data = (await res.json()) as { url?: string }
+      if (!data.url) throw new Error('Stripe did not return a billing URL.')
+      window.location.href = data.url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not open Stripe billing.')
+      setBillingLoading(false)
+    }
+  }
+
   useEffect(() => {
     return onAuthChange(async user => {
       if (!user) {
@@ -169,6 +217,9 @@ export default function ProSettingsPage() {
         return
       }
       try {
+        if (new URLSearchParams(window.location.search).get('billing') === 'success') {
+          await authenticatedFetch('/api/stripe/sync', { method: 'POST' })
+        }
         const res = await authenticatedFetch('/api/pro/profile')
         const data = await res.json()
         setProfile(data.profile ?? {})
@@ -197,6 +248,10 @@ export default function ProSettingsPage() {
   const score = completionScore(profile, account, verification)
   const visibility = profile.profileVisibility ?? 'visible'
   const isVisibleInSearch = profile.status === 'active' && visibility !== 'paused'
+  const subscriptionStatus = account.subscriptionStatus ?? profile.subscriptionStatus ?? 'inactive'
+  const subscriptionCurrentPeriodEnd = account.subscriptionCurrentPeriodEnd ?? profile.subscriptionCurrentPeriodEnd
+  const hasProPlan = hasProFeatures(subscriptionStatus, subscriptionCurrentPeriodEnd)
+  const canManageBilling = Boolean(account.stripeCustomerId) && ['active', 'trialing', 'past_due', 'unpaid'].includes(subscriptionStatus)
   const verificationItems = [
     ['Identity document', Boolean(verification.idDocumentUrl)],
     ['Selfie match', Boolean(verification.selfieUrl)],
@@ -260,6 +315,49 @@ export default function ProSettingsPage() {
               View public profile
             </Link>
           )}
+        </div>
+
+        <div className={styles.card} style={{ marginBottom: '1rem' }}>
+          <section className={styles.helpSection} style={{ marginBottom: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div>
+                <h2>Mestermind Pro</h2>
+                <p style={{ margin: '0.35rem 0 0' }}>
+                  {hasProPlan
+                    ? 'Your paid pro features are active.'
+                    : 'Subscribe to unlock customer-facing growth features.'}
+                </p>
+              </div>
+              <span style={{ borderRadius: 999, padding: '0.25rem 0.65rem', fontSize: '0.75rem', fontWeight: 900, background: hasProPlan ? '#dcfce7' : '#f3f4f6', color: hasProPlan ? '#166534' : '#6b7280', textTransform: 'capitalize' }}>
+                {subscriptionStatus.replaceAll('_', ' ')}
+              </span>
+            </div>
+            <div style={{ display: 'grid', gap: '0.6rem', marginBottom: '1rem' }}>
+              {[
+                'Unlimited job inquiries',
+                'Priority placement in search',
+                'Verified badge',
+                'Reviews visible on profile',
+                'Featured in category pages',
+                'Direct messages from customers',
+              ].map(feature => (
+                <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', color: '#374151', fontWeight: 700 }}>
+                  <span style={{ width: 18, height: 18, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: hasProPlan ? '#dcfce7' : '#f3f4f6', color: hasProPlan ? '#15803d' : '#9ca3af', fontSize: '0.75rem' }}>
+                    ✓
+                  </span>
+                  {feature}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              disabled={billingLoading}
+              onClick={() => openBilling(canManageBilling ? '/api/stripe/portal' : '/api/stripe/checkout')}
+              style={canManageBilling ? secondaryButton : primaryButton}
+            >
+              {billingLoading ? 'Opening Stripe...' : canManageBilling ? 'Manage billing' : 'Subscribe with Stripe'}
+            </button>
+          </section>
         </div>
 
         <div className={styles.card} style={{ marginBottom: '1rem' }}>

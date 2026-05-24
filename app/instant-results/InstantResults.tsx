@@ -526,6 +526,7 @@ function mapApiPro(doc: any): Pro {
   const hourlyRate = doc.hourlyRate ? parseInt(doc.hourlyRate, 10) : null
   const startingPrice = !isNaN(hourlyRate ?? NaN) ? hourlyRate : null
   const yearsExp = doc.yearsExp ? parseInt(doc.yearsExp, 10) : null
+  const subscriptionActive = Boolean(doc.subscriptionActive)
 
   return {
     id: doc.id ?? doc.uid,
@@ -534,7 +535,7 @@ function mapApiPro(doc: any): Pro {
     rating: doc.rating ?? null,
     ratingLabel: doc.ratingLabel ?? null,
     reviewCount: doc.reviewCount ?? 0,
-    isTopPro: doc.isTopPro ?? false,
+    isTopPro: subscriptionActive || Boolean(doc.isTopPro),
     isOnline: false,
     hires: doc.hires ?? null,
     location: doc.postcode ? `Budapest, ${doc.postcode}` : 'Budapest',

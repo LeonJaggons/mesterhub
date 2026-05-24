@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
+import { hasPaidProFeatures } from '@/lib/billing'
 import servicesData from '@/public/services.json'
 import districtsData from '@/public/districts.json'
 
@@ -26,6 +27,9 @@ type ProDoc = {
   backgroundCheck?: boolean
   profileVisibility?: 'visible' | 'paused'
   status?: string
+  subscriptionStatus?: string
+  subscriptionActive?: boolean
+  subscriptionCurrentPeriodEnd?: Date | { toDate?: () => Date; toMillis?: () => number } | null
   rating?: number
   reviewCount?: number
   createdAt?: { toMillis?: () => number }
@@ -49,6 +53,10 @@ function matchingServices(q: string): string[] {
   }
 
   return [...new Set(results)].slice(0, 10) // Firestore array-contains-any max 10
+}
+
+function isPaidPro(pro: ProDoc): boolean {
+  return hasPaidProFeatures(pro.subscriptionStatus, pro.subscriptionCurrentPeriodEnd)
 }
 
 export async function GET(request: NextRequest) {
@@ -88,7 +96,12 @@ export async function GET(request: NextRequest) {
 
     docs = docs
       .filter(p => p.status === 'active' && p.profileVisibility !== 'paused')
-      .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
+      .sort((a, b) => {
+        const aPaid = isPaidPro(a)
+        const bPaid = isPaidPro(b)
+        return Number(bPaid) - Number(aPaid)
+          || (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0)
+      })
 
     // Post-filter by district (Firestore can't combine two array-contains)
     if (districtId) {
@@ -96,29 +109,34 @@ export async function GET(request: NextRequest) {
     }
 
     return Response.json({
-      pros: docs.slice(0, RESULT_LIMIT).map(p => ({
-        id: p.id,
-        uid: p.uid ?? p.id,
-        fullName: p.fullName ?? '',
-        categoryId: p.categoryId ?? '',
-        categoryName: p.categoryName ?? '',
-        services: p.services ?? [],
-        districts: p.districts ?? [],
-        radius: p.radius ?? 10,
-        postcode: p.postcode ?? '',
-        bio: p.bio ?? '',
-        yearsExp: p.yearsExp ?? '',
-        pricingType: p.pricingType ?? 'quote',
-        hourlyRate: p.hourlyRate ?? '',
-        availability: p.availability ?? [],
-        avatarUrl: p.avatarUrl ?? null,
-        workPhotoUrls: p.workPhotoUrls ?? [],
-        pastProjects: p.pastProjects ?? [],
-        backgroundCheck: Boolean(p.backgroundCheck),
-        rating: typeof p.rating === 'number' ? p.rating : null,
-        reviewCount: typeof p.reviewCount === 'number' ? p.reviewCount : 0,
-        status: p.status ?? 'active',
-      })),
+      pros: docs.slice(0, RESULT_LIMIT).map(p => {
+        const paid = isPaidPro(p)
+        return {
+          id: p.id,
+          uid: p.uid ?? p.id,
+          fullName: p.fullName ?? '',
+          categoryId: p.categoryId ?? '',
+          categoryName: p.categoryName ?? '',
+          services: p.services ?? [],
+          districts: p.districts ?? [],
+          radius: p.radius ?? 10,
+          postcode: p.postcode ?? '',
+          bio: p.bio ?? '',
+          yearsExp: p.yearsExp ?? '',
+          pricingType: p.pricingType ?? 'quote',
+          hourlyRate: p.hourlyRate ?? '',
+          availability: p.availability ?? [],
+          avatarUrl: p.avatarUrl ?? null,
+          workPhotoUrls: p.workPhotoUrls ?? [],
+          pastProjects: p.pastProjects ?? [],
+          backgroundCheck: Boolean(p.backgroundCheck),
+          subscriptionActive: paid,
+          subscriptionStatus: p.subscriptionStatus ?? 'inactive',
+          rating: paid && typeof p.rating === 'number' ? p.rating : null,
+          reviewCount: paid && typeof p.reviewCount === 'number' ? p.reviewCount : 0,
+          status: p.status ?? 'active',
+        }
+      }),
     })
   } catch (err) {
     console.error('[/api/pros]', err)
