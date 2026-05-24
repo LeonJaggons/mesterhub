@@ -12,13 +12,22 @@
 .title {
   font-size: 1.75rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.35rem;
   color: var(--color-gray-900);
+}
+
+.subtitle {
+  max-width: 34rem;
+  margin: 0 0 1.25rem;
+  color: var(--color-gray-600);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .card {
   background: white;
   border-radius: 0.5rem;
+  border: 1px solid var(--color-gray-200);
   box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   padding: 2rem;
 }
@@ -201,9 +210,39 @@
   }
 }
 
+.accountPanel {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #fed7aa;
+  border-radius: 0.5rem;
+  background: #fff7ed;
+}
+
+.panelTitle {
+  margin: 0 0 0.5rem;
+  color: var(--color-gray-900);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.panelList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--color-gray-600);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
 .footer {
   text-align: center;
   margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.5rem;
+  background: white;
   font-size: 0.875rem;
   color: var(--color-gray-600);
 }
