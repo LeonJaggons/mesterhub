@@ -252,7 +252,7 @@ function shortText(value: string, max = 72): string {
 
 function Avatar({ pro, size }: { pro: ProProfile; size: number }) {
   const initials = pro.fullName.split(' ').map(n => n[0]).join('').slice(0, 1).toUpperCase()
-  const BG = ['#ea580c', '#f97316', '#c2410c', '#9a3412', '#1e293b', '#334155', '#b45309', '#78350f']
+  const BG = ['#1e293b', '#334155', '#475569', '#0f172a', '#7c3aed', '#15803d', '#2563eb', '#0369a1']
   const bg = BG[pro.fullName.charCodeAt(0) % BG.length]
   if (pro.avatarUrl) {
     return <img src={pro.avatarUrl} alt={pro.fullName} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: '3px solid #f3f4f6' }} />
@@ -427,14 +427,14 @@ function ReviewSection({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search reviews"
-            className="h-12 w-full rounded-sm border border-gray-300 bg-white pl-12 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+            className="h-12 w-full rounded-sm border border-gray-300 bg-white pl-12 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
           />
         </label>
         <label className="relative block">
           <select
             value={sort}
             onChange={e => setSort(e.target.value as typeof sort)}
-            className="h-12 w-full appearance-none rounded-sm border border-gray-300 bg-white px-4 pr-10 text-sm text-gray-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+            className="h-12 w-full appearance-none rounded-sm border border-gray-300 bg-white px-4 pr-10 text-sm text-gray-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
           >
             <option value="relevant">Most relevant</option>
             <option value="newest">Newest</option>
@@ -466,7 +466,7 @@ function ReviewSection({
         {filteredReviews.length > 0 ? filteredReviews.map(review => (
           <article key={review.id} className="py-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-black text-orange-700">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-700">
                 {reviewerInitials(review.customerName || 'Mestermind customer')}
               </div>
               <div className="min-w-0 flex-1">
@@ -600,7 +600,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
         <div className="flex flex-col gap-2">
           {checks.map(check => (
             <div key={check.label} className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
-              <span className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">✓</span>
+              <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold">✓</span>
               <span className="text-sm font-semibold text-gray-800">{check.label}</span>
             </div>
           ))}
@@ -618,7 +618,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
               </span>
             ))}
             {moreDistricts > 0 && (
-              <span className="bg-orange-50 text-orange-700 text-xs font-semibold rounded-full px-3 py-1">
+              <span className="bg-slate-50 text-slate-700 text-xs font-semibold rounded-full px-3 py-1">
                 +{moreDistricts} more
               </span>
             )}
@@ -675,7 +675,7 @@ function RequestSignupModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">Create account</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">Create account</p>
             <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>Request your estimate</h2>
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
               Sign up first, then we&apos;ll send this estimate request automatically.
@@ -742,9 +742,9 @@ function RequestSignupModal({
 
           <p className="text-sm text-gray-500">
             By clicking Create account, you agree to the{' '}
-            <Link href="/terms" target="_blank" className="text-orange-500 hover:underline">Terms of Use</Link>{' '}
+            <Link href="/terms" target="_blank" className="text-slate-700 hover:underline">Terms of Use</Link>{' '}
             and{' '}
-            <Link href="/privacy" target="_blank" className="text-orange-500 hover:underline">Privacy Policy</Link>.
+            <Link href="/privacy" target="_blank" className="text-slate-700 hover:underline">Privacy Policy</Link>.
           </p>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -1002,7 +1002,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
   return (
     <>
-      <div className="bg-white border border-gray-200 shadow-sm rounded-sm p-5 border-t-4 border-t-orange-500">
+      <div className="bg-white border border-gray-200 shadow-sm rounded-sm p-5 border-t-4 border-t-slate-800">
         {hasPrice && (
           <>
             <div className="mb-4">
@@ -1012,7 +1012,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
               <div className="text-sm text-gray-500">
                 {pro.pricingType === 'hourly' ? 'Per hour' : 'Starting price'}
               </div>
-              <button type="button" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })} className="mt-1 text-sm font-semibold text-orange-600 hover:underline">
+              <button type="button" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })} className="mt-1 text-sm font-semibold text-slate-700 hover:underline">
                 View details
               </button>
             </div>
@@ -1039,15 +1039,15 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
         </button>
 
         {reusableProjects.length > 0 && (
-          <div className="mt-4 rounded-sm border border-orange-100 bg-orange-50 p-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-orange-600 mb-2">
+          <div className="mt-4 rounded-sm border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-700 mb-2">
               Send an existing project
             </p>
             <div className="flex flex-col gap-2">
               {reusableProjects.map(project => {
                 const categoryMatch = project.categoryName === pro.categoryName
                 return (
-                  <div key={project.id} className="rounded-sm border border-orange-100 bg-white p-3">
+                  <div key={project.id} className="rounded-sm border border-slate-200 bg-white p-3">
                     <div className="mb-2">
                       <p className="text-sm font-bold leading-snug text-gray-900">
                         {shortText(projectSummaryTitle(project))}
@@ -1062,7 +1062,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                       type="button"
                       onClick={() => sendExistingProject(project)}
                       disabled={projectSendingId === project.id}
-                      className="w-full rounded-sm border border-orange-200 bg-white px-3 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 disabled:opacity-60 cursor-pointer"
+                      className="w-full rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
                     >
                       {projectSendingId === project.id ? 'Sending…' : 'Send to this pro'}
                     </button>
@@ -1085,15 +1085,15 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
         <div className="bg-gray-50 rounded-sm p-3">
           <div className="flex items-center gap-2 mb-1.5">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" fill="#f97316" opacity=".15" />
-              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M9 12l2 2 4-4" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" fill="#1e293b" opacity=".12" />
+              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M9 12l2 2 4-4" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className="text-sm font-bold text-gray-900">Mestermind Guarantee</span>
           </div>
           <p className="text-xs text-gray-500 leading-relaxed">
             If you hire this pro, you&apos;re covered by our satisfaction guarantee.{' '}
-            <Link href="/help#mestermind-guarantee" className="text-orange-500 hover:underline">Learn more</Link>
+            <Link href="/help#mestermind-guarantee" className="text-slate-700 hover:underline">Learn more</Link>
           </p>
         </div>
       </div>
@@ -1110,7 +1110,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           >
             <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
               <div>
-                <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">Estimate request</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">Estimate request</p>
                 <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>Tell {pro.fullName} about the job</h2>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500">
                   Share the basics now. You can coordinate photos, timing, and final details after the pro replies.
@@ -1221,7 +1221,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                   />
                   <label
                     htmlFor="request-attachments"
-                    className="block cursor-pointer rounded-sm bg-white px-4 py-3 text-center text-sm font-bold text-orange-600 border border-gray-200 hover:bg-orange-50"
+                    className="block cursor-pointer rounded-sm bg-white px-4 py-3 text-center text-sm font-bold text-slate-700 border border-gray-200 hover:bg-slate-50"
                   >
                     Add photos or PDFs
                   </label>
@@ -1421,7 +1421,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                 )}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                {paidPro && <span className="inline-flex items-center gap-1 font-semibold text-orange-600"><MdVerified size={16} /> Verified Pro</span>}
+                {paidPro && <span className="inline-flex items-center gap-1 font-semibold text-slate-700"><MdVerified size={16} /> Verified Pro</span>}
                 {pro.categoryName && <span>{pro.categoryName}</span>}
                 {pro.yearsExp && <span>{pro.yearsExp} years in business</span>}
               </div>
@@ -1461,7 +1461,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
               ['#credentials', 'Credentials'],
               ['#faqs', 'FAQs'],
             ].map(([href, label]) => (
-              <a key={href} href={href} className="whitespace-nowrap border-b-2 border-transparent pb-4 hover:border-orange-500 hover:text-gray-900">
+              <a key={href} href={href} className="whitespace-nowrap border-b-2 border-transparent pb-4 hover:border-slate-800 hover:text-gray-900">
                 {label}
               </a>
             ))}
@@ -1496,7 +1496,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                     const Icon = serviceIcon(s)
                     return (
                       <div key={s} className="rounded-sm border border-gray-200 bg-white p-4">
-                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-orange-50 text-orange-600">
+                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-700">
                           <Icon size={20} aria-hidden="true" />
                         </div>
                         <p className="font-bold text-gray-900">{s}</p>
@@ -1583,7 +1583,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
               {profileSocialLinks.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {profileSocialLinks.map(link => (
-                    <a key={link.key} href={externalHref(link.url)} target="_blank" rel="noreferrer" className="rounded-sm border border-gray-200 px-3 py-2 text-sm font-semibold text-orange-600 hover:bg-gray-50">
+                    <a key={link.key} href={externalHref(link.url)} target="_blank" rel="noreferrer" className="rounded-sm border border-gray-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-gray-50">
                       {link.label}
                     </a>
                   ))}

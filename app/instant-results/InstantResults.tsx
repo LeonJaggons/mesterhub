@@ -245,7 +245,7 @@ function ProCard({ pro }: { pro: Pro }) {
 
                   {/* Name */}
                   <div>
-                    <p className="text-sm md:text-base font-bold text-gray-900 leading-tight group-hover:text-orange-600 transition-colors">
+                    <p className="text-sm md:text-base font-bold text-gray-900 leading-tight group-hover:text-slate-800 transition-colors">
                       {pro.name}
                     </p>
 
@@ -295,7 +295,7 @@ function ProCard({ pro }: { pro: Pro }) {
                       <p className={`text-sm text-gray-600 leading-relaxed ${styles.descriptionClamp}`}>
                         {pro.review}
                       </p>
-                      <span className="text-sm text-orange-500 hover:underline">See more</span>
+                      <span className="text-sm text-slate-600 hover:underline">See more</span>
                     </div>
                   )}
                 </div>
@@ -317,7 +317,7 @@ function ProCard({ pro }: { pro: Pro }) {
                   )}
                 </div>
                 <div className="hidden md:block mt-2">
-                  <span className="bg-orange-500 text-white rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">
+                  <span className="bg-slate-800 text-white rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">
                     View profile
                   </span>
                 </div>
@@ -336,7 +336,7 @@ function TopMatchBanner({ pros }: { pros: Pro[] }) {
   if (first3.length === 0) return null
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-4 bg-orange-50 rounded-xl p-3 sm:p-4 mb-4 border border-orange-100">
+    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 rounded-xl p-3 sm:p-4 mb-4 border border-slate-200">
       <div className="flex flex-row-reverse items-center">
         {first3.map((pro, i) => (
           <div
@@ -362,7 +362,7 @@ function TopMatchBanner({ pros }: { pros: Pro[] }) {
       </div>
       <Link
         href={`/pro/${first3[0].id}`}
-        className="bg-orange-500 text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-orange-600 w-full sm:w-auto whitespace-nowrap text-center"
+        className="bg-slate-800 text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-slate-900 w-full sm:w-auto whitespace-nowrap text-center"
       >
         View top match
       </Link>
@@ -409,7 +409,7 @@ function Sidebar({
       <div className={styles.sidebarInner}>
         <div className="bg-gray-100 rounded-lg p-3 mt-4 mx-3 border border-gray-200">
           <p className="font-bold text-sm">{q || 'Services'}</p>
-          <p className="text-2xl font-bold text-orange-600 mt-1">
+          <p className="text-2xl font-bold text-slate-800 mt-1">
             {averagePrice ? `${averagePrice.toLocaleString('hu-HU')} Ft` : `${resultCount} pros`}
           </p>
           <p className="text-xs text-gray-500 mt-1 mb-3">
@@ -425,7 +425,7 @@ function Sidebar({
             <select
               value={filters.sort}
               onChange={e => patch({ sort: e.target.value as ResultsFilters['sort'] })}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
             >
               <option value="recommended">Recommended</option>
               <option value="rating">Highest rated</option>
@@ -504,7 +504,7 @@ function Sidebar({
         <button
           type="button"
           onClick={() => onChange(DEFAULT_FILTERS)}
-          className="text-sm text-orange-500 hover:underline ml-5 mb-4 cursor-pointer bg-none border-none disabled:text-gray-300 disabled:no-underline disabled:cursor-not-allowed"
+          className="text-sm text-slate-600 hover:underline ml-5 mb-4 cursor-pointer bg-none border-none disabled:text-gray-300 disabled:no-underline disabled:cursor-not-allowed"
           disabled={activeCount === 0}
         >
           Reset filters{activeCount > 0 ? ` (${activeCount})` : ''}
@@ -520,7 +520,7 @@ function Sidebar({
 function mapApiPro(doc: any): Pro {
   const name: string = doc.fullName ?? doc.name ?? 'Unknown'
   const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 1).toUpperCase()
-  const BG_COLORS = ['#7c3aed', '#16a34a', '#1e293b', '#ea580c', '#15803d', '#2563eb', '#b45309', '#0369a1']
+  const BG_COLORS = ['#7c3aed', '#16a34a', '#1e293b', '#334155', '#15803d', '#2563eb', '#475569', '#0369a1']
   const initialsBg = BG_COLORS[name.charCodeAt(0) % BG_COLORS.length]
 
   const hourlyRate = doc.hourlyRate ? parseInt(doc.hourlyRate, 10) : null

@@ -54,7 +54,7 @@
 }
 
 .radioCircleSelected {
-  border-color: #f97316;
+  border-color: #1e293b;
 }
 
 .radioCircleSelected::after {
@@ -62,7 +62,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #f97316;
+  background: #1e293b;
 }
 
 .checkCircle {
@@ -79,8 +79,8 @@
 }
 
 .checkCircleSelected {
-  border-color: #f97316;
-  background: #f97316;
+  border-color: #1e293b;
+  background: #1e293b;
 }
 
 .checkCircleSelected::after {
