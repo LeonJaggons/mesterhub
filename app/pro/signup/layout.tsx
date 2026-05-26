@@ -4,6 +4,8 @@ import { useEffect, useState, type MouseEvent } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LogoMark } from '@/app/components/Header'
+import { useTranslations } from '@/lib/i18n/client'
+import { getPathnameWithoutLocale } from '@/lib/i18n/config'
 import styles from './signup.module.css'
 
 const STEPS = [
@@ -21,13 +23,14 @@ const STEPS = [
 ]
 
 export default function SignupLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+  const t = useTranslations()
+  const pathname = getPathnameWithoutLocale(usePathname())
   const [showExitModal, setShowExitModal] = useState(false)
   const idx = STEPS.indexOf(pathname)
   const progress = idx >= 0 ? ((idx + 1) / STEPS.length) * 100 : 0
-  const stepLabel = idx >= 0 ? `Step ${idx + 1} of ${STEPS.length}` : ''
+  const stepLabel = idx >= 0 ? t('proSignup.layout.stepCount', { current: idx + 1, total: STEPS.length }) : ''
   const shouldWarnBeforeExit = idx >= 0 && pathname !== '/pro/signup/complete'
-  const exitWarning = 'Your pro account has not been created yet. If you exit now, your signup progress may be lost.'
+  const exitWarning = t('proSignup.layout.exitWarning')
 
   useEffect(() => {
     if (!shouldWarnBeforeExit) return
@@ -67,7 +70,7 @@ export default function SignupLayout({ children }: { children: React.ReactNode }
 
         <span className={styles.stepCount}>{stepLabel}</span>
 
-        <Link href="/pro" className={styles.exitLink} onClick={handleExit}>Exit</Link>
+        <Link href="/pro" className={styles.exitLink} onClick={handleExit}>{t('proSignup.layout.exit')}</Link>
       </header>
 
       <div className={styles.progressBar}>
@@ -87,16 +90,16 @@ export default function SignupLayout({ children }: { children: React.ReactNode }
             aria-labelledby="exit-modal-title"
             onClick={event => event.stopPropagation()}
           >
-            <h2 id="exit-modal-title" className={styles.exitModalTitle}>Exit signup?</h2>
+            <h2 id="exit-modal-title" className={styles.exitModalTitle}>{t('proSignup.layout.exitTitle')}</h2>
             <p className={styles.exitModalText}>
-              Your pro account hasn&apos;t been created yet. If you exit now, your signup progress may be lost.
+              {t('proSignup.layout.exitText')}
             </p>
             <div className={styles.exitModalActions}>
               <button type="button" className={styles.exitModalSecondary} onClick={() => setShowExitModal(false)}>
-                Keep going
+                {t('proSignup.layout.keepGoing')}
               </button>
               <Link href="/pro" className={styles.exitModalPrimary}>
-                Exit signup
+                {t('proSignup.layout.exitSignup')}
               </Link>
             </div>
           </div>

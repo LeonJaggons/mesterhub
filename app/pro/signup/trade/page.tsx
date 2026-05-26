@@ -8,6 +8,8 @@ import {
   MdSchool, MdFitnessCenter,
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory, translateLicenceNote, translateService } from '@/lib/i18n/taxonomy'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
@@ -42,6 +44,7 @@ type CategorySummary = {
 type CategoryDetail = CategorySummary & { services: string[] }
 
 export default function TradePage() {
+  const t = useTranslations()
   const router = useRouter()
 
   const [categories, setCategories] = useState<CategorySummary[]>([])
@@ -98,17 +101,17 @@ export default function TradePage() {
   if (loading) {
     return (
       <div className={styles.stepPage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-        <p style={{ color: '#9ca3af' }}>Loading trades…</p>
+        <p style={{ color: '#9ca3af' }}>{t('proSignup.trade.loading')}</p>
       </div>
     )
   }
 
   return (
     <div className={styles.stepPage}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Pick your trade</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.trade.title')}</h1>
       <p className={styles.stepSubtitle}>
-        Choose the category that best describes your work. You&apos;ll pick specific services next — this powers how customers find you.
+        {t('proSignup.trade.subtitle')}
       </p>
 
       {!selected ? (
@@ -122,8 +125,8 @@ export default function TradePage() {
                 onClick={() => selectCategory(cat)}
               >
                 {Icon && <Icon size={28} color="#f97316" />}
-                <span className={styles.categoryCardName}>{cat.name}</span>
-                {cat.regulated && <span className={styles.regulatedBadge}>Licensed</span>}
+                <span className={styles.categoryCardName}>{translateCategory(t, cat.name)}</span>
+                {cat.regulated && <span className={styles.regulatedBadge}>{t('proSignup.trade.licensed')}</span>}
               </button>
             )
           })}
@@ -131,7 +134,7 @@ export default function TradePage() {
       ) : (
         <>
           <button className={styles.back} style={{ marginBottom: '1rem' }} onClick={() => setSelected(null)}>
-            ← Change category
+            {t('proSignup.trade.changeCategory')}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -139,23 +142,23 @@ export default function TradePage() {
               const Icon = CATEGORY_ICONS[selected.name]
               return <Icon size={28} color="#f97316" />
             })()}
-            <span style={{ fontWeight: 700, fontSize: '1.125rem', color: '#111827', ...dg }}>{selected.name}</span>
+            <span style={{ fontWeight: 700, fontSize: '1.125rem', color: '#111827', ...dg }}>{translateCategory(t, selected.name)}</span>
           </div>
 
           {selected.regulated && selected.licenceNote && (
             <div className={styles.infoBox}>
-              <p className={styles.infoBoxTitle}>Licensed trade</p>
-              {selected.licenceNote} — you&apos;ll upload your certificate in a later step.
-              {selected.insuranceRequired && ' Proof of liability insurance is also required.'}
+              <p className={styles.infoBoxTitle}>{t('proSignup.trade.licensedTrade')}</p>
+              {t('proSignup.trade.certificateLater', { note: translateLicenceNote(t, selected.licenceNote) })}
+              {selected.insuranceRequired && t('proSignup.trade.insuranceRequired')}
             </div>
           )}
 
           {detailLoading ? (
-            <p style={{ color: '#9ca3af', fontSize: '0.9375rem', marginBottom: '1.5rem' }}>Loading services…</p>
+            <p style={{ color: '#9ca3af', fontSize: '0.9375rem', marginBottom: '1.5rem' }}>{t('proSignup.trade.loadingServices')}</p>
           ) : (
             <>
               <p className={styles.serviceCount}>
-                Select up to {MAX_SERVICES} services ({chosenServices.length}/{MAX_SERVICES})
+                {t('proSignup.trade.serviceCount', { selected: chosenServices.length, max: MAX_SERVICES })}
               </p>
               <div className={styles.serviceList}>
                 {detail?.services.map(s => {
@@ -175,7 +178,7 @@ export default function TradePage() {
                           </svg>
                         )}
                       </div>
-                      <span className={styles.serviceItemName}>{s}</span>
+                      <span className={styles.serviceItemName}>{translateService(t, s)}</span>
                     </button>
                   )
                 })}
@@ -189,7 +192,10 @@ export default function TradePage() {
             disabled={chosenServices.length === 0 || detailLoading}
             onClick={handleContinue}
           >
-            Continue with {chosenServices.length} service{chosenServices.length !== 1 ? 's' : ''}
+            {t('proSignup.trade.continueWithServices', {
+              count: chosenServices.length,
+              countLabel: chosenServices.length === 1 ? t('proSignup.trade.serviceSingular') : t('proSignup.trade.servicePlural'),
+            })}
           </button>
         </>
       )}

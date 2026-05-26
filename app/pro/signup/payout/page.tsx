@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from '@/lib/i18n/client'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
@@ -10,6 +11,7 @@ const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 const PAYOUT_COLLECTION_ENABLED = process.env.NEXT_PUBLIC_ENABLE_PAYOUT_COLLECTION === 'true'
 
 export default function PayoutPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [iban, setIban] = useState('')
 
@@ -25,15 +27,15 @@ export default function PayoutPage() {
 
   return (
     <div className={styles.stepPage}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Pricing & payouts</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.payout.title')}</h1>
       <p className={styles.stepSubtitle}>
-        Mestermind Pro is a flat-rate subscription. You keep what customers pay you directly, and the subscription unlocks lead and profile features.
+        {t('proSignup.payout.subtitle')}
       </p>
 
       {PAYOUT_COLLECTION_ENABLED ? (
         <div className={styles.field}>
-          <label className={styles.label}>Hungarian IBAN</label>
+          <label className={styles.label}>{t('proSignup.payout.iban')}</label>
           <input
             className={styles.input}
             placeholder="HU00 0000 0000 0000 0000 0000 0000"
@@ -42,28 +44,28 @@ export default function PayoutPage() {
             maxLength={36}
           />
           <p style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.375rem' }}>
-            Starts with HU followed by 26 digits. Payouts are sent 3 business days after job completion.
+            {t('proSignup.payout.ibanHint')}
           </p>
         </div>
       ) : (
         <div className={styles.infoBox}>
-          <p className={styles.infoBoxTitle}>Payout setup comes after approval</p>
-          We will collect bank details through the verified payout provider before your first paid job. Do not enter bank details during this preview flow.
+          <p className={styles.infoBoxTitle}>{t('proSignup.payout.setupAfterApprovalTitle')}</p>
+          {t('proSignup.payout.setupAfterApprovalBody')}
         </div>
       )}
 
       <hr className={styles.separator} />
 
       <div className={styles.infoBox}>
-        <p className={styles.infoBoxTitle}>What the flat rate includes</p>
-        Unlimited job inquiries, priority search placement, a verified badge, visible profile reviews, category featuring, and direct customer messages.
+        <p className={styles.infoBoxTitle}>{t('proSignup.payout.flatRateTitle')}</p>
+        {t('proSignup.payout.flatRateBody')}
       </div>
 
       <hr className={styles.separator} />
 
       <div className={styles.infoBox}>
-        <p className={styles.infoBoxTitle}>Subscribe after approval</p>
-        Once your profile is submitted, open Pro settings to subscribe securely through Stripe and activate the paid features.
+        <p className={styles.infoBoxTitle}>{t('proSignup.payout.subscribeTitle')}</p>
+        {t('proSignup.payout.subscribeBody')}
       </div>
 
       <button
@@ -72,7 +74,7 @@ export default function PayoutPage() {
         disabled={PAYOUT_COLLECTION_ENABLED && (!iban || iban.replace(/\s/g, '').length < 28)}
         onClick={handleContinue}
       >
-        {PAYOUT_COLLECTION_ENABLED ? 'Complete setup' : 'Continue to review'}
+        {PAYOUT_COLLECTION_ENABLED ? t('proSignup.payout.complete') : t('proSignup.payout.review')}
       </button>
     </div>
   )

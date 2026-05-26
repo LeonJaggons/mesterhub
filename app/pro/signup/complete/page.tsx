@@ -8,18 +8,15 @@ import { load, clear, getStagedFile, getStagedFiles, type SignupData } from '../
 import { auth } from '@/firebase/index'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { uploadProFile } from '@/firebase/storage'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
-const CHECKLIST = [
-  'Respond to enquiries within 1 hour — fast response rate is your single biggest early advantage.',
-  'Add past projects if you have not already — profiles with real examples get more views.',
-  'Set a competitive starting price. You can always negotiate up on larger jobs.',
-  'Share your profile link on WhatsApp and social — your existing network is your first source of reviews.',
-]
+const CHECKLIST_KEYS = ['checklist1', 'checklist2', 'checklist3', 'checklist4'] as const
 
 export default function CompletePage() {
+  const t = useTranslations()
   const router = useRouter()
   const data = load()
   const submittedRef = useRef(false)
@@ -41,11 +38,11 @@ export default function CompletePage() {
       const requirePhoneVerification = Boolean(flags.phoneNumberVerification)
 
       if (!user) {
-        throw new Error('Please return to the account step and verify your phone number before submitting your profile.')
+        throw new Error(t('proSignup.complete.verifyError'))
       }
 
       if (requirePhoneVerification && !user.phoneNumber) {
-        throw new Error('Please return to the account step and verify your phone number before submitting your profile.')
+        throw new Error(t('proSignup.complete.verifyError'))
       }
 
       if (draft.fullName?.trim() && user.displayName !== draft.fullName.trim()) {
@@ -99,30 +96,30 @@ export default function CompletePage() {
         router.refresh()
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Failed to save profile.')
+        setError(err instanceof Error ? err.message : t('proSignup.complete.saveError'))
       })
-  }, [data, router])
+  }, [data, router, t])
 
-  const firstName = data.fullName?.split(' ')[0] ?? 'there'
+  const firstName = data.fullName?.split(' ')[0] ?? t('proSignup.complete.fallbackName')
 
   async function handleShareProfile() {
     if (!profileUrl) {
-      setShareMessage('Your profile link is not ready yet.')
+      setShareMessage(t('proSignup.complete.shareNotReady'))
       return
     }
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'My Mestermind profile', url: profileUrl })
+        await navigator.share({ title: t('proSignup.complete.shareTitle'), url: profileUrl })
         setShareMessage('')
         return
       }
 
       await navigator.clipboard.writeText(profileUrl)
-      setShareMessage('Profile link copied.')
+      setShareMessage(t('proSignup.complete.copied'))
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return
-      setShareMessage('Could not share automatically. Copy the profile link from your browser after opening it.')
+      setShareMessage(t('proSignup.complete.shareFailed'))
     }
   }
 
@@ -130,7 +127,7 @@ export default function CompletePage() {
     return (
       <div className={styles.stepPage}>
         <div style={{ padding: '1.5rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', color: '#dc2626' }}>
-          <p style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Could not save your profile</p>
+          <p style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{t('proSignup.complete.errorTitle')}</p>
           <p style={{ fontSize: '0.875rem' }}>{error}</p>
         </div>
       </div>
@@ -140,7 +137,7 @@ export default function CompletePage() {
   if (!saved) {
     return (
       <div className={styles.stepPage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-        <p style={{ color: '#9ca3af', fontSize: '0.9375rem' }}>Saving your profile…</p>
+        <p style={{ color: '#9ca3af', fontSize: '0.9375rem' }}>{t('proSignup.complete.saving')}</p>
       </div>
     )
   }
@@ -150,25 +147,25 @@ export default function CompletePage() {
       <div className={styles.completionCard}>
         <div className={styles.completionIcon}>🎉</div>
         <h1 className={styles.stepTitle} style={{ ...dg, marginBottom: '0.5rem' }}>
-          You&apos;re in, {firstName}.
+          {t('proSignup.complete.title', { name: firstName })}
         </h1>
         <p style={{ fontSize: '0.9375rem', color: '#92400e', margin: 0, lineHeight: 1.6 }}>
-          Your profile has been submitted and your first month of Mestermind Pro is active. Once identity verification completes, you&apos;ll go live with priority placement, visible reviews, and direct inquiries.
+          {t('proSignup.complete.body')}
         </p>
       </div>
 
       <h2 style={{ ...dg, fontSize: '1.25rem', fontWeight: 900, color: '#111827', marginBottom: '0.5rem', letterSpacing: '-0.01em' }}>
-        How to land your first job
+        {t('proSignup.complete.howToTitle')}
       </h2>
       <p style={{ fontSize: '0.9375rem', color: '#6b7280', marginBottom: '1.25rem' }}>
-        That first review is the hardest. Here&apos;s what moves the needle.
+        {t('proSignup.complete.howToBody')}
       </p>
 
       <div className={styles.checklist}>
-        {CHECKLIST.map((item, i) => (
-          <div key={i} className={styles.checklistItem}>
+        {CHECKLIST_KEYS.map((item) => (
+          <div key={item} className={styles.checklistItem}>
             <div className={styles.checklistDot} />
-            <span>{item}</span>
+            <span>{t(`proSignup.complete.${item}`)}</span>
           </div>
         ))}
       </div>
@@ -177,7 +174,7 @@ export default function CompletePage() {
 
       {data.backgroundCheck && (
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.75rem', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.875rem', color: '#15803d' }}>
-          <strong>Background check submitted.</strong> Your <em>Háttérellenőrzött</em> badge will appear on your profile once the check completes — usually 1–3 business days.
+          <strong>{t('proSignup.complete.backgroundSubmitted')}</strong> {t('proSignup.complete.backgroundBody', { badge: t('proSignup.background.badge') })}
         </div>
       )}
 
@@ -192,7 +189,7 @@ export default function CompletePage() {
           onMouseEnter={e => (e.currentTarget.style.background = '#ea580c')}
           onMouseLeave={e => (e.currentTarget.style.background = '#f97316')}
         >
-          Go to my dashboard
+          {t('proSignup.complete.dashboard')}
         </Link>
 
         <button
@@ -200,7 +197,7 @@ export default function CompletePage() {
           className={styles.secondaryBtn}
           style={dg}
         >
-          Share my profile
+          {t('proSignup.complete.share')}
         </button>
         {shareMessage && (
           <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem', textAlign: 'center' }}>{shareMessage}</p>

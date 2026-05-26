@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User } from 'firebase/auth'
 import { normalizeHungarianPhone, onAuthChange, sendPhoneVerificationCode, signUp, signUpWithVerifiedPhone, verifyCurrentUserPhone } from '@/firebase/auth'
+import { useTranslations } from '@/lib/i18n/client'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 export default function AccountPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -72,7 +74,7 @@ export default function AccountPage() {
       setVerificationId(id)
       setCodeSentTo(normalizedPhone)
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Could not send verification code.'
+      const msg = err instanceof Error ? err.message : t('proSignup.account.sendCodeError')
       setAuthError(msg.replace('Firebase: ', '').replace(/ \(auth\/.*\)\.?/, ''))
     } finally {
       setSendingCode(false)
@@ -115,7 +117,7 @@ export default function AccountPage() {
       }
       router.push('/pro/signup/trade')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Could not save account details.'
+      const msg = err instanceof Error ? err.message : t('proSignup.account.saveError')
       setAuthError(msg.replace('Firebase: ', '').replace(/ \(auth\/.*\)\.?/, ''))
     } finally {
       setSubmitting(false)
@@ -125,12 +127,12 @@ export default function AccountPage() {
   return (
     <div className={styles.stepPage}>
       <h1 className={styles.stepTitle} style={dg}>
-        {usingExistingAccount ? 'Confirm your contact details' : 'Create your account'}
+        {usingExistingAccount ? t('proSignup.account.titleExisting') : t('proSignup.account.titleNew')}
       </h1>
       <p className={styles.stepSubtitle}>
         {usingExistingAccount
-          ? 'You are already signed in, so we will use this account for your mester profile. Just verify the phone number customers can use to reach you.'
-          : 'Your phone number is how customers reach you and how we send job alerts. We verify it now to keep the platform trustworthy.'}
+          ? t('proSignup.account.subtitleExisting')
+          : t('proSignup.account.subtitleNew')}
       </p>
 
       {usingExistingAccount && (
@@ -144,17 +146,17 @@ export default function AccountPage() {
           fontSize: '0.875rem',
           lineHeight: 1.5,
         }}>
-          You&apos;ll become a mester with your existing account. No new login or password is needed.
+          {t('proSignup.account.existingNotice')}
         </div>
       )}
 
       <div className={styles.field}>
-        <label className={styles.label}>Full name</label>
+        <label className={styles.label}>{t('proSignup.account.fullName')}</label>
         <input className={styles.input} placeholder="Kovács János" value={fullName} onChange={e => setFullName(e.target.value)} />
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Email address</label>
+        <label className={styles.label}>{t('proSignup.account.email')}</label>
         <input
           className={styles.input}
           type="email"
@@ -168,13 +170,13 @@ export default function AccountPage() {
 
       {!usingExistingAccount && (
         <div className={styles.field}>
-          <label className={styles.label}>Password <span className={styles.labelHint}>min. 8 characters</span></label>
+          <label className={styles.label}>{t('proSignup.account.password')} <span className={styles.labelHint}>{t('proSignup.account.passwordHint')}</span></label>
           <input className={styles.input} type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
         </div>
       )}
 
       <div className={styles.field}>
-        <label className={styles.label}>Phone number</label>
+        <label className={styles.label}>{t('proSignup.account.phone')}</label>
         <div className={styles.inputGroup}>
           <input
             className={styles.input}
@@ -195,22 +197,22 @@ export default function AccountPage() {
             disabled={!requirePhoneVerification || hasVerifiedPhone || sendingCode || !canSend}
             className={styles.inlineBtn}
           >
-            {!requirePhoneVerification ? 'Flag off' : hasVerifiedPhone ? 'Verified' : sendingCode ? 'Sending...' : verificationId ? 'Resend code' : 'Send code'}
+            {!requirePhoneVerification ? t('proSignup.account.flagOff') : hasVerifiedPhone ? t('proSignup.account.verified') : sendingCode ? t('proSignup.account.sending') : verificationId ? t('proSignup.account.resendCode') : t('proSignup.account.sendCode')}
           </button>
         </div>
         <p style={{ fontSize: '0.8125rem', color: hasVerifiedPhone ? '#15803d' : '#9ca3af', marginTop: '0.5rem' }}>
           {!requirePhoneVerification
-            ? 'Phone verification is currently disabled by feature flag. We will save this phone number unverified.'
+            ? t('proSignup.account.phoneFlagOff')
             : hasVerifiedPhone
-            ? 'This phone number is verified on your Firebase account.'
-            : 'We send a Firebase SMS code and link this number to your account before you continue.'}
+            ? t('proSignup.account.phoneVerified')
+            : t('proSignup.account.phoneHelper')}
         </p>
         {requirePhoneVerification && <div id="pro-phone-recaptcha" />}
       </div>
 
       {requirePhoneVerification && !hasVerifiedPhone && verificationId && (
         <div className={styles.field}>
-          <label className={styles.label}>Enter the 6-digit code sent to {codeSentTo || normalizedPhone}</label>
+          <label className={styles.label}>{t('proSignup.account.codeLabel', { phone: codeSentTo || normalizedPhone })}</label>
           <input
             className={styles.input}
             inputMode="numeric"
@@ -220,7 +222,7 @@ export default function AccountPage() {
             placeholder="123456"
           />
           <p style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.5rem' }}>
-            We verify the code and attach the number to your Firebase account when you continue.
+            {t('proSignup.account.codeHelper')}
           </p>
         </div>
       )}
@@ -235,7 +237,7 @@ export default function AccountPage() {
         disabled={!flagsLoaded || !canContinue || submitting}
         onClick={handleContinue}
       >
-        {!flagsLoaded ? 'Checking settings...' : submitting ? 'Saving…' : 'Continue'}
+        {!flagsLoaded ? t('proSignup.account.checking') : submitting ? t('proSignup.account.saving') : t('proSignup.common.continue')}
       </button>
     </div>
   )

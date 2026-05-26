@@ -11,6 +11,7 @@ import {
   signIn,
   forgotPassword,
 } from '@/firebase/auth'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from './page.module.css'
 
 function CheckIcon() {
@@ -24,6 +25,7 @@ function CheckIcon() {
 }
 
 function LoginForm() {
+  const t = useTranslations()
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next')
@@ -46,7 +48,7 @@ function LoginForm() {
       await signIn(email, password, rememberMe)
       router.push(redirectTo)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password.')
+      setError(err instanceof Error ? err.message : t('login.errors.invalid'))
     } finally {
       setLoading(false)
     }
@@ -54,7 +56,7 @@ function LoginForm() {
 
   async function handleForgotPassword() {
     if (!email) {
-      setError('Enter your email address first.')
+      setError(t('login.errors.emailRequired'))
       return
     }
     setError(null)
@@ -62,9 +64,9 @@ function LoginForm() {
     setResetLoading(true)
     try {
       await forgotPassword(email)
-      setResetMessage(`If an account exists for ${email.trim()}, a password reset email has been sent.`)
+      setResetMessage(t('login.forgotPassword.success', { email: email.trim() }))
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not send reset email.')
+      setError(err instanceof Error ? err.message : t('login.errors.reset'))
     } finally {
       setResetLoading(false)
     }
@@ -73,20 +75,20 @@ function LoginForm() {
   return (
     <div className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>Welcome back</h1>
+        <h1 className={styles.title}>{t('login.title')}</h1>
         <p className={styles.subtitle}>
-          Log in to manage requests, messages, appointments, and saved projects.
+          {t('login.subtitle')}
         </p>
 
         <div className={styles.card}>
           <form onSubmit={handleSubmit}>
             <Field.Root>
-              <Field.Label className={styles.label}>Email address</Field.Label>
+              <Field.Label className={styles.label}>{t('login.fields.email')}</Field.Label>
               <Field.Control
                 render={<Input className={styles.input} />}
                 name="login_email"
                 type="email"
-                placeholder="Email"
+                placeholder={t('login.fields.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -96,7 +98,7 @@ function LoginForm() {
 
             <div className={styles.fieldGap}>
               <Field.Root>
-                <Field.Label className={styles.label}>Password</Field.Label>
+                <Field.Label className={styles.label}>{t('login.fields.password')}</Field.Label>
                 <Field.Control
                   render={<Input className={styles.input} />}
                   name="login_password"
@@ -123,7 +125,7 @@ function LoginForm() {
                     <CheckIcon />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
-                Remember me
+                {t('login.rememberMe')}
               </label>
               <button
                 type="button"
@@ -131,27 +133,27 @@ function LoginForm() {
                 onClick={handleForgotPassword}
                 disabled={resetLoading}
               >
-                {resetLoading ? 'Sending...' : 'Forgot password?'}
+                {resetLoading ? t('login.forgotPassword.sending') : t('login.forgotPassword.default')}
               </button>
             </div>
 
             <Button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Logging in…' : 'Log in'}
+              {loading ? t('login.submit.loading') : t('login.submit.default')}
             </Button>
           </form>
 
           <div className={styles.accountPanel}>
-            <p className={styles.panelTitle}>What you can do after logging in</p>
+            <p className={styles.panelTitle}>{t('login.panel.title')}</p>
             <ul className={styles.panelList}>
-              <li>Track quotes and job status in one place.</li>
-              <li>Message pros securely through Mestermind.</li>
-              <li>Manage appointments, reviews, and account details.</li>
+              <li>{t('login.panel.quotes')}</li>
+              <li>{t('login.panel.messages')}</li>
+              <li>{t('login.panel.account')}</li>
             </ul>
           </div>
         </div>
 
         <div className={styles.footer}>
-          New to Mestermind? <Link href="/register">Create an account</Link>.
+          {t('login.footer.prefix')} <Link href="/register">{t('login.footer.register')}</Link>.
         </div>
       </div>
     </div>
@@ -159,12 +161,14 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const t = useTranslations()
+
   return (
     <Suspense fallback={
       <div className={styles.page}>
         <div className={styles.wrap}>
-          <h1 className={styles.title}>Welcome back</h1>
-          <p className={styles.termsText}>Loading…</p>
+          <h1 className={styles.title}>{t('login.title')}</h1>
+          <p className={styles.termsText}>{t('login.loading')}</p>
         </div>
       </div>
     }>

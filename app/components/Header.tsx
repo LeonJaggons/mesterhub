@@ -8,6 +8,7 @@ import { onAuthChange, signOut } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { defaultLocale, getPathLocale, getPathnameWithoutLocale, locales, localizeHref, type Locale } from '@/lib/i18n/config'
 import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
 import { useNotifications, type ClientNotification } from './notifications/useNotifications'
 import type { User } from 'firebase/auth'
 import styles from './Header.module.css'
@@ -175,7 +176,7 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
               onClick={() => setActive(cat.name)}
             >
               <span className={styles.CategoryItemText}>
-                <span>{cat.name}</span>
+                <span>{translateCategory(t, cat.name)}</span>
                 <small>{t('header.services.serviceCount', { count: cat.total_services })}</small>
               </span>
               <span className={styles.CategoryItemChevron}><ChevronRight /></span>
@@ -185,13 +186,13 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
       </div>
       <div className={styles.ServicesPanel}>
         <div className={styles.ServicesHeader}>
-          <p className={styles.DropdownKicker}>{activeCategory ?? t('header.services.fallbackTitle')}</p>
+          <p className={styles.DropdownKicker}>{activeCategory ? translateCategory(t, activeCategory) : t('header.services.fallbackTitle')}</p>
           <p className={styles.ServicesHint}>{t('header.services.hint')}</p>
         </div>
         <div className={styles.ServicesGrid}>
           {detail?.services.map(service => (
             <a key={service} href={`/instant-results?q=${encodeURIComponent(service)}`} className={styles.ServiceLink}>
-              {service}
+              {translateService(t, service)}
             </a>
           ))}
         </div>

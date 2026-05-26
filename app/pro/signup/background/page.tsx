@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from '@/lib/i18n/client'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 export default function BackgroundPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [opted, setOpted] = useState<boolean | null>(null)
 
@@ -18,10 +20,10 @@ export default function BackgroundPage() {
 
   return (
     <div className={styles.stepPage}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Background check</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.background.title')}</h1>
       <p className={styles.stepSubtitle}>
-        This step is optional at launch. Pros who opt in get a visible <strong>Háttérellenőrzött</strong> badge on their profile — a meaningful trust signal that meaningfully increases enquiry rates.
+        {t('proSignup.background.subtitle', { badge: t('proSignup.background.badge') })}
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
@@ -38,11 +40,11 @@ export default function BackgroundPage() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#111827', ...dg }}>Yes, run a background check on me</span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#f97316', color: 'white', borderRadius: '1rem', padding: '0.2rem 0.6rem' }}>Recommended</span>
+            <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#111827', ...dg }}>{t('proSignup.background.yes')}</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#f97316', color: 'white', borderRadius: '1rem', padding: '0.2rem 0.6rem' }}>{t('proSignup.background.recommended')}</span>
           </div>
           <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
-            You&apos;ll receive the <strong>Háttérellenőrzött</strong> badge once the check completes (typically 1–3 business days). Customers filter by this badge.
+            {t('proSignup.background.yesBody', { badge: t('proSignup.background.badge') })}
           </p>
         </button>
 
@@ -58,17 +60,17 @@ export default function BackgroundPage() {
             transition: 'border-color 0.15s',
           }}
         >
-          <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: '#374151' }}>Skip for now</span>
+          <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: '#374151' }}>{t('proSignup.background.skip')}</span>
           <p style={{ fontSize: '0.875rem', color: '#9ca3af', margin: '0.375rem 0 0' }}>
-            You can opt in from your dashboard at any time.
+            {t('proSignup.background.skipBody')}
           </p>
         </button>
       </div>
 
       {opted === true && (
         <div className={styles.infoBox}>
-          <p className={styles.infoBoxTitle}>What we check</p>
-          Criminal record search via a registered Hungarian provider. You&apos;ll be asked to consent and provide your ID number. Results are shared only with you — not publicly displayed.
+          <p className={styles.infoBoxTitle}>{t('proSignup.background.checkTitle')}</p>
+          {t('proSignup.background.checkBody')}
         </div>
       )}
 
@@ -78,7 +80,7 @@ export default function BackgroundPage() {
         disabled={opted === null}
         onClick={handleContinue}
       >
-        Continue
+        {t('proSignup.common.continue')}
       </button>
     </div>
   )

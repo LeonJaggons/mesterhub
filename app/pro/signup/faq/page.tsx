@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from '@/lib/i18n/client'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 export default function FaqPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [faqs, setFaqs] = useState({
     pricing: '',
@@ -28,53 +30,53 @@ export default function FaqPage() {
 
   return (
     <div className={styles.stepPage}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Answer common questions</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.faq.title')}</h1>
       <p className={styles.stepSubtitle}>
-        These answers appear on your public profile and help customers understand how you price, plan, and work.
+        {t('proSignup.faq.subtitle')}
       </p>
 
       <div className={styles.field}>
         <label className={styles.label}>
-          What should the customer know about your pricing (e.g., discounts, fees)?
+          {t('proSignup.faq.pricing')}
         </label>
         <textarea
           className={styles.textarea}
           style={{ minHeight: 120 }}
           value={faqs.pricing}
           onChange={e => setFaqs(prev => ({ ...prev, pricing: e.target.value }))}
-          placeholder="Mention call-out fees, discounts, material costs, minimum job size, or when the final price may change."
+          placeholder={t('proSignup.faq.pricingPlaceholder')}
         />
       </div>
 
       <div className={styles.field}>
         <label className={styles.label}>
-          What is your typical process for working with a new customer?
+          {t('proSignup.faq.process')}
         </label>
         <textarea
           className={styles.textarea}
           style={{ minHeight: 120 }}
           value={faqs.process}
           onChange={e => setFaqs(prev => ({ ...prev, process: e.target.value }))}
-          placeholder="Explain how you scope the job, confirm details, prepare materials, schedule work, and follow up."
+          placeholder={t('proSignup.faq.processPlaceholder')}
         />
       </div>
 
       <div className={styles.field}>
         <label className={styles.label}>
-          What advice would you give a customer looking to hire a provider in your area of work?
+          {t('proSignup.faq.advice')}
         </label>
         <textarea
           className={styles.textarea}
           style={{ minHeight: 120 }}
           value={faqs.advice}
           onChange={e => setFaqs(prev => ({ ...prev, advice: e.target.value }))}
-          placeholder="Share what customers should check, prepare, compare, or ask before choosing someone."
+          placeholder={t('proSignup.faq.advicePlaceholder')}
         />
       </div>
 
       <button className={styles.continueBtn} style={dg} onClick={handleContinue}>
-        {faqs.pricing || faqs.process || faqs.advice ? 'Continue' : 'Skip for now'}
+        {faqs.pricing || faqs.process || faqs.advice ? t('proSignup.common.continue') : t('proSignup.common.skipForNow')}
       </button>
     </div>
   )

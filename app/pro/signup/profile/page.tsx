@@ -3,25 +3,52 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { FaFacebookF, FaGlobe, FaInstagram, FaLinkedinIn, FaTiktok } from 'react-icons/fa'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 import { load, save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
-const AVAILABILITY = ['Monday–Friday', 'Weekends', 'Evenings', 'Public holidays']
-const PAYMENT_METHODS = ['Cash', 'Bank transfer', 'Card', 'Online payment']
+const AVAILABILITY = [
+  { key: 'availabilityWeekdays', value: 'Monday–Friday' },
+  { key: 'availabilityWeekends', value: 'Weekends' },
+  { key: 'availabilityEvenings', value: 'Evenings' },
+  { key: 'availabilityHolidays', value: 'Public holidays' },
+] as const
+const PAYMENT_METHODS = [
+  { key: 'paymentCash', value: 'Cash' },
+  { key: 'paymentBank', value: 'Bank transfer' },
+  { key: 'paymentCard', value: 'Card' },
+  { key: 'paymentOnline', value: 'Online payment' },
+] as const
 const MAX_BIO = 1000
 const MIN_BIO = 100
 const SOCIAL_FIELDS = [
-  { key: 'website', label: 'Website or portfolio', placeholder: 'https://example.hu', Icon: FaGlobe },
-  { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/...', Icon: FaFacebookF },
-  { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/...', Icon: FaInstagram },
-  { key: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/...', Icon: FaLinkedinIn },
-  { key: 'tiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@...', Icon: FaTiktok },
-] as const
+  { key: 'website', label: 'Website or portfolio', labelKey: 'website', placeholder: 'https://example.hu', Icon: FaGlobe },
+  { key: 'facebook', label: 'Facebook', labelKey: undefined, placeholder: 'https://facebook.com/...', Icon: FaFacebookF },
+  { key: 'instagram', label: 'Instagram', labelKey: undefined, placeholder: 'https://instagram.com/...', Icon: FaInstagram },
+  { key: 'linkedin', label: 'LinkedIn', labelKey: undefined, placeholder: 'https://linkedin.com/in/...', Icon: FaLinkedinIn },
+  { key: 'tiktok', label: 'TikTok', labelKey: undefined, placeholder: 'https://tiktok.com/@...', Icon: FaTiktok },
+] as const satisfies readonly {
+  key: keyof SignupSocialLinks
+  label: string
+  labelKey?: string
+  placeholder: string
+  Icon: typeof FaGlobe
+}[]
+
+type SignupSocialLinks = {
+  website: string
+  facebook: string
+  instagram: string
+  linkedin: string
+  tiktok: string
+}
 
 type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 
 export default function ProfilePage() {
+  const t = useTranslations()
   const router = useRouter()
   const data = load()
 
@@ -91,17 +118,17 @@ export default function ProfilePage() {
 
   return (
     <div className={styles.stepPageWide}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Build your profile</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.profile.title')}</h1>
       <p className={styles.stepSubtitle}>
-        This is what customers see when they find you. A complete, honest profile gets significantly more enquiries.
+        {t('proSignup.profile.subtitle')}
       </p>
 
       <div className={styles.previewLayout}>
         <div>
           {/* Avatar */}
           <div className={styles.field}>
-            <label className={styles.label}>Profile photo</label>
+            <label className={styles.label}>{t('proSignup.profile.photo')}</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div
                 onClick={() => avatarInputRef.current?.click()}
@@ -113,7 +140,7 @@ export default function ProfilePage() {
                 }}
               >
                 {avatarPreview
-                  ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={avatarPreview} alt={t('proSignup.profile.avatarAlt')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : initials}
               </div>
               <div
@@ -121,13 +148,13 @@ export default function ProfilePage() {
                 style={{ flex: 1, padding: '0.875rem', cursor: 'pointer' }}
                 onClick={() => avatarInputRef.current?.click()}
               >
-                {avatarState === 'uploading' && <p className={styles.uploadTitle} style={{ marginBottom: 0 }}>Uploading…</p>}
-                {avatarState === 'done' && <p className={styles.uploadTitle} style={{ marginBottom: 0, color: '#16a34a' }}>✓ Photo uploaded</p>}
-                {avatarState === 'error' && <p className={styles.uploadTitle} style={{ marginBottom: 0, color: '#ef4444' }}>Upload failed — try again</p>}
+                {avatarState === 'uploading' && <p className={styles.uploadTitle} style={{ marginBottom: 0 }}>{t('proSignup.common.uploading')}</p>}
+                {avatarState === 'done' && <p className={styles.uploadTitle} style={{ marginBottom: 0, color: '#16a34a' }}>{t('proSignup.profile.photoUploaded')}</p>}
+                {avatarState === 'error' && <p className={styles.uploadTitle} style={{ marginBottom: 0, color: '#ef4444' }}>{t('proSignup.common.uploadFailedRetry')}</p>}
                 {avatarState === 'idle' && (
                   <>
-                    <p className={styles.uploadTitle} style={{ marginBottom: 0, fontSize: '0.875rem' }}>Click to upload</p>
-                    <p className={styles.uploadHint}>JPG or PNG, at least 400×400px</p>
+                    <p className={styles.uploadTitle} style={{ marginBottom: 0, fontSize: '0.875rem' }}>{t('proSignup.profile.clickToUpload')}</p>
+                    <p className={styles.uploadHint}>{t('proSignup.profile.photoHint')}</p>
                   </>
                 )}
               </div>
@@ -138,36 +165,36 @@ export default function ProfilePage() {
           {/* Bio */}
           <div className={styles.field}>
             <label className={styles.label}>
-              Bio <span className={styles.labelHint}>{bio.length}/{MAX_BIO} chars (min {MIN_BIO})</span>
+              {t('proSignup.profile.bio')} <span className={styles.labelHint}>{t('proSignup.profile.bioHint', { count: bio.length, max: MAX_BIO, min: MIN_BIO })}</span>
             </label>
             <textarea
               className={styles.textarea}
-              placeholder="Describe your experience, what makes you stand out, and how you work. Customers read this before they contact you."
+              placeholder={t('proSignup.profile.bioPlaceholder')}
               value={bio}
               onChange={e => setBio(e.target.value.slice(0, MAX_BIO))}
             />
             {bio.length > 0 && bio.length < MIN_BIO && (
               <p style={{ fontSize: '0.8125rem', color: '#ef4444', marginTop: '0.25rem' }}>
-                Please write at least {MIN_BIO} characters.
+                {t('proSignup.profile.bioMinError', { min: MIN_BIO })}
               </p>
             )}
           </div>
 
           {/* Years exp */}
           <div className={styles.field}>
-            <label className={styles.label}>Years of experience</label>
+            <label className={styles.label}>{t('proSignup.profile.years')}</label>
             <input className={styles.input} type="number" min={0} max={50} placeholder="e.g. 5"
               value={yearsExp} onChange={e => setYearsExp(e.target.value)} />
           </div>
 
           {/* Pricing */}
           <div className={styles.field}>
-            <label className={styles.label}>Pricing structure</label>
+            <label className={styles.label}>{t('proSignup.profile.pricing')}</label>
             <div className={styles.pricingGrid}>
               {[
-                { id: 'hourly', title: 'Hourly rate', desc: 'You charge per hour' },
-                { id: 'fixed', title: 'Fixed price', desc: 'Set price per job type' },
-                { id: 'quote', title: 'Quote on request', desc: 'You assess first' },
+                { id: 'hourly', title: t('proSignup.profile.pricingHourly'), desc: t('proSignup.profile.pricingHourlyDesc') },
+                { id: 'fixed', title: t('proSignup.profile.pricingFixed'), desc: t('proSignup.profile.pricingFixedDesc') },
+                { id: 'quote', title: t('proSignup.profile.pricingQuote'), desc: t('proSignup.profile.pricingQuoteDesc') },
               ].map(p => (
                 <button key={p.id}
                   className={`${styles.pricingCard} ${pricingType === p.id ? styles.pricingCardSelected : ''}`}
@@ -182,7 +209,7 @@ export default function ProfilePage() {
 
           {pricingType !== 'quote' && (
             <div className={styles.field}>
-              <label className={styles.label}>{pricingType === 'hourly' ? 'Hourly rate (Ft)' : 'Starting price (Ft)'}</label>
+              <label className={styles.label}>{pricingType === 'hourly' ? t('proSignup.profile.hourlyRate') : t('proSignup.profile.startingPrice')}</label>
               <input className={styles.input} type="number"
                 placeholder={pricingType === 'hourly' ? 'e.g. 4500' : 'e.g. 15000'}
                 value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} />
@@ -191,27 +218,27 @@ export default function ProfilePage() {
 
           {/* Availability */}
           <div className={styles.field}>
-            <label className={styles.label}>Availability</label>
+            <label className={styles.label}>{t('proSignup.profile.availability')}</label>
             <div className={styles.availRow}>
               {AVAILABILITY.map(a => (
-                <button key={a}
-                  className={`${styles.availChip} ${availability.includes(a) ? styles.availChipSelected : ''}`}
-                  onClick={() => toggleAvail(a)}>{a}</button>
+                <button key={a.value}
+                  className={`${styles.availChip} ${availability.includes(a.value) ? styles.availChipSelected : ''}`}
+                  onClick={() => toggleAvail(a.value)}>{t(`proSignup.profile.${a.key}`)}</button>
               ))}
             </div>
           </div>
 
           {/* Payment methods */}
           <div className={styles.field}>
-            <label className={styles.label}>Payment methods accepted</label>
+            <label className={styles.label}>{t('proSignup.profile.paymentMethods')}</label>
             <div className={styles.availRow}>
               {PAYMENT_METHODS.map(method => (
                 <button
-                  key={method}
-                  className={`${styles.availChip} ${paymentMethods.includes(method) ? styles.availChipSelected : ''}`}
-                  onClick={() => togglePaymentMethod(method)}
+                  key={method.value}
+                  className={`${styles.availChip} ${paymentMethods.includes(method.value) ? styles.availChipSelected : ''}`}
+                  onClick={() => togglePaymentMethod(method.value)}
                 >
-                  {method}
+                  {t(`proSignup.profile.${method.key}`)}
                 </button>
               ))}
             </div>
@@ -219,54 +246,57 @@ export default function ProfilePage() {
 
           {/* Social links */}
           <div className={styles.field}>
-            <label className={styles.label}>Social media and website <span className={styles.labelHint}>optional</span></label>
+            <label className={styles.label}>{t('proSignup.profile.social')} <span className={styles.labelHint}>{t('proSignup.common.optional')}</span></label>
             <div style={{ display: 'grid', gap: '0.75rem' }}>
-              {SOCIAL_FIELDS.map(({ key, label, placeholder, Icon }) => (
+              {SOCIAL_FIELDS.map(({ key, labelKey, label, placeholder, Icon }) => {
+                const fieldLabel = labelKey ? t(`proSignup.profile.${labelKey}`) : label
+                return (
                 <label key={key} style={{ display: 'grid', gap: '0.375rem' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 700, color: '#374151' }}>
                     <Icon size={15} color="#f97316" />
-                    {label}
+                    {fieldLabel}
                   </span>
                   <input
                     className={styles.input}
                     type="url"
                     placeholder={placeholder}
-                    aria-label={label}
+                    aria-label={fieldLabel}
                     value={socialLinks[key]}
                     onChange={e => setSocialLinks(prev => ({ ...prev, [key]: e.target.value }))}
                   />
                 </label>
-              ))}
+                )
+              })}
             </div>
           </div>
 
           <button className={styles.continueBtn} style={dg} disabled={!canContinue} onClick={handleContinue}>
-            {avatarState === 'uploading' ? 'Uploading…' : 'Continue'}
+            {avatarState === 'uploading' ? t('proSignup.common.uploading') : t('proSignup.common.continue')}
           </button>
         </div>
 
         {/* Live preview */}
         <div>
           <div className={styles.previewCard}>
-            <div className={styles.previewCardHeader}>Live preview</div>
+            <div className={styles.previewCardHeader}>{t('proSignup.profile.livePreview')}</div>
             <div className={styles.previewCardBody}>
               {avatarPreview
-                ? <img src={avatarPreview} alt="avatar" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', marginBottom: '0.75rem', border: '2px solid #f3f4f6' }} />
+                ? <img src={avatarPreview} alt={t('proSignup.profile.avatarAlt')} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', marginBottom: '0.75rem', border: '2px solid #f3f4f6' }} />
                 : <div className={styles.previewAvatar}>{initials}</div>}
-              <p className={styles.previewName}>{data.fullName || 'Your name'}</p>
+              <p className={styles.previewName}>{data.fullName || t('proSignup.profile.yourName')}</p>
               <p className={styles.previewMeta}>
-                {data.categoryName || 'Your trade'} · {yearsExp ? `${yearsExp} yrs exp` : 'Experience'}
+                {data.categoryName ? translateCategory(t, data.categoryName) : t('proSignup.profile.yourTrade')} · {yearsExp ? t('proSignup.profile.yearsExp', { years: yearsExp }) : t('proSignup.profile.experience')}
               </p>
               {bio
                 ? <p className={styles.previewBio}>{bio}</p>
-                : <p className={styles.previewBio} style={{ color: '#d1d5db' }}>Your bio will appear here…</p>}
+                : <p className={styles.previewBio} style={{ color: '#d1d5db' }}>{t('proSignup.profile.bioPreview')}</p>}
               {pricingType !== 'quote' && hourlyRate && (
                 <p style={{ fontSize: '0.875rem', fontWeight: 700, color: '#f97316', marginTop: '0.75rem' }}>
-                  {Number(hourlyRate).toLocaleString('hu-HU')} Ft {pricingType === 'hourly' ? '/ hr' : 'starting'}
+                  {Number(hourlyRate).toLocaleString('hu-HU')} Ft {pricingType === 'hourly' ? t('proSignup.profile.perHour') : t('proSignup.profile.starting')}
                 </p>
               )}
               {pricingType === 'quote' && (
-                <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.75rem' }}>Quote on request</p>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.75rem' }}>{t('proSignup.profile.quoteOnRequest')}</p>
               )}
             </div>
           </div>

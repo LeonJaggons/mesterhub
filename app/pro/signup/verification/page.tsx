@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdOutlineUploadFile, MdOutlineCameraAlt, MdCheckCircle } from 'react-icons/md'
+import { useTranslations } from '@/lib/i18n/client'
 import { save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
@@ -10,6 +11,7 @@ const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 
 export default function VerificationPage() {
+  const t = useTranslations()
   const router = useRouter()
 
   const idInputRef = useRef<HTMLInputElement>(null)
@@ -43,22 +45,22 @@ export default function VerificationPage() {
 
   return (
     <div className={styles.stepPage}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Verify your identity</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.verification.title')}</h1>
       <p className={styles.stepSubtitle}>
-        Every professional on Mestermind is identity-verified before going live. Checks are typically completed within a few hours.
+        {t('proSignup.verification.subtitle')}
       </p>
 
       <div className={styles.infoBox}>
-        <p className={styles.infoBoxTitle}>Your data is encrypted and secure</p>
-        Documents are uploaded to owner-restricted storage and reviewed before a profile can go live.
+        <p className={styles.infoBoxTitle}>{t('proSignup.verification.secureTitle')}</p>
+        {t('proSignup.verification.secureText')}
       </div>
 
       {/* ID upload */}
       <div className={styles.field}>
-        <label className={styles.label}>Government-issued ID</label>
+        <label className={styles.label}>{t('proSignup.verification.id')}</label>
         <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-          Személyi igazolvány, útlevél, or driving licence. All four corners must be visible.
+          {t('proSignup.verification.idHint')}
         </p>
 
         {idState !== 'done' ? (
@@ -68,12 +70,12 @@ export default function VerificationPage() {
             onClick={() => idState !== 'uploading' && idInputRef.current?.click()}
           >
             <MdOutlineUploadFile size={32} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />
-            {idState === 'uploading' && <p className={styles.uploadTitle}>Uploading…</p>}
-            {idState === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>Upload failed — click to retry</p>}
+            {idState === 'uploading' && <p className={styles.uploadTitle}>{t('proSignup.common.uploading')}</p>}
+            {idState === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{t('proSignup.common.uploadFailedClickRetry')}</p>}
             {idState === 'idle' && (
               <>
-                <p className={styles.uploadTitle}>Upload front of ID</p>
-                <p className={styles.uploadHint}>JPG, PNG or PDF · max 10 MB</p>
+                <p className={styles.uploadTitle}>{t('proSignup.verification.uploadId')}</p>
+                <p className={styles.uploadHint}>{t('proSignup.common.documentHint')}</p>
               </>
             )}
           </div>
@@ -81,12 +83,12 @@ export default function VerificationPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '0.75rem' }}>
             <MdCheckCircle size={22} color="#16a34a" />
             <div>
-              <p style={{ fontWeight: 600, color: '#15803d', margin: 0, fontSize: '0.9375rem' }}>ID uploaded</p>
+              <p style={{ fontWeight: 600, color: '#15803d', margin: 0, fontSize: '0.9375rem' }}>{t('proSignup.verification.idUploaded')}</p>
               {idFileName && <p style={{ color: '#6b7280', margin: 0, fontSize: '0.8125rem' }}>{idFileName}</p>}
             </div>
             <button onClick={() => { setIdState('idle'); setIdFileName(null) }}
               style={{ marginLeft: 'auto', fontSize: '0.8125rem', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Replace
+              {t('proSignup.common.replace')}
             </button>
           </div>
         )}
@@ -95,9 +97,9 @@ export default function VerificationPage() {
 
       {/* Selfie */}
       <div className={styles.field}>
-        <label className={styles.label}>Selfie match</label>
+        <label className={styles.label}>{t('proSignup.verification.selfie')}</label>
         <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-          Take a selfie or upload a photo of your face so we can confirm the ID belongs to you.
+          {t('proSignup.verification.selfieHint')}
         </p>
 
         {selfieState !== 'done' ? (
@@ -107,22 +109,22 @@ export default function VerificationPage() {
             onClick={() => selfieState !== 'uploading' && selfieInputRef.current?.click()}
           >
             {selfiePreview
-              ? <img src={selfiePreview} alt="selfie" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 0.5rem' }} />
+              ? <img src={selfiePreview} alt={t('proSignup.verification.selfieAlt')} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 0.5rem' }} />
               : <MdOutlineCameraAlt size={32} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />}
-            {selfieState === 'uploading' && <p className={styles.uploadTitle}>Uploading…</p>}
-            {selfieState === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>Upload failed — click to retry</p>}
+            {selfieState === 'uploading' && <p className={styles.uploadTitle}>{t('proSignup.common.uploading')}</p>}
+            {selfieState === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{t('proSignup.common.uploadFailedClickRetry')}</p>}
             {selfieState === 'idle' && (
               <>
-                <p className={styles.uploadTitle}>{selfiePreview ? 'Uploading…' : 'Take or upload a selfie'}</p>
-                <p className={styles.uploadHint}>Uses camera on mobile · good lighting, neutral background</p>
+                <p className={styles.uploadTitle}>{selfiePreview ? t('proSignup.common.uploading') : t('proSignup.verification.takeSelfie')}</p>
+                <p className={styles.uploadHint}>{t('proSignup.verification.selfieUploadHint')}</p>
               </>
             )}
           </div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '0.75rem' }}>
-            {selfiePreview && <img src={selfiePreview} alt="selfie" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />}
+            {selfiePreview && <img src={selfiePreview} alt={t('proSignup.verification.selfieAlt')} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />}
             <div style={{ flex: 1 }}>
-              <p style={{ fontWeight: 600, color: '#15803d', margin: 0, fontSize: '0.9375rem' }}>Selfie uploaded</p>
+              <p style={{ fontWeight: 600, color: '#15803d', margin: 0, fontSize: '0.9375rem' }}>{t('proSignup.verification.selfieUploaded')}</p>
             </div>
             <MdCheckCircle size={22} color="#16a34a" />
           </div>
@@ -143,11 +145,11 @@ export default function VerificationPage() {
         disabled={!canContinue && idState !== 'uploading' && selfieState !== 'uploading'}
         onClick={() => router.push('/pro/signup/credentials')}
       >
-        {(idState === 'uploading' || selfieState === 'uploading') ? 'Uploading…' : 'Submit for verification'}
+        {(idState === 'uploading' || selfieState === 'uploading') ? t('proSignup.common.uploading') : t('proSignup.verification.submit')}
       </button>
 
       <button className={styles.secondaryBtn} style={dg} onClick={() => router.push('/pro/signup/credentials')}>
-        Skip for now — finish later
+        {t('proSignup.verification.skip')}
       </button>
     </div>
   )

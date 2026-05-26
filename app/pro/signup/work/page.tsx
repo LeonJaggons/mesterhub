@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdClose, MdOutlineUploadFile } from 'react-icons/md'
+import { useTranslations } from '@/lib/i18n/client'
 import { save, stageFile, type PastProject } from '../store'
 import styles from '../signup.module.css'
 
@@ -13,6 +14,7 @@ type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 type ImageSlot = 'before' | 'after'
 
 export default function WorkPhotosPage() {
+  const t = useTranslations()
   const router = useRouter()
   const beforeInputRef = useRef<HTMLInputElement>(null)
   const afterInputRef = useRef<HTMLInputElement>(null)
@@ -89,10 +91,10 @@ export default function WorkPhotosPage() {
 
   return (
     <div className={styles.stepPageWide}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Add past projects</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.work.title')}</h1>
       <p className={styles.stepSubtitle}>
-        Turn sample work into project cards. Add a before and after photo if it helps, plus the basic details customers care about.
+        {t('proSignup.work.subtitle')}
       </p>
 
       {projects.length > 0 && (
@@ -110,7 +112,7 @@ export default function WorkPhotosPage() {
                 type="button"
                 onClick={() => removeProject(project.id)}
                 style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', alignSelf: 'flex-start' }}
-                aria-label="Remove project"
+                aria-label={t('proSignup.work.removeProject')}
               >
                 <MdClose size={18} />
               </button>
@@ -122,65 +124,65 @@ export default function WorkPhotosPage() {
       <div className={styles.previewLayout}>
         <div>
           <div className={styles.field}>
-            <label className={styles.label}>Job type</label>
+            <label className={styles.label}>{t('proSignup.work.jobType')}</label>
             <input
               className={styles.input}
               value={form.jobType}
               onChange={e => setForm(prev => ({ ...prev, jobType: e.target.value }))}
-              placeholder="e.g. Bathroom renovation, Deep cleaning, AC installation"
+              placeholder={t('proSignup.work.jobTypePlaceholder')}
             />
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Location</label>
+            <label className={styles.label}>{t('proSignup.work.location')}</label>
             <input
               className={styles.input}
               value={form.location}
               onChange={e => setForm(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="e.g. District V, Budapest"
+              placeholder={t('proSignup.work.locationPlaceholder')}
             />
           </div>
 
           <div className={styles.inputGroup}>
             <div className={styles.field} style={{ flex: 1 }}>
-              <label className={styles.label}>Duration</label>
+              <label className={styles.label}>{t('proSignup.work.duration')}</label>
               <input
                 className={styles.input}
                 value={form.duration}
                 onChange={e => setForm(prev => ({ ...prev, duration: e.target.value }))}
-                placeholder="e.g. 2 days"
+                placeholder={t('proSignup.work.durationPlaceholder')}
               />
             </div>
             <div className={styles.field} style={{ flex: 1 }}>
-              <label className={styles.label}>Year</label>
+              <label className={styles.label}>{t('proSignup.work.year')}</label>
               <input
                 className={styles.input}
                 inputMode="numeric"
                 maxLength={4}
                 value={form.year}
                 onChange={e => setForm(prev => ({ ...prev, year: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
-                placeholder="e.g. 2025"
+                placeholder={t('proSignup.work.yearPlaceholder')}
               />
             </div>
           </div>
 
           <div className={styles.field}>
             <label className={styles.label}>
-              Short description <span className={styles.labelHint}>{form.description.length}/{MAX_DESCRIPTION}</span>
+              {t('proSignup.work.description')} <span className={styles.labelHint}>{form.description.length}/{MAX_DESCRIPTION}</span>
             </label>
             <textarea
               className={styles.textarea}
               value={form.description}
               onChange={e => setForm(prev => ({ ...prev, description: e.target.value.slice(0, MAX_DESCRIPTION) }))}
-              placeholder="Briefly explain the job, result, or customer need."
+              placeholder={t('proSignup.work.descriptionPlaceholder')}
             />
           </div>
 
           <button className={styles.continueBtn} style={dg} disabled={!canAddProject} onClick={addProject}>
-            {uploading ? 'Uploading…' : 'Add project'}
+            {uploading ? t('proSignup.common.uploading') : t('proSignup.work.addProject')}
           </button>
           <button className={styles.secondaryBtn} style={dg} disabled={uploading} onClick={continueToFaq}>
-            {projects.length > 0 ? 'Continue' : 'Skip for now'}
+            {projects.length > 0 ? t('proSignup.common.continue') : t('proSignup.common.skipForNow')}
           </button>
         </div>
 
@@ -189,17 +191,18 @@ export default function WorkPhotosPage() {
             const inputRef = slot === 'before' ? beforeInputRef : afterInputRef
             const state = uploadState[slot]
             const preview = previews[slot]
+            const slotLabel = slot === 'before' ? t('proSignup.work.beforeSlot') : t('proSignup.work.afterSlot')
             return (
               <div className={styles.field} key={slot}>
-                <label className={styles.label}>{slot === 'before' ? 'Before photo' : 'After photo'} <span className={styles.labelHint}>optional</span></label>
+                <label className={styles.label}>{slot === 'before' ? t('proSignup.work.beforePhoto') : t('proSignup.work.afterPhoto')} <span className={styles.labelHint}>{t('proSignup.common.optional')}</span></label>
                 {preview ? (
                   <div style={{ position: 'relative', aspectRatio: '4 / 3', borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-                    <img src={preview} alt={`${slot} project`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={preview} alt={slot === 'before' ? t('proSignup.work.beforeAlt') : t('proSignup.work.afterAlt')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
                       type="button"
                       onClick={() => clearImage(slot)}
                       style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                      aria-label={`Remove ${slot} photo`}
+                      aria-label={t('proSignup.work.removePhoto', { slot: slotLabel })}
                     >
                       <MdClose size={15} color="white" />
                     </button>
@@ -211,9 +214,9 @@ export default function WorkPhotosPage() {
                     onClick={() => state !== 'uploading' && inputRef.current?.click()}
                   >
                     <MdOutlineUploadFile size={26} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />
-                    <p className={styles.uploadTitle}>{state === 'uploading' ? 'Uploading…' : `Upload ${slot}`}</p>
-                    {state === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>Upload failed — try again</p>}
-                    <p className={styles.uploadHint}>JPG or PNG</p>
+                    <p className={styles.uploadTitle}>{state === 'uploading' ? t('proSignup.common.uploading') : t('proSignup.work.uploadSlot', { slot: slotLabel })}</p>
+                    {state === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{t('proSignup.common.uploadFailedRetry')}</p>}
+                    <p className={styles.uploadHint}>{t('proSignup.common.jpgPng')}</p>
                   </div>
                 )}
                 <input

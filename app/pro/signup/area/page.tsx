@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from '@/lib/i18n/client'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
@@ -34,6 +35,7 @@ const DISTRICTS = [
 ]
 
 export default function AreaPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [selected, setSelected] = useState<number[]>([])
   const [radius, setRadius] = useState(10)
@@ -53,22 +55,25 @@ export default function AreaPage() {
 
   return (
     <div className={styles.stepPage}>
-      <button className={styles.back} onClick={() => router.back()}>← Back</button>
-      <h1 className={styles.stepTitle} style={dg}>Where do you work?</h1>
+      <button className={styles.back} onClick={() => router.back()}>{t('proSignup.common.back')}</button>
+      <h1 className={styles.stepTitle} style={dg}>{t('proSignup.area.title')}</h1>
       <p className={styles.stepSubtitle}>
-        Pick the Budapest districts you cover. Customers can only find you in the districts you select — so choose all that you&apos;re happy to travel to.
+        {t('proSignup.area.subtitle')}
       </p>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
         <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
-          {selected.length} district{selected.length !== 1 ? 's' : ''} selected
+          {t('proSignup.area.selectedCount', {
+            count: selected.length,
+            countLabel: selected.length === 1 ? t('proSignup.area.districtSingular') : t('proSignup.area.districtPlural'),
+          })}
         </span>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button onClick={selectAll} style={{ fontSize: '0.8125rem', color: '#f97316', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-            Select all
+            {t('proSignup.area.selectAll')}
           </button>
           <button onClick={clearAll} style={{ fontSize: '0.8125rem', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}>
-            Clear
+            {t('proSignup.area.clear')}
           </button>
         </div>
       </div>
@@ -91,7 +96,7 @@ export default function AreaPage() {
 
       <div className={styles.field}>
         <div className={styles.sliderLabel}>
-          <label className={styles.label} style={{ marginBottom: 0 }}>Radius from home base</label>
+          <label className={styles.label} style={{ marginBottom: 0 }}>{t('proSignup.area.radius')}</label>
           <span className={styles.sliderValue}>{radius} km</span>
         </div>
         <input
@@ -103,12 +108,12 @@ export default function AreaPage() {
           className={styles.slider}
         />
         <p style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.375rem' }}>
-          We&apos;ll also show you jobs within this radius of your home postcode.
+          {t('proSignup.area.radiusHint')}
         </p>
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Home postcode <span className={styles.labelHint}>for routing</span></label>
+        <label className={styles.label}>{t('proSignup.area.postcode')} <span className={styles.labelHint}>{t('proSignup.area.postcodeHint')}</span></label>
         <input
           className={styles.input}
           placeholder="e.g. 1051"
@@ -125,7 +130,7 @@ export default function AreaPage() {
         disabled={selected.length === 0 || !postcode}
         onClick={handleContinue}
       >
-        Continue
+        {t('proSignup.common.continue')}
       </button>
     </div>
   )

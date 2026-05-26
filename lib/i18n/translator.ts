@@ -23,6 +23,7 @@ export function createTranslator(messages: Messages) {
     const message = resolveMessage(messages, key)
 
     if (typeof message !== 'string') {
+      if (typeof params?.defaultValue === 'string') return params.defaultValue
       if (process.env.NODE_ENV !== 'production') {
         console.warn(`Missing translation for "${key}"`)
       }

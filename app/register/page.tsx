@@ -9,6 +9,7 @@ import { Checkbox } from '@base-ui/react/checkbox'
 import { Button } from '@base-ui/react/button'
 import { normalizeHungarianPhone, sendPhoneVerificationCode, signUp, signUpWithVerifiedPhone } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from './page.module.css'
 
 function CheckIcon() {
@@ -22,6 +23,7 @@ function CheckIcon() {
 }
 
 export default function RegisterPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [form, setForm] = useState({
     firstName: '',
@@ -74,7 +76,7 @@ export default function RegisterPage() {
       setVerificationId(id)
       setCodeSentTo(phoneNumber)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not send verification code.')
+      setError(err instanceof Error ? err.message : t('register.errors.sendCode'))
     } finally {
       setSendingCode(false)
     }
@@ -84,7 +86,7 @@ export default function RegisterPage() {
     e.preventDefault()
     setError(null)
     if (requirePhoneVerification && !phoneCodeReady) {
-      setError('Verify your phone number before creating your account.')
+      setError(t('register.errors.verifyPhone'))
       return
     }
     setLoading(true)
@@ -110,7 +112,7 @@ export default function RegisterPage() {
       })
       router.push('/')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setError(err instanceof Error ? err.message : t('register.errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -119,9 +121,9 @@ export default function RegisterPage() {
   return (
     <div className={styles.page}>
     <div className={styles.wrap}>
-      <h1 className={styles.title}>Create your account</h1>
+      <h1 className={styles.title}>{t('register.title')}</h1>
       <p className={styles.subtitle}>
-        Join Mestermind to find trusted local pros, save projects, and manage every request from one place.
+        {t('register.subtitle')}
       </p>
 
       <div className={styles.card}>
@@ -131,7 +133,7 @@ export default function RegisterPage() {
               <div className={styles.fieldRow}>
                 <div className={styles.fieldRowItem}>
                   <Field.Root>
-                    <Field.Label className={styles.label}>First name</Field.Label>
+                    <Field.Label className={styles.label}>{t('register.fields.firstName')}</Field.Label>
                     <Field.Control
                       render={<Input className={styles.input} />}
                       name="firstName"
@@ -144,7 +146,7 @@ export default function RegisterPage() {
                 </div>
                 <div className={styles.fieldRowItem}>
                   <Field.Root>
-                    <Field.Label className={styles.label}>Last name</Field.Label>
+                    <Field.Label className={styles.label}>{t('register.fields.lastName')}</Field.Label>
                     <Field.Control
                       render={<Input className={styles.input} />}
                       name="lastName"
@@ -160,7 +162,7 @@ export default function RegisterPage() {
 
             <li className={styles.fieldItem}>
               <Field.Root>
-                <Field.Label className={styles.label}>Email</Field.Label>
+                <Field.Label className={styles.label}>{t('register.fields.email')}</Field.Label>
                 <Field.Control
                   render={<Input className={styles.input} />}
                   name="email"
@@ -175,7 +177,7 @@ export default function RegisterPage() {
             {requirePhoneVerification && (
               <li className={styles.fieldItem}>
                 <Field.Root>
-                  <Field.Label className={styles.label}>Phone number</Field.Label>
+                  <Field.Label className={styles.label}>{t('register.fields.phone')}</Field.Label>
                   <div className={styles.phoneRow}>
                     <Field.Control
                       render={<Input className={styles.input} />}
@@ -192,12 +194,12 @@ export default function RegisterPage() {
                       className={styles.codeBtn}
                       disabled={sendingCode || phoneNumber.length < 11}
                     >
-                      {sendingCode ? 'Sending...' : verificationId ? 'Resend code' : 'Send code'}
+                      {sendingCode ? t('register.phone.sending') : verificationId ? t('register.phone.resend') : t('register.phone.send')}
                     </button>
                   </div>
                 </Field.Root>
                 <p className={styles.helperText}>
-                  We use Firebase SMS verification to keep customer accounts trustworthy.
+                  {t('register.phone.helper')}
                 </p>
                 <div id="customer-phone-recaptcha" />
               </li>
@@ -206,7 +208,7 @@ export default function RegisterPage() {
             {requirePhoneVerification && verificationId && (
               <li className={styles.fieldItem}>
                 <Field.Root>
-                  <Field.Label className={styles.label}>Verification code</Field.Label>
+                  <Field.Label className={styles.label}>{t('register.fields.verificationCode')}</Field.Label>
                   <Field.Control
                     render={<Input className={styles.input} />}
                     name="phoneCode"
@@ -219,14 +221,14 @@ export default function RegisterPage() {
                   />
                 </Field.Root>
                 <p className={styles.helperText}>
-                  Enter the 6-digit code sent to {codeSentTo || phoneNumber}. Your phone is linked when you create the account.
+                  {t('register.phone.codeHelper', { phone: codeSentTo || phoneNumber })}
                 </p>
               </li>
             )}
 
             <li className={styles.fieldItem}>
               <Field.Root>
-                <Field.Label className={styles.label}>Password</Field.Label>
+                <Field.Label className={styles.label}>{t('register.fields.password')}</Field.Label>
                 <Field.Control
                   render={<Input className={styles.input} />}
                   name="password"
@@ -238,11 +240,11 @@ export default function RegisterPage() {
                 />
               </Field.Root>
               <div className={styles.passwordHints}>
-                <p className={styles.passwordHintTitle}>Your password must:</p>
+                <p className={styles.passwordHintTitle}>{t('register.passwordHints.title')}</p>
                 <ul className={styles.passwordHintList}>
-                  <li>be 8 to 72 characters long</li>
-                  <li>not contain your name or email</li>
-                  <li>not be commonly used, easily guessed or contain any variation of the word &ldquo;Mestermind&rdquo;</li>
+                  <li>{t('register.passwordHints.length')}</li>
+                  <li>{t('register.passwordHints.identity')}</li>
+                  <li>{t('register.passwordHints.common')}</li>
                 </ul>
               </div>
             </li>
@@ -255,10 +257,10 @@ export default function RegisterPage() {
 
             <li>
               <p className={styles.termsText}>
-                By clicking Create Account, you agree to the{' '}
-                <Link href="/terms" target="_blank">Terms of Use</Link>{' '}
-                and{' '}
-                <Link href="/privacy" target="_blank">Privacy Policy</Link>.
+                {t('register.terms.prefix')}{' '}
+                <Link href="/terms" target="_blank">{t('register.terms.terms')}</Link>{' '}
+                {t('register.terms.and')}{' '}
+                <Link href="/privacy" target="_blank">{t('register.terms.privacy')}</Link>.
               </p>
             </li>
 
@@ -274,30 +276,30 @@ export default function RegisterPage() {
                     <CheckIcon />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
-                Remember me
+                {t('register.rememberMe')}
               </label>
             </li>
 
             <li>
               <Button type="submit" className={styles.submitBtn} disabled={loading || !flagsLoaded}>
-                {!flagsLoaded ? 'Checking settings...' : loading ? 'Creating account…' : 'Create Account'}
+                {!flagsLoaded ? t('register.submit.checking') : loading ? t('register.submit.loading') : t('register.submit.default')}
               </Button>
             </li>
           </ol>
         </form>
 
         <div className={styles.accountPanel}>
-          <p className={styles.panelTitle}>Your account gives you</p>
+          <p className={styles.panelTitle}>{t('register.panel.title')}</p>
           <ul className={styles.panelList}>
-            <li>Saved project details so you can contact more than one pro.</li>
-            <li>Private messages and quote updates in your dashboard.</li>
-            <li>Appointment tracking and reviews after the job is complete.</li>
+            <li>{t('register.panel.savedProjects')}</li>
+            <li>{t('register.panel.messages')}</li>
+            <li>{t('register.panel.appointments')}</li>
           </ul>
         </div>
       </div>
 
       <div className={styles.footer}>
-        Already have an account? <Link href="/login">Log in</Link>.
+        {t('register.footer.prefix')} <Link href="/login">{t('register.footer.login')}</Link>.
       </div>
     </div>
     </div>
