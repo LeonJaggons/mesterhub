@@ -6,6 +6,86 @@
   "common": {
     "brand": "Mestermind"
   },
+  "footer": {
+    "brandTagline": "Találj megbízható helyi szakembereket.",
+    "columns": {
+      "customers": "Ügyfelek",
+      "pros": "Szakemberek",
+      "support": "Támogatás"
+    },
+    "links": {
+      "howToUse": "A Mestermind használata",
+      "signUp": "Regisztráció",
+      "findPros": "Szakemberek a közelemben",
+      "myProjects": "Projektjeim",
+      "helpCenter": "Súgóközpont",
+      "proLanding": "Mestermind szakembereknek",
+      "signUpPro": "Regisztráció szakemberként",
+      "proDashboard": "Szakember irányítópult",
+      "proResources": "Szakember források",
+      "proSettings": "Szakember beállítások",
+      "help": "Segítség",
+      "safety": "Biztonság",
+      "terms": "Felhasználási feltételek",
+      "privacy": "Adatvédelmi irányelvek",
+      "accountSettings": "Fiókbeállítások"
+    },
+    "copyright": "© 2026 Mestermind, Inc.",
+    "guarantee": "Mestermind garancia"
+  },
+  "feedback": {
+    "fab": "Visszajelzés",
+    "eyebrow": "MVP visszajelzés",
+    "title": "Probléma vagy ötlet jelentése",
+    "close": "Visszajelzési űrlap bezárása",
+    "typeLabel": "Miről szól?",
+    "types": {
+      "problem": "Probléma jelentése",
+      "feature": "Funkció kérése",
+      "general": "Általános visszajelzés"
+    },
+    "details": "Részletek",
+    "detailsPlaceholder": "Írd le, mi történt, mire számítottál, vagy mitől lenne jobb.",
+    "email": "E-mail utánkövetéshez, opcionális",
+    "hint": "Az aktuális oldalt és a böngészőadatokat mellékeljük, így ezt nem kell külön megadnod.",
+    "cancel": "Mégse",
+    "sending": "Küldés...",
+    "submit": "Visszajelzés küldése",
+    "success": "Köszönjük, megkaptuk. Ez segít eldönteni, mit javítsunk először.",
+    "error": "Nem sikerült elküldeni a visszajelzést."
+  },
+  "reports": {
+    "button": {
+      "pro": "Szakember jelentése",
+      "customer": "Ügyfél jelentése",
+      "user": "Felhasználó jelentése"
+    },
+    "kicker": "Biztonsági jelentés",
+    "title": "{name} jelentése",
+    "userFallback": "ez a felhasználó",
+    "body": "A jelentések a Mestermind ügyfélszolgálatához kerülnek. Használd biztonsági, zaklatási, csalási vagy bizalmi problémák esetén.",
+    "closeAria": "Jelentési űrlap bezárása",
+    "reason": "Ok",
+    "details": "Mi történt?",
+    "detailsPlaceholder": "Oszd meg az üzenetet, kérést, időpontot, ajánlatot, fizetési vagy profilrészletet, amit az ügyfélszolgálatnak át kell néznie.",
+    "emergency": "Ha bárki közvetlen veszélyben van, először a helyi segélyszolgálatot hívd. A Mestermind jelentéseket piactéri biztonság és ügyfélszolgálati utánkövetés miatt vizsgáljuk.",
+    "close": "Bezárás",
+    "sending": "Küldés...",
+    "submit": "Jelentés küldése",
+    "validation": "Adj meg egy rövid leírást, hogy az ügyfélszolgálat át tudja nézni a jelentést.",
+    "success": "A jelentést elküldtük. A Mestermind ügyfélszolgálata át fogja nézni.",
+    "error": "Nem sikerült elküldeni a jelentést.",
+    "reasons": {
+      "spam": "Spam vagy csalás",
+      "harassment": "Zaklatás vagy sértő viselkedés",
+      "unsafe": "Veszélyes vagy fenyegető magatartás",
+      "falseProfile": "Hamis profil, személyazonosság vagy igazolás",
+      "payment": "Fizetési, ajánlati vagy visszatérítési probléma",
+      "noShow": "Meg nem jelenés vagy időpontprobléma",
+      "inappropriate": "Nem megfelelő üzenetek vagy tartalom",
+      "other": "Egyéb biztonsági aggály"
+    }
+  },
   "taxonomy": {
     "categories": {
       "cleaning": "Takarítás",
@@ -313,6 +393,36 @@
       "invalid": "Érvénytelen e-mail cím vagy jelszó.",
       "emailRequired": "Először add meg az e-mail címedet.",
       "reset": "Nem sikerült elküldeni a jelszó-visszaállító e-mailt."
+    }
+  },
+  "loginReset": {
+    "title": "Jelszó visszaállítása",
+    "subtitle": "Válassz új jelszót a Mestermind fiókodhoz.",
+    "checking": "Visszaállítási link ellenőrzése...",
+    "ready": "Jelszó visszaállítása ehhez: {email}.",
+    "newPassword": "Új jelszó",
+    "confirmPassword": "Új jelszó megerősítése",
+    "resetting": "Jelszó visszaállítása...",
+    "submit": "Jelszó visszaállítása",
+    "success": "A jelszavad vissza lett állítva.",
+    "login": "Bejelentkezés",
+    "newLink": "Új visszaállítási link kérése",
+    "errors": {
+      "invalid": "Ez a jelszó-visszaállítási link érvénytelen vagy lejárt.",
+      "mismatch": "A jelszavak nem egyeznek.",
+      "reset": "Nem sikerült visszaállítani a jelszavadat."
+    }
+  },
+  "loginVerify": {
+    "title": "Bejelentkezés megerősítése",
+    "checking": "Biztonságos bejelentkezési link ellenőrzése...",
+    "emailPrompt": "Add meg azt az e-mail címet, amellyel ezt a linket kérted.",
+    "email": "E-mail",
+    "finish": "Bejelentkezés befejezése",
+    "newLink": "Új link kérése",
+    "errors": {
+      "invalid": "Ez a bejelentkezési link érvénytelen vagy lejárt.",
+      "complete": "Nem sikerült befejezni a bejelentkezést."
     }
   },
   "proSignup": {
@@ -758,6 +868,119 @@
     "schedule": {
       "kicker": "Figyelmet igényel",
       "title": "Következő ütemezés"
+    }
+  },
+  "proAppointment": {
+    "common": {
+      "close": "Bezárás",
+      "customer": "Ügyfél",
+      "at": "ekkor"
+    },
+    "notFound": {
+      "title": "Az időpont nem található",
+      "body": "Ez az időpont nem létezik, vagy nincs jogosultságod megtekinteni.",
+      "back": "Vissza a Munkáimhoz"
+    },
+    "header": {
+      "back": "← Munkáim",
+      "confirmed": "Megerősített időpont",
+      "request": "Időpontkérés",
+      "withCustomer": "{name} ügyféllel"
+    },
+    "kind": {
+      "quote": "Felmérési látogatás",
+      "service": "Szolgáltatási időpont"
+    },
+    "details": {
+      "customer": "Ügyfél",
+      "location": "Helyszín",
+      "openMaps": "Megnyitás Google Térképen",
+      "openGoogleMaps": "Google Térkép megnyitása",
+      "note": "Időpont megjegyzés"
+    },
+    "progress": {
+      "kicker": "Folyamat",
+      "title": "Időpont állapota",
+      "requested": "Kérve",
+      "confirmed": "Megerősítve",
+      "today": "Ma",
+      "inProgress": "Folyamatban",
+      "followUp": "Utánkövetés"
+    },
+    "map": {
+      "kicker": "Ügyfél helyszíne",
+      "approximate": "A térkép az ügyfél engedélyével rögzített hozzávetőleges munkaterületet mutatja. A pontos címet Google Térképen nézd meg, ha meg lett osztva.",
+      "district": "A térkép az ügyfél kerületét mutatja. A pontos címet Google Térképen nézd meg, ha meg lett osztva."
+    },
+    "actions": {
+      "kicker": "Időpont műveletek",
+      "title": "Munka kezelése",
+      "completed": "Az ügyfél megerősítette, hogy a munka elkészült.",
+      "cancelled": "Ezt a kérést lemondták.",
+      "cancelledWithReason": "Ezt a kérést lemondták: {reason}",
+      "waitingCompletion": "Várakozás az ügyfél befejezési megerősítésére.",
+      "changeSent": "Időpontmódosítás elküldve. Várakozás az ügyfél megerősítésére.",
+      "default": "Innen kezelheted az időponttal kapcsolatos műveleteket.",
+      "marking": "Befejezés jelölése...",
+      "markComplete": "Munka befejezettnek jelölése",
+      "proposeChange": "Időpontmódosítás javaslata",
+      "cancel": "Időpont lemondása",
+      "openJob": "Munka részleteinek megnyitása",
+      "message": "Üzenet az ügyfélnek",
+      "markError": "Nem sikerült befejezettként jelölni ezt a munkát."
+    },
+    "checklist": {
+      "kicker": "Napi ellenőrzőlista",
+      "title": "Zökkenőmentes teljesítés",
+      "parking": "Erősítsd meg a parkolást, bejutási kódokat, háziállatokat és liftelérést.",
+      "materials": "Vidd magaddal az ajánlatban szereplő anyagokat.",
+      "photos": "Készíts előtte fotókat, ha hasznosak a munkanyilvántartáshoz.",
+      "costs": "Magyarázd el az extra költségeket, mielőtt további munkát végzel."
+    },
+    "brief": {
+      "kicker": "Projektleírás",
+      "title": "Ügyfél válaszai"
+    },
+    "reschedule": {
+      "kicker": "Időpontmódosítás",
+      "title": "Új időpont javaslata",
+      "body": "Az ügyfélnek meg kell erősítenie, mielőtt ez felváltja a jelenlegi időpontot.",
+      "date": "Dátum",
+      "time": "Idő",
+      "duration": "Időtartam",
+      "type": "Időpont típusa",
+      "location": "Helyszín vagy találkozási megjegyzés",
+      "locationPlaceholder": "Ügyfél címe, kerület vagy videóhívás",
+      "message": "Üzenet az ügyfélnek",
+      "messagePlaceholder": "Írd le, miért javasolsz módosítást, és mit készítsen elő az ügyfél.",
+      "keep": "Jelenlegi időpont megtartása",
+      "sending": "Küldés...",
+      "submit": "Módosítási kérés küldése",
+      "dateTimeError": "Válassz dátumot és időpontot.",
+      "sendError": "Nem sikerült elküldeni az időpontmódosítást."
+    },
+    "cancelModal": {
+      "kicker": "Időpont lemondása",
+      "title": "Lemondod {name} ügyféllel?",
+      "customerFallback": "az ügyfél",
+      "body": "Ez lemondja a kérést, és értesíti az ügyfelet.",
+      "why": "Miért mondod le?",
+      "details": "Részletek az ügyfélnek",
+      "optional": "(opcionális)",
+      "detailsPlaceholder": "Adj kontextust, vagy írd le, hogy később újrafoglalhat-e.",
+      "keep": "Időpont megtartása",
+      "cancelling": "Lemondás...",
+      "submit": "Időpont lemondása",
+      "error": "Nem sikerült lemondani ezt az időpontot.",
+      "reasonPrefix": "Ok",
+      "detailsPrefix": "Részletek",
+      "reasons": {
+        "schedule": "Az időpont nem megfelelő",
+        "customer": "Az ügyfél kérte a lemondást",
+        "scope": "A terjedelem változott",
+        "emergency": "Vészhelyzet vagy elérhetőségi probléma",
+        "other": "Egyéb"
+      }
     }
   },
   "proEarnings": {
@@ -1240,6 +1463,164 @@
         "background": "Háttérellenőrzés"
       }
     }
+  },
+  "proVerificationPage": {
+    "loading": "Ellenőrzés betöltése...",
+    "title": "Személyazonosság és ellenőrzés",
+    "subtitle": "Kövesd a jóváhagyási állapotodat és azt, mit látnak az ügyfelek.",
+    "currentStatus": "Jelenlegi állapot",
+    "approved": "A profilod jóváhagyva, és látható a keresésben.",
+    "status": "A profilod állapota: {status}.",
+    "pending": "ellenőrzésre vár",
+    "adminNote": "Admin megjegyzés",
+    "updateTitle": "Frissítenéd a dokumentumokat?",
+    "updateBody": "Írj az ügyfélszolgálatnak a fiókod e-mail címéről. A dokumentumok újrafeltöltését az MVP indulása alatt manuálisan kezeljük."
+  },
+  "proProfileEdit": {
+    "loading": "Profilszerkesztő betöltése...",
+    "back": "Vissza a beállításokhoz",
+    "title": "Szakemberprofil szerkesztése",
+    "subtitle": "Frissítsd azokat a profiladatokat, amelyeket az ügyfelek ajánlatkérés előtt látnak.",
+    "contact": "Kapcsolat",
+    "profileBasics": "Profil alapok",
+    "servicesArea": "Szolgáltatások és terület",
+    "pricingAvailability": "Árazás és elérhetőség",
+    "socialLinks": "Közösségi linkek",
+    "customerFaq": "Ügyfél GYIK",
+    "notSet": "Nincs beállítva",
+    "fullName": "Teljes név",
+    "phone": "Telefon",
+    "trade": "Szakma",
+    "about": "Bemutatkozás",
+    "years": "Tapasztalat évei",
+    "services": "Szolgáltatások",
+    "servicesPlaceholder": "Takarítás, nagytakarítás",
+    "districts": "Kerületazonosítók",
+    "districtsPlaceholder": "5, 6, 7",
+    "radius": "Utazási körzet km-ben",
+    "postcode": "Otthoni irányítószám",
+    "pricingType": "Árazási mód",
+    "pricing": {
+      "hourly": "Óradíj",
+      "fixed": "Induló vagy fix ár",
+      "quote": "Ajánlat kérésre"
+    },
+    "rate": "Díj vagy induló ár Ft-ban",
+    "availability": "Elérhetőség",
+    "availabilityPlaceholder": "Hétfő-péntek, hétvégék, esték",
+    "paymentMethods": "Elfogadott fizetési módok",
+    "faq": {
+      "pricing": "Mit érdemes tudnia az ügyfélnek az árazásodról?",
+      "process": "Mi a szokásos folyamatod új ügyféllel?",
+      "advice": "Milyen tanácsot adnál annak, aki a területeden keres szolgáltatót?"
+    },
+    "saved": "Profil mentve.",
+    "saving": "Mentés...",
+    "submit": "Profil mentése",
+    "errors": {
+      "load": "Nem sikerült betölteni a szakemberprofilodat.",
+      "save": "Nem sikerült menteni a profilt."
+    }
+  },
+  "settings": {
+    "loading": "Betöltés…",
+    "title": "Fiókbeállítások",
+    "subtitle": "Kezeld a profilodat és a bejelentkezési adataidat.",
+    "profile": {
+      "title": "Profiladatok",
+      "body": "Ezek az adatok jelennek meg a kéréseken, üzenetekben és időpont részleteiben.",
+      "firstName": "Keresztnév",
+      "lastName": "Vezetéknév",
+      "displayName": "Megjelenített név",
+      "displayNamePlaceholder": "A kéréseken látható név"
+    },
+    "contact": {
+      "title": "Kapcsolat és alapértelmezések",
+      "body": "A mentett alapértelmezések segítenek kitölteni a jövőbeli kéréseket és ajánlatelfogadásokat.",
+      "phone": "Telefon",
+      "preferredDistrict": "Preferált kerület",
+      "noDistrict": "Nincs alapértelmezett kerület",
+      "district": "{district}. kerület - {name}",
+      "address": "Alapértelmezett cím",
+      "addressPlaceholder": "Utca, házszám, bejutási megjegyzések",
+      "addressHelper": "Csak akkor osztjuk meg a szakemberrel, amikor elfogadod az ajánlatát, és megadod az elfogadási részletekben."
+    },
+    "signin": {
+      "title": "Bejelentkezési adatok",
+      "body": "Ezek a mezők a bejelentkezési fiókodból származnak, és itt nem szerkeszthetők.",
+      "email": "E-mail",
+      "emailStatus": "E-mail állapota",
+      "verified": "Ellenőrizve",
+      "notVerified": "Nincs ellenőrizve",
+      "accountId": "Fiókazonosító"
+    },
+    "errors": {
+      "displayNameRequired": "A megjelenített név kötelező.",
+      "save": "Nem sikerült menteni a módosításokat."
+    },
+    "saved": "Módosítások mentve.",
+    "saving": "Mentés…",
+    "submit": "Módosítások mentése"
+  },
+  "notificationsPage": {
+    "loading": "Értesítések betöltése...",
+    "title": "Értesítések",
+    "unreadSingular": "{count} olvasatlan frissítés.",
+    "unreadPlural": "{count} olvasatlan frissítés.",
+    "allCaughtUp": "Minden naprakész.",
+    "markAllRead": "Összes olvasottnak jelölése",
+    "emptyLoading": "Betöltés...",
+    "emptyTitle": "Még nincsenek értesítések",
+    "emptyBody": "Az ajánlatokról, üzenetekről, időpontokról és munkákról szóló frissítések itt jelennek meg."
+  },
+  "helpPage": {
+    "title": "Segítség",
+    "subtitle": "Válaszok a Mestermind használatával kapcsolatos gyakori kérdésekre.",
+    "quote": {
+      "title": "Hogyan kérhetek ajánlatot?",
+      "bodyBefore": "Böngéssz szolgáltatásokat a kezdőlapról vagy a Szolgáltatások menüből, válassz szakembert, és töltsd ki a projektűrlapot a profilján. Az ajánlatát itt tudod áttekinteni:",
+      "link": "Kéréseim"
+    },
+    "contact": {
+      "title": "Mikor kapom meg a szakember elérhetőségeit?",
+      "body": "Miután elfogadsz egy ajánlatot, a szakember e-mailben elérhet. Addig a kommunikáció a kérések oldal állapotán keresztül történik."
+    },
+    "guarantee": {
+      "title": "Mestermind garancia",
+      "body": "Tartsd a munkarészleteket, ajánlati döntéseket, időpontfrissítéseket és befejezési megerősítéseket a Mesterminden belül, hogy az ügyfélszolgálat át tudja nézni az előzményeket, ha gond van. Induláskor csapatunk eseti alapon segít rendezni a vitákat."
+    },
+    "pro": {
+      "title": "Szolgáltatást kínálnál?",
+      "link": "Csatlakozz szakemberként",
+      "bodyAfter": "üzleti profil létrehozásához és a környékedről érkező munkakérések fogadásához."
+    },
+    "more": {
+      "title": "További segítség kell?",
+      "bodyBefore": "Írj nekünk ide:",
+      "bodyAfter": "és egy munkanapon belül válaszolunk."
+    }
+  },
+  "proHelpPage": {
+    "title": "Szakember segítség",
+    "subtitle": "A Mestermind használata a regisztrációtól a befejezett munkáig.",
+    "verified": {
+      "title": "Ellenőrzés",
+      "body": "Végezd el a szakember-regisztráció lépéseit, és töltsd fel a kért dokumentumokat. Egy admin átnézi a függő profilokat, mielőtt megjelennek az ügyfélkeresésben."
+    },
+    "quotes": {
+      "title": "Ajánlatadás",
+      "body": "Az új kérések a Munkák alatt jelennek meg. Nézd át a helyszínt és a projektválaszokat, majd küldj egyértelmű ajánlatot árral, időzítéssel és megjegyzésekkel."
+    },
+    "accepted": {
+      "title": "Elfogadás után",
+      "body": "Miután az ügyfél elfogadja az ajánlatodat, üzenetekben egyeztessétek a részleteket és javasolj időpontot. A munka után jelöld befejezettként."
+    },
+    "support": {
+      "title": "Segítség kell?",
+      "bodyBefore": "Írj ide:",
+      "bodyAfter": "a kérésazonosítóval és a probléma rövid leírásával."
+    },
+    "back": "Vissza a munkákhoz"
   },
   "customerRequests": {
     "header": {

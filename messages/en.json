@@ -6,6 +6,86 @@
   "common": {
     "brand": "Mestermind"
   },
+  "footer": {
+    "brandTagline": "Find trusted local pros.",
+    "columns": {
+      "customers": "Customers",
+      "pros": "Pros",
+      "support": "Support"
+    },
+    "links": {
+      "howToUse": "How to use Mestermind",
+      "signUp": "Sign up",
+      "findPros": "Find pros near me",
+      "myProjects": "My projects",
+      "helpCenter": "Help center",
+      "proLanding": "Mestermind for pros",
+      "signUpPro": "Sign up as a pro",
+      "proDashboard": "Pro dashboard",
+      "proResources": "Pro resources",
+      "proSettings": "Pro settings",
+      "help": "Help",
+      "safety": "Safety",
+      "terms": "Terms of Use",
+      "privacy": "Privacy Policy",
+      "accountSettings": "Account settings"
+    },
+    "copyright": "© 2026 Mestermind, Inc.",
+    "guarantee": "Mestermind Guarantee"
+  },
+  "feedback": {
+    "fab": "Feedback",
+    "eyebrow": "MVP feedback",
+    "title": "Report a problem or idea",
+    "close": "Close feedback form",
+    "typeLabel": "What is this about?",
+    "types": {
+      "problem": "Report a problem",
+      "feature": "Request a feature",
+      "general": "General feedback"
+    },
+    "details": "Details",
+    "detailsPlaceholder": "Tell us what happened, what you expected, or what would make this better.",
+    "email": "Email for follow-up, optional",
+    "hint": "We include the current page and browser info so you do not have to.",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "submit": "Send feedback",
+    "success": "Thanks, got it. This helps us prioritize what to fix next.",
+    "error": "Could not send feedback."
+  },
+  "reports": {
+    "button": {
+      "pro": "Report pro",
+      "customer": "Report customer",
+      "user": "Report user"
+    },
+    "kicker": "Safety report",
+    "title": "Report {name}",
+    "userFallback": "this user",
+    "body": "Reports go to Mestermind support. Use this for safety, abuse, fraud, or trust concerns.",
+    "closeAria": "Close report form",
+    "reason": "Reason",
+    "details": "What happened?",
+    "detailsPlaceholder": "Share the message, request, appointment, quote, payment, or profile details support should review.",
+    "emergency": "If anyone is in immediate danger, contact local emergency services first. Mestermind reports are reviewed for marketplace safety and support follow-up.",
+    "close": "Close",
+    "sending": "Sending...",
+    "submit": "Send report",
+    "validation": "Please include a short description so support can review the report.",
+    "success": "Report sent. Mestermind support will review it.",
+    "error": "Could not send report.",
+    "reasons": {
+      "spam": "Spam or scam",
+      "harassment": "Harassment or abusive behavior",
+      "unsafe": "Unsafe or threatening conduct",
+      "falseProfile": "False profile, identity, or credentials",
+      "payment": "Payment, quote, or refund issue",
+      "noShow": "No-show or appointment problem",
+      "inappropriate": "Inappropriate messages or content",
+      "other": "Other safety concern"
+    }
+  },
   "taxonomy": {
     "categories": {
       "cleaning": "Cleaning",
@@ -315,6 +395,36 @@
       "reset": "Could not send reset email."
     }
   },
+  "loginReset": {
+    "title": "Reset your password",
+    "subtitle": "Choose a new password for your Mestermind account.",
+    "checking": "Checking your reset link...",
+    "ready": "Resetting password for {email}.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "resetting": "Resetting password...",
+    "submit": "Reset password",
+    "success": "Your password has been reset.",
+    "login": "Log in",
+    "newLink": "Request a new reset link",
+    "errors": {
+      "invalid": "This password reset link is invalid or expired.",
+      "mismatch": "Passwords do not match.",
+      "reset": "Could not reset your password."
+    }
+  },
+  "loginVerify": {
+    "title": "Confirm your login",
+    "checking": "Checking your secure login link...",
+    "emailPrompt": "Enter the email address you used to request this link.",
+    "email": "Email",
+    "finish": "Finish login",
+    "newLink": "Request a new link",
+    "errors": {
+      "invalid": "This login link is invalid or expired.",
+      "complete": "Could not complete login."
+    }
+  },
   "proSignup": {
     "common": {
       "back": "← Back",
@@ -433,7 +543,8 @@
       "yearsExp": "{years} yrs exp",
       "bioPreview": "Your bio will appear here…",
       "perHour": "/ hr",
-      "starting": "starting"
+      "starting": "starting",
+      "quoteOnRequest": "Quote on request"
     },
     "work": {
       "title": "Add past projects",
@@ -757,6 +868,119 @@
     "schedule": {
       "kicker": "Needs attention",
       "title": "Schedule next"
+    }
+  },
+  "proAppointment": {
+    "common": {
+      "close": "Close",
+      "customer": "Customer",
+      "at": "at"
+    },
+    "notFound": {
+      "title": "Appointment not found",
+      "body": "This appointment does not exist or you do not have permission to view it.",
+      "back": "Back to My Work"
+    },
+    "header": {
+      "back": "← My Work",
+      "confirmed": "Confirmed appointment",
+      "request": "Appointment request",
+      "withCustomer": "with {name}"
+    },
+    "kind": {
+      "quote": "Quote visit",
+      "service": "Service appointment"
+    },
+    "details": {
+      "customer": "Customer",
+      "location": "Location",
+      "openMaps": "Open in Google Maps",
+      "openGoogleMaps": "Open Google Maps",
+      "note": "Appointment note"
+    },
+    "progress": {
+      "kicker": "Progress",
+      "title": "Appointment stage",
+      "requested": "Requested",
+      "confirmed": "Confirmed",
+      "today": "Today",
+      "inProgress": "In progress",
+      "followUp": "Follow up"
+    },
+    "map": {
+      "kicker": "Customer location",
+      "approximate": "Map shows the approximate job area captured from the customer permission. Use Google Maps for the exact address if shared.",
+      "district": "Map shows the customer district. Use Google Maps for the exact address if shared."
+    },
+    "actions": {
+      "kicker": "Appointment actions",
+      "title": "Manage this job",
+      "completed": "The customer confirmed this job is complete.",
+      "cancelled": "This request was cancelled.",
+      "cancelledWithReason": "This request was cancelled: {reason}",
+      "waitingCompletion": "Waiting for the customer to confirm completion.",
+      "changeSent": "Appointment change sent. Waiting for customer confirmation.",
+      "default": "Use these actions to manage the appointment from here.",
+      "marking": "Marking complete...",
+      "markComplete": "Mark job complete",
+      "proposeChange": "Propose appointment change",
+      "cancel": "Cancel appointment",
+      "openJob": "Open job details",
+      "message": "Message customer",
+      "markError": "Could not mark this job complete."
+    },
+    "checklist": {
+      "kicker": "Day-of checklist",
+      "title": "Complete smoothly",
+      "parking": "Confirm parking, entry codes, pets, and elevator access.",
+      "materials": "Bring any materials included in the quote.",
+      "photos": "Take before photos if useful for the job record.",
+      "costs": "Explain extra costs before doing additional work."
+    },
+    "brief": {
+      "kicker": "Project brief",
+      "title": "Customer answers"
+    },
+    "reschedule": {
+      "kicker": "Appointment change",
+      "title": "Propose a new time",
+      "body": "The customer must confirm before this replaces the current appointment.",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "type": "Appointment type",
+      "location": "Location or meeting note",
+      "locationPlaceholder": "Customer address, district, or video call",
+      "message": "Message to customer",
+      "messagePlaceholder": "Explain why you are proposing this change and what the customer should prepare.",
+      "keep": "Keep current time",
+      "sending": "Sending...",
+      "submit": "Send change request",
+      "dateTimeError": "Choose a date and time.",
+      "sendError": "Could not send appointment change."
+    },
+    "cancelModal": {
+      "kicker": "Cancel appointment",
+      "title": "Cancel with {name}?",
+      "customerFallback": "the customer",
+      "body": "This cancels the request and notifies the customer.",
+      "why": "Why are you cancelling?",
+      "details": "Details for the customer",
+      "optional": "(optional)",
+      "detailsPlaceholder": "Add context or explain whether they can rebook later.",
+      "keep": "Keep appointment",
+      "cancelling": "Cancelling...",
+      "submit": "Cancel appointment",
+      "error": "Could not cancel this appointment.",
+      "reasonPrefix": "Reason",
+      "detailsPrefix": "Details",
+      "reasons": {
+        "schedule": "Schedule does not work",
+        "customer": "Customer requested cancellation",
+        "scope": "Scope changed",
+        "emergency": "Emergency or availability issue",
+        "other": "Other"
+      }
     }
   },
   "proEarnings": {
@@ -1239,6 +1463,164 @@
         "background": "Background check"
       }
     }
+  },
+  "proVerificationPage": {
+    "loading": "Loading verification...",
+    "title": "ID & verification",
+    "subtitle": "Track your approval status and what customers see.",
+    "currentStatus": "Current status",
+    "approved": "Your profile is approved and visible in search.",
+    "status": "Your profile status is {status}.",
+    "pending": "pending_verification",
+    "adminNote": "Admin note",
+    "updateTitle": "Need to update documents?",
+    "updateBody": "Email support with your account email. Document re-upload can be handled manually during MVP launch."
+  },
+  "proProfileEdit": {
+    "loading": "Loading profile editor...",
+    "back": "Back to settings",
+    "title": "Edit pro profile",
+    "subtitle": "Update the profile information customers see before they request an estimate.",
+    "contact": "Contact",
+    "profileBasics": "Profile basics",
+    "servicesArea": "Services and area",
+    "pricingAvailability": "Pricing and availability",
+    "socialLinks": "Social links",
+    "customerFaq": "Customer FAQ",
+    "notSet": "Not set",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "trade": "Trade",
+    "about": "About",
+    "years": "Years of experience",
+    "services": "Services",
+    "servicesPlaceholder": "Cleaning, Deep cleaning",
+    "districts": "District IDs",
+    "districtsPlaceholder": "5, 6, 7",
+    "radius": "Travel radius in km",
+    "postcode": "Home postcode",
+    "pricingType": "Pricing type",
+    "pricing": {
+      "hourly": "Hourly rate",
+      "fixed": "Starting or fixed price",
+      "quote": "Quote on request"
+    },
+    "rate": "Rate or starting price in Ft",
+    "availability": "Availability",
+    "availabilityPlaceholder": "Monday-Friday, Weekends, Evenings",
+    "paymentMethods": "Payment methods accepted",
+    "faq": {
+      "pricing": "What should the customer know about your pricing?",
+      "process": "What is your typical process for working with a new customer?",
+      "advice": "What advice would you give a customer looking to hire a provider in your area of work?"
+    },
+    "saved": "Profile saved.",
+    "saving": "Saving...",
+    "submit": "Save profile",
+    "errors": {
+      "load": "Could not load your pro profile.",
+      "save": "Could not save profile."
+    }
+  },
+  "settings": {
+    "loading": "Loading…",
+    "title": "Account settings",
+    "subtitle": "Manage your profile and sign-in details.",
+    "profile": {
+      "title": "Profile details",
+      "body": "These details are shown on requests, messages, and appointment details.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Name shown on requests"
+    },
+    "contact": {
+      "title": "Contact and defaults",
+      "body": "Saved defaults help prefill future requests and quote acceptances.",
+      "phone": "Phone",
+      "preferredDistrict": "Preferred district",
+      "noDistrict": "No default district",
+      "district": "District {district} - {name}",
+      "address": "Default address",
+      "addressPlaceholder": "Street, building, access notes",
+      "addressHelper": "Shared with a pro only when you accept their quote and include it in the acceptance details."
+    },
+    "signin": {
+      "title": "Sign-in details",
+      "body": "These fields come from your sign-in account and cannot be edited here.",
+      "email": "Email",
+      "emailStatus": "Email status",
+      "verified": "Verified",
+      "notVerified": "Not verified",
+      "accountId": "Account ID"
+    },
+    "errors": {
+      "displayNameRequired": "Display name is required.",
+      "save": "Could not save changes."
+    },
+    "saved": "Changes saved.",
+    "saving": "Saving…",
+    "submit": "Save changes"
+  },
+  "notificationsPage": {
+    "loading": "Loading notifications...",
+    "title": "Notifications",
+    "unreadSingular": "{count} unread update.",
+    "unreadPlural": "{count} unread updates.",
+    "allCaughtUp": "All caught up.",
+    "markAllRead": "Mark all read",
+    "emptyLoading": "Loading...",
+    "emptyTitle": "No notifications yet",
+    "emptyBody": "Updates about quotes, messages, appointments, and jobs will appear here."
+  },
+  "helpPage": {
+    "title": "Help",
+    "subtitle": "Answers to common questions about using Mestermind.",
+    "quote": {
+      "title": "How do I request a quote?",
+      "bodyBefore": "Browse services from the home page or Explore Services menu, find a pro, and fill out the project form on their profile. They'll respond with a quote you can review under",
+      "link": "My requests"
+    },
+    "contact": {
+      "title": "When do I get the pro's contact details?",
+      "body": "After you accept a quote, the pro can reach you by email. Until then, communication happens through the request status on your requests page."
+    },
+    "guarantee": {
+      "title": "Mestermind Guarantee",
+      "body": "Keep job details, quote decisions, appointment updates, and completion confirmations in Mestermind so support can review the history if something goes wrong. During launch, our team helps resolve disputes case by case."
+    },
+    "pro": {
+      "title": "Want to offer services?",
+      "link": "Join as a pro",
+      "bodyAfter": "to create a business profile and receive job requests from customers in your area."
+    },
+    "more": {
+      "title": "Need more help?",
+      "bodyBefore": "Email us at",
+      "bodyAfter": "and we'll get back to you within one business day."
+    }
+  },
+  "proHelpPage": {
+    "title": "Pro help",
+    "subtitle": "How to use Mestermind from signup through completed work.",
+    "verified": {
+      "title": "Getting verified",
+      "body": "Complete the pro signup steps and upload requested documents. An admin reviews pending profiles before they appear in customer search."
+    },
+    "quotes": {
+      "title": "Quoting jobs",
+      "body": "New requests appear under Jobs. Review the location and project answers, then send a clear quote with price, timing, and notes."
+    },
+    "accepted": {
+      "title": "After acceptance",
+      "body": "Once a customer accepts your quote, use messages to confirm details and propose an appointment. Mark the job complete after the work is done."
+    },
+    "support": {
+      "title": "Need support?",
+      "bodyBefore": "Email",
+      "bodyAfter": "with the request ID and a short description of the issue."
+    },
+    "back": "Back to jobs"
   },
   "customerRequests": {
     "header": {

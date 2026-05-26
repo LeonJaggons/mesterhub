@@ -8,6 +8,7 @@ import { MdCancel, MdCheckCircle, MdMap, MdMessage, MdSchedule, MdWork } from 'r
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { requestAppointment, type AppointmentRequestInput } from '@/firebase/conversations'
+import { useTranslations } from '@/lib/i18n/client'
 import {
   approximateLocationLabel,
   approximateRadiusMeters,
@@ -28,6 +29,7 @@ const primaryActionButton = `${actionButtonBase} border border-orange-500 bg-ora
 const darkActionButton = `${actionButtonBase} border border-slate-800 bg-slate-800 text-white hover:bg-slate-900 hover:border-slate-900`
 const secondaryActionButton = `${actionButtonBase} border border-gray-200 bg-white text-gray-700 hover:bg-gray-50`
 const dangerActionButton = `${actionButtonBase} border border-gray-300 bg-white text-gray-700 hover:border-red-200 hover:bg-red-50 hover:text-red-700`
+type Translator = ReturnType<typeof useTranslations>
 
 const DistrictMap = dynamic(() => import('@/app/components/DistrictMap'), {
   ssr: false,
@@ -68,9 +70,9 @@ type ServiceRequest = {
   obfuscated?: boolean
 }
 
-function formatAppointmentDateTime(date: string, time: string): string {
+function formatAppointmentDateTime(t: Translator, date: string, time: string): string {
   const parsed = new Date(`${date}T${time}`)
-  if (Number.isNaN(parsed.getTime())) return `${date} at ${time}`
+  if (Number.isNaN(parsed.getTime())) return `${date} ${t('proAppointment.common.at')} ${time}`
   return parsed.toLocaleString(undefined, {
     weekday: 'long',
     month: 'long',
@@ -89,8 +91,8 @@ function formatAnswers(answers?: Record<string, string>) {
     }))
 }
 
-function districtCopy(req: ServiceRequest): string {
-  return req.customerDistrict ? districtLabel(req.customerDistrict) : 'District not shared'
+function districtCopy(t: Translator, req: ServiceRequest): string {
+  return req.customerDistrict ? districtLabel(req.customerDistrict) : t('proWork.location.notShared')
 }
 
 function appointmentStart(appointment: AppointmentRequest): Date | null {
@@ -124,12 +126,12 @@ function appointmentStage(appointment: AppointmentRequest): number {
   return 1
 }
 
-function mapsUrl(req: ServiceRequest, appointment: AppointmentRequest): string {
+function mapsUrl(t: Translator, req: ServiceRequest, appointment: AppointmentRequest): string {
   const location = appointment.jobLocation ?? req.jobLocation
   if (!appointment.location && location) {
     return `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`
   }
-  const query = appointment.location || districtCopy(req) || 'Budapest'
+  const query = appointment.location || districtCopy(t, req) || 'Budapest'
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
 
@@ -137,12 +139,12 @@ function canCancel(status: ServiceRequestStatus): boolean {
   return status === 'pending' || status === 'quoted' || status === 'accepted'
 }
 
-function actionStatusCopy(req: ServiceRequest): string {
-  if (req.status === 'completed') return 'The customer confirmed this job is complete.'
-  if (req.status === 'cancelled') return req.cancelReason ? `This request was cancelled: ${req.cancelReason}` : 'This request was cancelled.'
-  if (req.completion?.status === 'pro_marked_complete') return 'Waiting for the customer to confirm completion.'
-  if (req.appointmentChangeRequest?.status === 'proposed') return 'Appointment change sent. Waiting for customer confirmation.'
-  return 'Use these actions to manage the appointment from here.'
+function actionStatusCopy(t: Translator, req: ServiceRequest): string {
+  if (req.status === 'completed') return t('proAppointment.actions.completed')
+  if (req.status === 'cancelled') return req.cancelReason ? t('proAppointment.actions.cancelledWithReason', { reason: req.cancelReason }) : t('proAppointment.actions.cancelled')
+  if (req.completion?.status === 'pro_marked_complete') return t('proAppointment.actions.waitingCompletion')
+  if (req.appointmentChangeRequest?.status === 'proposed') return t('proAppointment.actions.changeSent')
+  return t('proAppointment.actions.default')
 }
 
 function RescheduleModal({
@@ -156,6 +158,7 @@ function RescheduleModal({
   onClose: () => void
   onSubmit: (input: AppointmentRequestInput) => Promise<void>
 }) {
+  const t = useTranslations()
   const [kind, setKind] = useState<AppointmentRequestInput['kind']>(appointment.kind)
   const [date, setDate] = useState(appointment.date)
   const [time, setTime] = useState(appointment.time)
@@ -168,7 +171,7 @@ function RescheduleModal({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!date || !time) {
-      setError('Choose a date and time.')
+      setError(t('proAppointment.reschedule.dateTimeError'))
       return
     }
     setSubmitting(true)
@@ -183,7 +186,7 @@ function RescheduleModal({
         notes: notes.trim(),
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send appointment change.')
+      setError(err instanceof Error ? err.message : t('proAppointment.reschedule.sendError'))
       setSubmitting(false)
     }
   }
@@ -193,57 +196,64 @@ function RescheduleModal({
       <div className="w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl" style={{ maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">Appointment change</p>
-            <h2 className="text-2xl font-black text-gray-900" style={dg}>Propose a new time</h2>
-            <p className="mt-1 text-sm text-gray-500">The customer must confirm before this replaces the current appointment.</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">{t('proAppointment.reschedule.kicker')}</p>
+            <h2 className="text-2xl font-black text-gray-900" style={dg}>{t('proAppointment.reschedule.title')}</h2>
+            <p className="mt-1 text-sm text-gray-500">{t('proAppointment.reschedule.body')}</p>
           </div>
-          <button type="button" onClick={onClose} className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer" aria-label="Close">
+          <button type="button" onClick={onClose} className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer" aria-label={t('proAppointment.common.close')}>
             ×
           </button>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Date
+              {t('proAppointment.reschedule.date')}
               <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Time
+              {t('proAppointment.reschedule.time')}
               <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Duration
+              {t('proAppointment.reschedule.duration')}
               <select value={duration} onChange={e => setDuration(e.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
-                {['30 minutes', '60 minutes', '90 minutes', '2 hours', 'Half day', 'Full day'].map(option => (
-                  <option key={option} value={option}>{option}</option>
+                {[
+                  { value: '30 minutes', label: t('messages.appointmentModal.durations.30') },
+                  { value: '60 minutes', label: t('messages.appointmentModal.durations.60') },
+                  { value: '90 minutes', label: t('messages.appointmentModal.durations.90') },
+                  { value: '2 hours', label: t('messages.appointmentModal.durations.2h') },
+                  { value: 'Half day', label: t('messages.appointmentModal.durations.halfDay') },
+                  { value: 'Full day', label: t('messages.appointmentModal.durations.fullDay') },
+                ].map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
             </label>
           </div>
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Appointment type
+            {t('proAppointment.reschedule.type')}
             <select value={kind} onChange={e => setKind(e.target.value as AppointmentRequestInput['kind'])} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
-              <option value="quote">Quote visit</option>
-              <option value="service">Service appointment</option>
+              <option value="quote">{t('proAppointment.kind.quote')}</option>
+              <option value="service">{t('proAppointment.kind.service')}</option>
             </select>
           </label>
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Location or meeting note
-            <input value={location} onChange={e => setLocation(e.target.value)} placeholder="Customer address, district, or video call" className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
+            {t('proAppointment.reschedule.location')}
+            <input value={location} onChange={e => setLocation(e.target.value)} placeholder={t('proAppointment.reschedule.locationPlaceholder')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
           </label>
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Message to customer
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} placeholder="Explain why you are proposing this change and what the customer should prepare." className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
+            {t('proAppointment.reschedule.message')}
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} placeholder={t('proAppointment.reschedule.messagePlaceholder')} className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
           </label>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className={secondaryActionButton}>
               <MdCancel size={18} aria-hidden="true" />
-              Keep current time
+              {t('proAppointment.reschedule.keep')}
             </button>
             <button type="submit" disabled={submitting || !date || !time} className={primaryActionButton}>
               <MdSchedule size={18} aria-hidden="true" />
-              {submitting ? 'Sending...' : 'Send change request'}
+              {submitting ? t('proAppointment.reschedule.sending') : t('proAppointment.reschedule.submit')}
             </button>
           </div>
         </form>
@@ -261,7 +271,15 @@ function CancelAppointmentModal({
   onClose: () => void
   onConfirm: (reason: string) => Promise<void>
 }) {
-  const [reason, setReason] = useState('Schedule does not work')
+  const t = useTranslations()
+  const cancelReasons = [
+    { value: 'Schedule does not work', label: t('proAppointment.cancelModal.reasons.schedule') },
+    { value: 'Customer requested cancellation', label: t('proAppointment.cancelModal.reasons.customer') },
+    { value: 'Scope changed', label: t('proAppointment.cancelModal.reasons.scope') },
+    { value: 'Emergency or availability issue', label: t('proAppointment.cancelModal.reasons.emergency') },
+    { value: 'Other', label: t('proAppointment.cancelModal.reasons.other') },
+  ]
+  const [reason, setReason] = useState(cancelReasons[0].value)
   const [details, setDetails] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -272,11 +290,11 @@ function CancelAppointmentModal({
     setError('')
     try {
       await onConfirm([
-        `Reason: ${reason}`,
-        details.trim() ? `Details: ${details.trim()}` : '',
+        `${t('proAppointment.cancelModal.reasonPrefix')}: ${reason}`,
+        details.trim() ? `${t('proAppointment.cancelModal.detailsPrefix')}: ${details.trim()}` : '',
       ].filter(Boolean).join('\n'))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not cancel this appointment.')
+      setError(err instanceof Error ? err.message : t('proAppointment.cancelModal.error'))
       setSubmitting(false)
     }
   }
@@ -286,36 +304,36 @@ function CancelAppointmentModal({
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">Cancel appointment</p>
-            <h2 className="text-2xl font-black text-gray-900" style={dg}>Cancel with {customerName || 'the customer'}?</h2>
-            <p className="mt-1 text-sm text-gray-500">This cancels the request and notifies the customer.</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">{t('proAppointment.cancelModal.kicker')}</p>
+            <h2 className="text-2xl font-black text-gray-900" style={dg}>{t('proAppointment.cancelModal.title', { name: customerName || t('proAppointment.cancelModal.customerFallback') })}</h2>
+            <p className="mt-1 text-sm text-gray-500">{t('proAppointment.cancelModal.body')}</p>
           </div>
-          <button type="button" onClick={onClose} className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer" aria-label="Close">
+          <button type="button" onClick={onClose} className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer" aria-label={t('proAppointment.common.close')}>
             ×
           </button>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Why are you cancelling?
+            {t('proAppointment.cancelModal.why')}
             <select value={reason} onChange={e => setReason(e.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
-              {['Schedule does not work', 'Customer requested cancellation', 'Scope changed', 'Emergency or availability issue', 'Other'].map(option => (
-                <option key={option} value={option}>{option}</option>
+              {cancelReasons.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </label>
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Details for the customer <span className="font-normal text-gray-400">(optional)</span>
-            <textarea value={details} onChange={e => setDetails(e.target.value)} rows={4} placeholder="Add context or explain whether they can rebook later." className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
+            {t('proAppointment.cancelModal.details')} <span className="font-normal text-gray-400">{t('proAppointment.cancelModal.optional')}</span>
+            <textarea value={details} onChange={e => setDetails(e.target.value)} rows={4} placeholder={t('proAppointment.cancelModal.detailsPlaceholder')} className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" />
           </label>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className={secondaryActionButton}>
               <MdCancel size={18} aria-hidden="true" />
-              Keep appointment
+              {t('proAppointment.cancelModal.keep')}
             </button>
             <button type="submit" disabled={submitting} className={darkActionButton}>
               <MdCancel size={18} aria-hidden="true" />
-              {submitting ? 'Cancelling...' : 'Cancel appointment'}
+              {submitting ? t('proAppointment.cancelModal.cancelling') : t('proAppointment.cancelModal.submit')}
             </button>
           </div>
         </form>
@@ -327,6 +345,7 @@ function CancelAppointmentModal({
 export default function AppointmentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const t = useTranslations()
   const [req, setReq] = useState<ServiceRequest | null>(null)
   const [loading, setLoading] = useState(true)
   const [forbidden] = useState(false)
@@ -374,7 +393,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
       await markServiceRequestComplete(id)
       await refreshRequest()
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Could not mark this job complete.')
+      setActionError(err instanceof Error ? err.message : t('proAppointment.actions.markError'))
     } finally {
       setBusyAction(null)
     }
@@ -408,12 +427,12 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
     return (
       <main className="bg-gray-50 min-h-screen">
         <div className="max-w-lg mx-auto px-4 py-20 text-center">
-          <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>Appointment not found</p>
+          <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>{t('proAppointment.notFound.title')}</p>
           <p className="text-gray-500 mb-6 text-sm">
-            This appointment does not exist or you do not have permission to view it.
+            {t('proAppointment.notFound.body')}
           </p>
           <Link href="/pro/work" className="inline-block bg-orange-500 text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:bg-orange-600">
-            Back to My Work
+            {t('proAppointment.notFound.back')}
           </Link>
         </div>
       </main>
@@ -425,7 +444,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
   const isConfirmed = appointment.status === 'confirmed'
   const [lat, lng] = appointmentCoords(req, appointment)
   const approximateLocation = appointment.jobLocation ?? req.jobLocation ?? null
-  const locationLabel = appointment.location || (approximateLocation ? approximateLocationLabel(approximateLocation) : districtCopy(req))
+  const locationLabel = appointment.location || (approximateLocation ? approximateLocationLabel(approximateLocation) : districtCopy(t, req))
   const mapLabel = req.customerDistrict ? districtLabel(req.customerDistrict) : 'Budapest'
   const stageIndex = appointmentStage(appointment)
   const isActiveJob = req.status === 'accepted'
@@ -433,23 +452,23 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
   const isCompleted = req.status === 'completed'
   const requestCanCancel = canCancel(req.status)
   const stages = [
-    'Requested',
-    'Confirmed',
-    'Today',
-    'In progress',
-    'Follow up',
+    t('proAppointment.progress.requested'),
+    t('proAppointment.progress.confirmed'),
+    t('proAppointment.progress.today'),
+    t('proAppointment.progress.inProgress'),
+    t('proAppointment.progress.followUp'),
   ]
 
   return (
     <main className="bg-gray-50 min-h-screen pb-16">
       <div className="max-w-5xl mx-auto px-4 py-10">
         <Link href="/pro/work" className="text-sm text-gray-500 hover:text-gray-800 mb-6 inline-flex">
-          ← My Work
+          {t('proAppointment.header.back')}
         </Link>
 
         <div className="mb-6">
           <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">
-            {isConfirmed ? 'Confirmed appointment' : 'Appointment request'}
+            {isConfirmed ? t('proAppointment.header.confirmed') : t('proAppointment.header.request')}
           </p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
@@ -458,7 +477,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
             {req.categoryName}
           </h1>
           <p className="text-gray-500 text-base mt-2">
-            with {req.customerName || 'Customer'}
+            {t('proAppointment.header.withCustomer', { name: req.customerName || t('proAppointment.common.customer') })}
           </p>
         </div>
 
@@ -467,18 +486,18 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
               <div className="rounded-2xl bg-slate-50 border border-slate-100 p-5 mb-6">
                 <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">
-                  {appointment.kind === 'quote' ? 'Quote visit' : 'Service appointment'}
+                  {appointment.kind === 'quote' ? t('proAppointment.kind.quote') : t('proAppointment.kind.service')}
                 </p>
                 <p className="text-3xl font-black text-gray-900 leading-none" style={dg}>
-                  {formatAppointmentDateTime(appointment.date, appointment.time)}
+                  {formatAppointmentDateTime(t, appointment.date, appointment.time)}
                 </p>
                 <p className="text-sm text-slate-600 font-semibold mt-3">{appointment.duration}</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="rounded-xl bg-gray-50 border border-gray-100 p-4">
-                  <p className="text-xs text-gray-400 mb-1">Customer</p>
-                  <p className="text-sm font-semibold text-gray-900">{req.customerName || 'Customer'}</p>
+                  <p className="text-xs text-gray-400 mb-1">{t('proAppointment.details.customer')}</p>
+                  <p className="text-sm font-semibold text-gray-900">{req.customerName || t('proAppointment.common.customer')}</p>
                   {req.customerEmail && (
                     <a href={`mailto:${req.customerEmail}`} className="text-sm text-orange-500 hover:underline">
                       {req.customerEmail}
@@ -486,30 +505,30 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                   )}
                 </div>
                 <div className="rounded-xl bg-gray-50 border border-gray-100 p-4">
-                  <p className="text-xs text-gray-400 mb-1">Location</p>
+                  <p className="text-xs text-gray-400 mb-1">{t('proAppointment.details.location')}</p>
                   <p className="text-sm font-semibold text-gray-900">{locationLabel}</p>
                   <a
-                    href={mapsUrl(req, appointment)}
+                    href={mapsUrl(t, req, appointment)}
                     target="_blank"
                     rel="noreferrer"
                     className="text-sm text-orange-500 hover:underline"
                   >
-                    Open in Google Maps
+                    {t('proAppointment.details.openMaps')}
                   </a>
                 </div>
               </div>
 
               {appointment.notes && (
                 <div className="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4">
-                  <p className="text-xs text-gray-400 mb-1">Appointment note</p>
+                  <p className="text-xs text-gray-400 mb-1">{t('proAppointment.details.note')}</p>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.notes}</p>
                 </div>
               )}
             </div>
 
             <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Progress</p>
-              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Appointment stage</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proAppointment.progress.kicker')}</p>
+              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proAppointment.progress.title')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                 {stages.map((stage, index) => {
                   const active = index <= stageIndex
@@ -536,7 +555,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
             </section>
 
             <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Customer location</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proAppointment.map.kicker')}</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
                 {mapLabel}
               </h2>
@@ -551,17 +570,17 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
               <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <p className="text-xs text-gray-400">
                   {approximateLocation
-                    ? 'Map shows the approximate job area captured from the customer permission. Use Google Maps for the exact address if shared.'
-                    : 'Map shows the customer district. Use Google Maps for the exact address if shared.'}
+                    ? t('proAppointment.map.approximate')
+                    : t('proAppointment.map.district')}
                 </p>
                 <a
-                  href={mapsUrl(req, appointment)}
+                  href={mapsUrl(t, req, appointment)}
                   target="_blank"
                   rel="noreferrer"
                   className={darkActionButton}
                 >
                   <MdMap size={18} aria-hidden="true" />
-                  Open Google Maps
+                  {t('proAppointment.details.openGoogleMaps')}
                 </a>
               </div>
             </section>
@@ -569,8 +588,8 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
 
           <aside className="lg:col-span-2 flex flex-col gap-4">
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Appointment actions</p>
-              <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>Manage this job</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proAppointment.actions.kicker')}</p>
+              <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>{t('proAppointment.actions.title')}</h2>
               <p className={`mb-4 rounded-xl border px-3 py-2 text-sm ${
                 isCompleted
                   ? 'border-green-100 bg-green-50 text-green-700'
@@ -580,7 +599,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                   ? 'border-gray-200 bg-gray-100 text-gray-600'
                   : 'border-gray-100 bg-gray-50 text-gray-600'
               }`}>
-                {actionStatusCopy(req)}
+                {actionStatusCopy(t, req)}
               </p>
               {actionError && <p className="mb-3 text-sm font-semibold text-red-600">{actionError}</p>}
               <div className="flex flex-col gap-2">
@@ -592,7 +611,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                     className={primaryActionButton}
                   >
                     <MdCheckCircle size={18} aria-hidden="true" />
-                    {busyAction === 'complete' ? 'Marking complete...' : 'Mark job complete'}
+                    {busyAction === 'complete' ? t('proAppointment.actions.marking') : t('proAppointment.actions.markComplete')}
                   </button>
                 )}
                 {isActiveJob && (
@@ -602,7 +621,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                     className={secondaryActionButton}
                   >
                     <MdSchedule size={18} aria-hidden="true" />
-                    Propose appointment change
+                    {t('proAppointment.actions.proposeChange')}
                   </button>
                 )}
                 {requestCanCancel && (
@@ -612,7 +631,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                     className={dangerActionButton}
                   >
                     <MdCancel size={18} aria-hidden="true" />
-                    Cancel appointment
+                    {t('proAppointment.actions.cancel')}
                   </button>
                 )}
               </div>
@@ -621,32 +640,32 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                 className={`mt-4 ${darkActionButton}`}
               >
                 <MdWork size={18} aria-hidden="true" />
-                Open job details
+                {t('proAppointment.actions.openJob')}
               </Link>
               <Link
                 href={`/pro/messages/${req.id}`}
                 className={`mt-2 ${secondaryActionButton}`}
               >
                 <MdMessage size={18} aria-hidden="true" />
-                Message customer
+                {t('proAppointment.actions.message')}
               </Link>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Day-of checklist</p>
-              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Complete smoothly</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proAppointment.checklist.kicker')}</p>
+              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proAppointment.checklist.title')}</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
-                <li>Confirm parking, entry codes, pets, and elevator access.</li>
-                <li>Bring any materials included in the quote.</li>
-                <li>Take before photos if useful for the job record.</li>
-                <li>Explain extra costs before doing additional work.</li>
+                <li>{t('proAppointment.checklist.parking')}</li>
+                <li>{t('proAppointment.checklist.materials')}</li>
+                <li>{t('proAppointment.checklist.photos')}</li>
+                <li>{t('proAppointment.checklist.costs')}</li>
               </ul>
             </div>
 
             {details.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Project brief</p>
-                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Customer answers</h2>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proAppointment.brief.kicker')}</p>
+                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proAppointment.brief.title')}</h2>
                 <div className="divide-y divide-gray-100">
                   {details.slice(0, 5).map(detail => (
                     <div key={detail.key} className="py-2.5 flex justify-between gap-4 text-sm">
@@ -670,7 +689,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
       )}
       {showCancel && (
         <CancelAppointmentModal
-          customerName={req.customerName || 'the customer'}
+          customerName={req.customerName || t('proAppointment.cancelModal.customerFallback')}
           onClose={() => setShowCancel(false)}
           onConfirm={handleCancel}
         />

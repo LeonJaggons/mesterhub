@@ -1,37 +1,40 @@
+'use client'
+
 import Link from 'next/link'
 import { FaFacebookF, FaInstagram, FaPinterestP, FaXTwitter } from 'react-icons/fa6'
 import { MdShield } from 'react-icons/md'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from './Footer.module.css'
 
 const columns = [
   {
-    title: 'Customers',
+    titleKey: 'customers',
     links: [
-      { label: 'How to use Mestermind', href: '/help' },
-      { label: 'Sign up', href: '/register' },
-      { label: 'Find pros near me', href: '/instant-results' },
-      { label: 'My projects', href: '/projects' },
-      { label: 'Help center', href: '/help' },
+      { labelKey: 'howToUse', href: '/help' },
+      { labelKey: 'signUp', href: '/register' },
+      { labelKey: 'findPros', href: '/instant-results' },
+      { labelKey: 'myProjects', href: '/projects' },
+      { labelKey: 'helpCenter', href: '/help' },
     ],
   },
   {
-    title: 'Pros',
+    titleKey: 'pros',
     links: [
-      { label: 'Mestermind for pros', href: '/pro' },
-      { label: 'Sign up as a pro', href: '/pro/signup' },
-      { label: 'Pro dashboard', href: '/pro/jobs' },
-      { label: 'Pro resources', href: '/pro/help' },
-      { label: 'Pro settings', href: '/pro/settings' },
+      { labelKey: 'proLanding', href: '/pro' },
+      { labelKey: 'signUpPro', href: '/pro/signup' },
+      { labelKey: 'proDashboard', href: '/pro/jobs' },
+      { labelKey: 'proResources', href: '/pro/help' },
+      { labelKey: 'proSettings', href: '/pro/settings' },
     ],
   },
   {
-    title: 'Support',
+    titleKey: 'support',
     links: [
-      { label: 'Help', href: '/help' },
-      { label: 'Safety', href: '/help' },
-      { label: 'Terms of Use', href: '/terms' },
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Account settings', href: '/settings' },
+      { labelKey: 'help', href: '/help' },
+      { labelKey: 'safety', href: '/help' },
+      { labelKey: 'terms', href: '/terms' },
+      { labelKey: 'privacy', href: '/privacy' },
+      { labelKey: 'accountSettings', href: '/settings' },
     ],
   },
 ] as const
@@ -44,13 +47,15 @@ const socialLinks = [
 ] as const
 
 export default function Footer() {
+  const t = useTranslations()
+
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.columns}>
           <section aria-label="Mestermind">
             <p className={styles.brandTitle}>Mestermind</p>
-            <p className={styles.brandTagline}>Find trusted local pros.</p>
+            <p className={styles.brandTagline}>{t('footer.brandTagline')}</p>
             <div className={styles.socialLinks}>
               {socialLinks.map(({ label, href, icon: Icon }) => (
                 <a
@@ -68,15 +73,15 @@ export default function Footer() {
           </section>
 
           {columns.map(column => (
-            <section key={column.title} aria-labelledby={`footer-${column.title.toLowerCase()}`}>
-              <h2 id={`footer-${column.title.toLowerCase()}`} className={styles.columnTitle}>
-                {column.title}
+            <section key={column.titleKey} aria-labelledby={`footer-${column.titleKey}`}>
+              <h2 id={`footer-${column.titleKey}`} className={styles.columnTitle}>
+                {t(`footer.columns.${column.titleKey}`)}
               </h2>
               <ul className={styles.linkList}>
                 {column.links.map(link => (
-                  <li key={`${column.title}-${link.label}`}>
+                  <li key={`${column.titleKey}-${link.labelKey}`}>
                     <Link href={link.href} className={styles.link}>
-                      {link.label}
+                      {t(`footer.links.${link.labelKey}`)}
                     </Link>
                   </li>
                 ))}
@@ -88,13 +93,13 @@ export default function Footer() {
         <div className={styles.bottom}>
           <span className={styles.copyright}>
             <span className={styles.brandDot}>m</span>
-            <span>© 2026 Mestermind, Inc.</span>
+            <span>{t('footer.copyright')}</span>
           </span>
           <span className={styles.guarantee}>
             <span className={styles.shield}>
               <MdShield size={13} aria-hidden="true" />
             </span>
-            Mestermind Guarantee
+            {t('footer.guarantee')}
           </span>
         </div>
       </div>

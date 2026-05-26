@@ -7,9 +7,11 @@ import { Field } from '@base-ui/react/field'
 import { Input } from '@base-ui/react/input'
 import { Button } from '@base-ui/react/button'
 import { resetPassword, verifyResetCode } from '@/firebase/auth'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from '../page.module.css'
 
 function ResetPasswordContent() {
+  const t = useTranslations()
   const searchParams = useSearchParams()
   const oobCode = searchParams.get('oobCode')
   const mode = searchParams.get('mode')
@@ -25,7 +27,7 @@ function ResetPasswordContent() {
 
     async function checkCode() {
       if (!oobCode || (mode && mode !== 'resetPassword')) {
-        setError('This password reset link is invalid or expired.')
+        setError(t('loginReset.errors.invalid'))
         setStatus('error')
         return
       }
@@ -37,7 +39,7 @@ function ResetPasswordContent() {
         setStatus('ready')
       } catch (err: unknown) {
         if (!mounted) return
-        setError(err instanceof Error ? err.message : 'This password reset link is invalid or expired.')
+        setError(err instanceof Error ? err.message : t('loginReset.errors.invalid'))
         setStatus('error')
       }
     }
@@ -55,7 +57,7 @@ function ResetPasswordContent() {
 
     setError(null)
     if (password !== confirmPassword) {
-      setError('Passwords do not match.')
+      setError(t('loginReset.errors.mismatch'))
       return
     }
 
@@ -64,7 +66,7 @@ function ResetPasswordContent() {
       await resetPassword(oobCode, password)
       setStatus('success')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not reset your password.')
+      setError(err instanceof Error ? err.message : t('loginReset.errors.reset'))
     } finally {
       setLoading(false)
     }
@@ -73,24 +75,24 @@ function ResetPasswordContent() {
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>Reset your password</h1>
+        <h1 className={styles.title}>{t('loginReset.title')}</h1>
         <p className={styles.subtitle}>
-          Choose a new password for your Mestermind account.
+          {t('loginReset.subtitle')}
         </p>
 
         <section className={styles.card}>
           {status === 'checking' && (
-            <p className={styles.statusText}>Checking your reset link...</p>
+            <p className={styles.statusText}>{t('loginReset.checking')}</p>
           )}
 
           {status === 'ready' && (
             <form onSubmit={handleSubmit}>
               <p className={styles.statusText}>
-                Resetting password for <strong>{email}</strong>.
+                {t('loginReset.ready', { email })}
               </p>
 
               <Field.Root>
-                <Field.Label className={styles.label}>New password</Field.Label>
+                <Field.Label className={styles.label}>{t('loginReset.newPassword')}</Field.Label>
                 <Field.Control
                   render={<Input className={styles.input} />}
                   name="new_password"
@@ -105,7 +107,7 @@ function ResetPasswordContent() {
 
               <div className={styles.fieldGap}>
                 <Field.Root>
-                  <Field.Label className={styles.label}>Confirm new password</Field.Label>
+                  <Field.Label className={styles.label}>{t('loginReset.confirmPassword')}</Field.Label>
                   <Field.Control
                     render={<Input className={styles.input} />}
                     name="confirm_new_password"
@@ -122,22 +124,22 @@ function ResetPasswordContent() {
               {error && <p className={styles.errorText}>{error}</p>}
 
               <Button type="submit" className={styles.submitBtn} disabled={loading}>
-                {loading ? 'Resetting password...' : 'Reset password'}
+                {loading ? t('loginReset.resetting') : t('loginReset.submit')}
               </Button>
             </form>
           )}
 
           {status === 'success' && (
             <>
-              <p className={styles.successText}>Your password has been reset.</p>
-              <Link href="/login" className={styles.submitBtn}>Log in</Link>
+              <p className={styles.successText}>{t('loginReset.success')}</p>
+              <Link href="/login" className={styles.submitBtn}>{t('loginReset.login')}</Link>
             </>
           )}
 
           {status === 'error' && (
             <>
               <p className={styles.errorText}>{error}</p>
-              <Link href="/login" className={styles.submitBtn}>Request a new reset link</Link>
+              <Link href="/login" className={styles.submitBtn}>{t('loginReset.newLink')}</Link>
             </>
           )}
         </section>
@@ -147,13 +149,15 @@ function ResetPasswordContent() {
 }
 
 export default function ResetPasswordPage() {
+  const t = useTranslations()
+
   return (
     <Suspense fallback={
       <main className={styles.page}>
         <div className={styles.wrap}>
-          <h1 className={styles.title}>Reset your password</h1>
+          <h1 className={styles.title}>{t('loginReset.title')}</h1>
           <section className={styles.card}>
-            <p className={styles.statusText}>Checking your reset link...</p>
+            <p className={styles.statusText}>{t('loginReset.checking')}</p>
           </section>
         </div>
       </main>

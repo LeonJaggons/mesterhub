@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { onAuthChange } from '@/firebase/auth'
 import { useNotifications } from '@/app/components/notifications/useNotifications'
+import { useTranslations } from '@/lib/i18n/client'
 import type { User } from 'firebase/auth'
 import styles from '../account/account.module.css'
 
@@ -22,6 +23,7 @@ function formatTime(value: string | null): string {
 
 export default function NotificationsPage() {
   const router = useRouter()
+  const t = useTranslations()
   const [user, setUser] = useState<User | null>(null)
   const [authReady, setAuthReady] = useState(false)
   const notificationsState = useNotifications(Boolean(user))
@@ -41,7 +43,7 @@ export default function NotificationsPage() {
     return (
       <main className={styles.page}>
         <div className={styles.wrap}>
-          <p className={styles.subtitle}>Loading notifications...</p>
+          <p className={styles.subtitle}>{t('notificationsPage.loading')}</p>
         </div>
       </main>
     )
@@ -50,11 +52,11 @@ export default function NotificationsPage() {
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>Notifications</h1>
+        <h1 className={styles.title}>{t('notificationsPage.title')}</h1>
         <p className={styles.subtitle}>
           {notificationsState.unreadCount
-            ? `${notificationsState.unreadCount} unread update${notificationsState.unreadCount === 1 ? '' : 's'}.`
-            : 'All caught up.'}
+            ? t(notificationsState.unreadCount === 1 ? 'notificationsPage.unreadSingular' : 'notificationsPage.unreadPlural', { count: notificationsState.unreadCount })
+            : t('notificationsPage.allCaughtUp')}
         </p>
 
         <section className={styles.card}>
@@ -65,7 +67,7 @@ export default function NotificationsPage() {
               style={{ marginTop: 0, marginBottom: '1rem' }}
               onClick={() => { void notificationsState.markAllRead() }}
             >
-              Mark all read
+              {t('notificationsPage.markAllRead')}
             </button>
           )}
 
@@ -98,8 +100,8 @@ export default function NotificationsPage() {
             </div>
           ) : (
             <div className={styles.empty}>
-              <p className={styles.emptyTitle}>{notificationsState.loading ? 'Loading...' : 'No notifications yet'}</p>
-              <p>Updates about quotes, messages, appointments, and jobs will appear here.</p>
+              <p className={styles.emptyTitle}>{notificationsState.loading ? t('notificationsPage.emptyLoading') : t('notificationsPage.emptyTitle')}</p>
+              <p>{t('notificationsPage.emptyBody')}</p>
             </div>
           )}
         </section>

@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { auth } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
+import { useTranslations } from '@/lib/i18n/client'
 import type { User } from 'firebase/auth'
 import styles from './FeedbackFab.module.css'
 
@@ -42,6 +43,7 @@ function getViewport() {
 
 export default function FeedbackFab() {
   const pathname = usePathname()
+  const t = useTranslations()
   const formTitleId = useId()
   const [user, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(false)
@@ -95,16 +97,16 @@ export default function FeedbackFab() {
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        throw new Error(data.error || 'Could not send feedback.')
+        throw new Error(data.error || t('feedback.error'))
       }
 
       setSubmitState('success')
-      setStatusMessage('Thanks, got it. This helps us prioritize what to fix next.')
+      setStatusMessage(t('feedback.success'))
       setMessage('')
       if (!user) setEmail('')
     } catch (err) {
       setSubmitState('error')
-      setStatusMessage(err instanceof Error ? err.message : 'Could not send feedback.')
+      setStatusMessage(err instanceof Error ? err.message : t('feedback.error'))
     }
   }
 
@@ -112,7 +114,7 @@ export default function FeedbackFab() {
     <>
       <button type="button" className={styles.fab} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}>
         <span className={styles.fabIcon}><FeedbackIcon /></span>
-        <span className={styles.fabLabel}>Feedback</span>
+        <span className={styles.fabLabel}>{t('feedback.fab')}</span>
       </button>
 
       {open && (
@@ -121,31 +123,31 @@ export default function FeedbackFab() {
           <section className={styles.panel} role="dialog" aria-modal="true" aria-labelledby={formTitleId}>
             <div className={styles.panelHeader}>
               <div>
-                <p className={styles.eyebrow}>MVP feedback</p>
-                <h2 id={formTitleId} className={styles.title}>Report a problem or idea</h2>
+                <p className={styles.eyebrow}>{t('feedback.eyebrow')}</p>
+                <h2 id={formTitleId} className={styles.title}>{t('feedback.title')}</h2>
               </div>
-              <button type="button" className={styles.closeButton} onClick={() => setOpen(false)} aria-label="Close feedback form">
+              <button type="button" className={styles.closeButton} onClick={() => setOpen(false)} aria-label={t('feedback.close')}>
                 <CloseIcon />
               </button>
             </div>
 
             <form className={styles.form} onSubmit={handleSubmit}>
               <label className={styles.field}>
-                <span className={styles.label}>What is this about?</span>
+                <span className={styles.label}>{t('feedback.typeLabel')}</span>
                 <select className={styles.select} value={type} onChange={event => setType(event.target.value as FeedbackType)}>
-                  <option value="problem">Report a problem</option>
-                  <option value="feature">Request a feature</option>
-                  <option value="general">General feedback</option>
+                  <option value="problem">{t('feedback.types.problem')}</option>
+                  <option value="feature">{t('feedback.types.feature')}</option>
+                  <option value="general">{t('feedback.types.general')}</option>
                 </select>
               </label>
 
               <label className={styles.field}>
-                <span className={styles.label}>Details</span>
+                <span className={styles.label}>{t('feedback.details')}</span>
                 <textarea
                   className={styles.textarea}
                   value={message}
                   onChange={event => setMessage(event.target.value)}
-                  placeholder="Tell us what happened, what you expected, or what would make this better."
+                  placeholder={t('feedback.detailsPlaceholder')}
                   maxLength={2000}
                   required
                 />
@@ -153,7 +155,7 @@ export default function FeedbackFab() {
 
               {!user && (
                 <label className={styles.field}>
-                  <span className={styles.label}>Email for follow-up, optional</span>
+                  <span className={styles.label}>{t('feedback.email')}</span>
                   <input
                     className={styles.input}
                     type="email"
@@ -165,7 +167,7 @@ export default function FeedbackFab() {
                 </label>
               )}
 
-              <p className={styles.hint}>We include the current page and browser info so you do not have to.</p>
+              <p className={styles.hint}>{t('feedback.hint')}</p>
 
               {statusMessage && (
                 <p className={styles.status} data-tone={submitState === 'success' ? 'success' : 'error'}>
@@ -175,10 +177,10 @@ export default function FeedbackFab() {
 
               <div className={styles.actions}>
                 <button type="button" className={styles.secondaryButton} onClick={() => setOpen(false)} disabled={submitState === 'submitting'}>
-                  Cancel
+                  {t('feedback.cancel')}
                 </button>
                 <button type="submit" className={styles.submitButton} disabled={submitState === 'submitting'}>
-                  {submitState === 'submitting' ? 'Sending...' : 'Send feedback'}
+                  {submitState === 'submitting' ? t('feedback.sending') : t('feedback.submit')}
                 </button>
               </div>
             </form>

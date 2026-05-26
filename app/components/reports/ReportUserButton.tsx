@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { useTranslations } from '@/lib/i18n/client'
 
 type TargetRole = 'pro' | 'customer' | 'user'
 type ReporterRole = 'pro' | 'customer' | 'user'
@@ -21,15 +22,15 @@ type Props = {
 }
 
 const REPORT_REASONS = [
-  'Spam or scam',
-  'Harassment or abusive behavior',
-  'Unsafe or threatening conduct',
-  'False profile, identity, or credentials',
-  'Payment, quote, or refund issue',
-  'No-show or appointment problem',
-  'Inappropriate messages or content',
-  'Other safety concern',
-]
+  { value: 'Spam or scam', labelKey: 'spam' },
+  { value: 'Harassment or abusive behavior', labelKey: 'harassment' },
+  { value: 'Unsafe or threatening conduct', labelKey: 'unsafe' },
+  { value: 'False profile, identity, or credentials', labelKey: 'falseProfile' },
+  { value: 'Payment, quote, or refund issue', labelKey: 'payment' },
+  { value: 'No-show or appointment problem', labelKey: 'noShow' },
+  { value: 'Inappropriate messages or content', labelKey: 'inappropriate' },
+  { value: 'Other safety concern', labelKey: 'other' },
+] as const
 
 export default function ReportUserButton({
   targetUid,
@@ -43,10 +44,11 @@ export default function ReportUserButton({
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations()
   const detailsId = useId()
   const [currentUid, setCurrentUid] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [reason, setReason] = useState(REPORT_REASONS[0])
+  const [reason, setReason] = useState(REPORT_REASONS[0].value)
   const [details, setDetails] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -76,7 +78,7 @@ export default function ReportUserButton({
     setSuccess('')
 
     if (details.trim().length < 10) {
-      setError('Please include a short description so support can review the report.')
+      setError(t('reports.validation'))
       return
     }
 
@@ -96,11 +98,11 @@ export default function ReportUserButton({
           path: pathname,
         }),
       })
-      setSuccess('Report sent. Mestermind support will review it.')
+      setSuccess(t('reports.success'))
       setDetails('')
-      setReason(REPORT_REASONS[0])
+      setReason(REPORT_REASONS[0].value)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send report.')
+      setError(err instanceof Error ? err.message : t('reports.error'))
     } finally {
       setSubmitting(false)
     }
@@ -113,7 +115,7 @@ export default function ReportUserButton({
         onClick={openReport}
         className={className ?? 'rounded-xl border border-red-100 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 cursor-pointer'}
       >
-        {buttonLabel ?? `Report ${targetRole === 'pro' ? 'pro' : targetRole === 'customer' ? 'customer' : 'user'}`}
+        {buttonLabel ?? t(`reports.button.${targetRole === 'pro' ? 'pro' : targetRole === 'customer' ? 'customer' : 'user'}`)}
       </button>
 
       {open && (
@@ -127,19 +129,19 @@ export default function ReportUserButton({
           >
             <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
               <div>
-                <p className="mb-1 text-xs font-bold uppercase tracking-widest text-red-500">Safety report</p>
+                <p className="mb-1 text-xs font-bold uppercase tracking-widest text-red-500">{t('reports.kicker')}</p>
                 <h2 className="text-2xl font-black text-gray-950" style={{ fontFamily: 'var(--font-darker-grotesque)' }}>
-                  Report {targetName || 'this user'}
+                  {t('reports.title', { name: targetName || t('reports.userFallback') })}
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Reports go to Mestermind support. Use this for safety, abuse, fraud, or trust concerns.
+                  {t('reports.body')}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 className="border-none bg-transparent p-1 text-gray-400 hover:text-gray-600 cursor-pointer"
-                aria-label="Close report form"
+                aria-label={t('reports.closeAria')}
               >
                 ×
               </button>
@@ -147,33 +149,33 @@ export default function ReportUserButton({
 
             <form onSubmit={submitReport} className="flex flex-col gap-4 p-6">
               <label className="text-sm font-bold text-gray-700">
-                Reason
+                {t('reports.reason')}
                 <select
                   value={reason}
                   onChange={event => setReason(event.target.value)}
                   className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 >
                   {REPORT_REASONS.map(option => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option.value} value={option.value}>{t(`reports.reasons.${option.labelKey}`)}</option>
                   ))}
                 </select>
               </label>
 
               <label htmlFor={detailsId} className="text-sm font-bold text-gray-700">
-                What happened?
+                {t('reports.details')}
                 <textarea
                   id={detailsId}
                   value={details}
                   onChange={event => setDetails(event.target.value)}
                   rows={5}
                   maxLength={2000}
-                  placeholder="Share the message, request, appointment, quote, payment, or profile details support should review."
+                  placeholder={t('reports.detailsPlaceholder')}
                   className="mt-1 w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 />
               </label>
 
               <p className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
-                If anyone is in immediate danger, contact local emergency services first. Mestermind reports are reviewed for marketplace safety and support follow-up.
+                {t('reports.emergency')}
               </p>
 
               {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
@@ -185,14 +187,14 @@ export default function ReportUserButton({
                   onClick={() => setOpen(false)}
                   className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
                 >
-                  Close
+                  {t('reports.close')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || details.trim().length < 10}
                   className="flex-1 rounded-xl border-none bg-red-600 px-4 py-3 text-sm font-black text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 >
-                  {submitting ? 'Sending...' : 'Send report'}
+                  {submitting ? t('reports.sending') : t('reports.submit')}
                 </button>
               </div>
             </form>

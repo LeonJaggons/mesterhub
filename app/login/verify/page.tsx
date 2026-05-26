@@ -6,12 +6,14 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth'
 import { auth } from '@/firebase/index'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from '../page.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 function VerifyLoginContent() {
   const router = useRouter()
+  const t = useTranslations()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'checking' | 'needs-email' | 'done' | 'error'>('checking')
@@ -34,14 +36,14 @@ function VerifyLoginContent() {
     setError('')
     try {
       if (!isSignInWithEmailLink(auth, window.location.href)) {
-        throw new Error('This login link is invalid or expired.')
+        throw new Error(t('loginVerify.errors.invalid'))
       }
       await signInWithEmailLink(auth, value, window.location.href)
       window.localStorage.removeItem('emailForSignIn')
       setStatus('done')
       router.replace(searchParams.get('next') ?? '/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not complete login.')
+      setError(err instanceof Error ? err.message : t('loginVerify.errors.complete'))
       setStatus('error')
     }
   }
@@ -49,11 +51,11 @@ function VerifyLoginContent() {
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title} style={dg}>Confirm your login</h1>
+        <h1 className={styles.title} style={dg}>{t('loginVerify.title')}</h1>
         <section className={styles.card}>
 
         {status === 'checking' && (
-          <p>Checking your secure login link...</p>
+          <p>{t('loginVerify.checking')}</p>
         )}
 
         {status === 'needs-email' && (
@@ -63,9 +65,9 @@ function VerifyLoginContent() {
               completeSignIn(email)
             }}
           >
-            <p>Enter the email address you used to request this link.</p>
+            <p>{t('loginVerify.emailPrompt')}</p>
             <label className={styles.label}>
-              Email
+              {t('loginVerify.email')}
               <input
                 type="email"
                 value={email}
@@ -74,14 +76,14 @@ function VerifyLoginContent() {
                 className={styles.input}
               />
             </label>
-            <button type="submit" className={styles.submitBtn}>Finish login</button>
+            <button type="submit" className={styles.submitBtn}>{t('loginVerify.finish')}</button>
           </form>
         )}
 
         {status === 'error' && (
           <>
             <p className={styles.errorText}>{error}</p>
-            <Link href="/login" className={styles.submitBtn}>Request a new link</Link>
+            <Link href="/login" className={styles.submitBtn}>{t('loginVerify.newLink')}</Link>
           </>
         )}
         </section>
@@ -91,13 +93,15 @@ function VerifyLoginContent() {
 }
 
 export default function VerifyLoginPage() {
+  const t = useTranslations()
+
   return (
     <Suspense fallback={(
       <main className={styles.page}>
         <div className={styles.wrap}>
-          <h1 className={styles.title} style={dg}>Confirm your login</h1>
+          <h1 className={styles.title} style={dg}>{t('loginVerify.title')}</h1>
           <section className={styles.card}>
-            <p>Checking your secure login link...</p>
+            <p>{t('loginVerify.checking')}</p>
           </section>
         </div>
       </main>

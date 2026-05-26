@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { onAuthChange, updateDisplayName } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { useTranslations } from '@/lib/i18n/client'
 import type { User } from 'firebase/auth'
 import districtsData from '@/public/districts.json'
 import styles from '../account/account.module.css'
@@ -45,6 +46,7 @@ function splitDisplayName(displayName: string): Pick<ProfileForm, 'firstName' | 
 
 export default function SettingsPage() {
   const router = useRouter()
+  const t = useTranslations()
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<CustomerProfile | null>(null)
   const [form, setForm] = useState<ProfileForm>(emptyForm)
@@ -103,7 +105,7 @@ export default function SettingsPage() {
     try {
       const displayName = form.displayName.trim()
       if (!displayName) {
-        throw new Error('Display name is required.')
+        throw new Error(t('settings.errors.displayNameRequired'))
       }
       await updateDisplayName(displayName)
       await authenticatedFetch('/api/profile', {
@@ -119,7 +121,7 @@ export default function SettingsPage() {
       })
       setSaved(true)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not save changes.')
+      setError(err instanceof Error ? err.message : t('settings.errors.save'))
     } finally {
       setSaving(false)
     }
@@ -129,7 +131,7 @@ export default function SettingsPage() {
     return (
       <div className={styles.page}>
         <div className={styles.wrap}>
-          <p className={styles.subtitle}>Loading…</p>
+          <p className={styles.subtitle}>{t('settings.loading')}</p>
         </div>
       </div>
     )
@@ -138,56 +140,56 @@ export default function SettingsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>Account settings</h1>
-        <p className={styles.subtitle}>Manage your profile and sign-in details.</p>
+        <h1 className={styles.title}>{t('settings.title')}</h1>
+        <p className={styles.subtitle}>{t('settings.subtitle')}</p>
 
         <form className={styles.cardStack} onSubmit={handleSubmit}>
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Profile details</h2>
-            <p className={styles.helperText}>These details are shown on requests, messages, and appointment details.</p>
+            <h2 className={styles.sectionTitle}>{t('settings.profile.title')}</h2>
+            <p className={styles.helperText}>{t('settings.profile.body')}</p>
 
             <div className={styles.fieldGrid}>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="firstName">First name</label>
+                <label className={styles.label} htmlFor="firstName">{t('settings.profile.firstName')}</label>
                 <input
                   id="firstName"
                   className={styles.input}
                   value={form.firstName}
                   onChange={e => updateField('firstName', e.target.value)}
-                  placeholder="First name"
+                  placeholder={t('settings.profile.firstName')}
                 />
               </div>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="lastName">Last name</label>
+                <label className={styles.label} htmlFor="lastName">{t('settings.profile.lastName')}</label>
                 <input
                   id="lastName"
                   className={styles.input}
                   value={form.lastName}
                   onChange={e => updateField('lastName', e.target.value)}
-                  placeholder="Last name"
+                  placeholder={t('settings.profile.lastName')}
                 />
               </div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="displayName">Display name</label>
+              <label className={styles.label} htmlFor="displayName">{t('settings.profile.displayName')}</label>
               <input
                 id="displayName"
                 className={styles.input}
                 value={form.displayName}
                 onChange={e => updateField('displayName', e.target.value)}
-                placeholder="Name shown on requests"
+                placeholder={t('settings.profile.displayNamePlaceholder')}
                 required
               />
             </div>
           </section>
 
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Contact and defaults</h2>
-            <p className={styles.helperText}>Saved defaults help prefill future requests and quote acceptances.</p>
+            <h2 className={styles.sectionTitle}>{t('settings.contact.title')}</h2>
+            <p className={styles.helperText}>{t('settings.contact.body')}</p>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="phone">Phone</label>
+              <label className={styles.label} htmlFor="phone">{t('settings.contact.phone')}</label>
               <input
                 id="phone"
                 className={styles.input}
@@ -199,67 +201,67 @@ export default function SettingsPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="preferredDistrict">Preferred district</label>
+              <label className={styles.label} htmlFor="preferredDistrict">{t('settings.contact.preferredDistrict')}</label>
               <select
                 id="preferredDistrict"
                 className={styles.input}
                 value={form.preferredDistrict}
                 onChange={e => updateField('preferredDistrict', e.target.value)}
               >
-                <option value="">No default district</option>
+                <option value="">{t('settings.contact.noDistrict')}</option>
                 {districtsData.districts.map(district => (
                   <option key={district.roman} value={district.roman}>
-                    District {district.roman} - {district.name}
+                    {t('settings.contact.district', { district: district.roman, name: district.name })}
                   </option>
                 ))}
               </select>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="address">Default address</label>
+              <label className={styles.label} htmlFor="address">{t('settings.contact.address')}</label>
               <textarea
                 id="address"
                 className={styles.textarea}
                 value={form.address}
                 onChange={e => updateField('address', e.target.value)}
-                placeholder="Street, building, access notes"
+                placeholder={t('settings.contact.addressPlaceholder')}
                 rows={4}
               />
-              <p className={styles.helperText}>Shared with a pro only when you accept their quote and include it in the acceptance details.</p>
+              <p className={styles.helperText}>{t('settings.contact.addressHelper')}</p>
             </div>
           </section>
 
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Sign-in details</h2>
-            <p className={styles.helperText}>These fields come from your sign-in account and cannot be edited here.</p>
+            <h2 className={styles.sectionTitle}>{t('settings.signin.title')}</h2>
+            <p className={styles.helperText}>{t('settings.signin.body')}</p>
 
             <div className={styles.fieldGrid}>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="email">Email</label>
+                <label className={styles.label} htmlFor="email">{t('settings.signin.email')}</label>
                 <input id="email" className={styles.input} value={profile?.email ?? user?.email ?? ''} disabled />
               </div>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="emailVerified">Email status</label>
+                <label className={styles.label} htmlFor="emailVerified">{t('settings.signin.emailStatus')}</label>
                 <input
                   id="emailVerified"
                   className={styles.input}
-                  value={(profile?.emailVerified ?? user?.emailVerified) ? 'Verified' : 'Not verified'}
+                  value={(profile?.emailVerified ?? user?.emailVerified) ? t('settings.signin.verified') : t('settings.signin.notVerified')}
                   disabled
                 />
               </div>
             </div>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="uid">Account ID</label>
+              <label className={styles.label} htmlFor="uid">{t('settings.signin.accountId')}</label>
               <input id="uid" className={styles.input} value={profile?.uid ?? user?.uid ?? ''} disabled />
             </div>
           </section>
 
           <section className={`${styles.card} ${styles.actionCard}`}>
             {error && <p className={styles.errorText}>{error}</p>}
-            {saved && <p className={styles.successText}>Changes saved.</p>}
+            {saved && <p className={styles.successText}>{t('settings.saved')}</p>}
 
             <button type="submit" className={styles.submitBtn} disabled={saving}>
-              {saving ? 'Saving…' : 'Save changes'}
+              {saving ? t('settings.saving') : t('settings.submit')}
             </button>
           </section>
         </form>

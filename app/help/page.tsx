@@ -1,56 +1,49 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from '../account/account.module.css'
 
 export default function HelpPage() {
+  const t = useTranslations()
+
   return (
     <div className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>Help</h1>
-        <p className={styles.subtitle}>Answers to common questions about using Mestermind.</p>
+        <h1 className={styles.title}>{t('helpPage.title')}</h1>
+        <p className={styles.subtitle}>{t('helpPage.subtitle')}</p>
 
         <div className={styles.card}>
           <section className={styles.helpSection}>
-            <h2>How do I request a quote?</h2>
+            <h2>{t('helpPage.quote.title')}</h2>
             <p>
-              Browse services from the home page or Explore Services menu, find a pro, and fill out
-              the project form on their profile. They&apos;ll respond with a quote you can review under{' '}
-              <Link href="/requests">My requests</Link>.
+              {t('helpPage.quote.bodyBefore')}{' '}
+              <Link href="/requests">{t('helpPage.quote.link')}</Link>.
             </p>
           </section>
 
           <section className={styles.helpSection}>
-            <h2>When do I get the pro&apos;s contact details?</h2>
-            <p>
-              After you accept a quote, the pro can reach you by email. Until then, communication
-              happens through the request status on your requests page.
-            </p>
+            <h2>{t('helpPage.contact.title')}</h2>
+            <p>{t('helpPage.contact.body')}</p>
           </section>
 
           <section id="mestermind-guarantee" className={styles.helpSection}>
-            <h2>Mestermind Guarantee</h2>
+            <h2>{t('helpPage.guarantee.title')}</h2>
+            <p>{t('helpPage.guarantee.body')}</p>
+          </section>
+
+          <section className={styles.helpSection}>
+            <h2>{t('helpPage.pro.title')}</h2>
             <p>
-              Keep job details, quote decisions, appointment updates, and completion confirmations
-              in Mestermind so support can review the history if something goes wrong. During launch,
-              our team helps resolve disputes case by case.
+              <Link href="/pro">{t('helpPage.pro.link')}</Link> {t('helpPage.pro.bodyAfter')}
             </p>
           </section>
 
           <section className={styles.helpSection}>
-            <h2>Want to offer services?</h2>
+            <h2>{t('helpPage.more.title')}</h2>
             <p>
-              <Link href="/pro">Join as a pro</Link> to create a business profile and receive job
-              requests from customers in your area.
-            </p>
-          </section>
-
-          <section className={styles.helpSection}>
-            <h2>Need more help?</h2>
-            <p>
-              Email us at{' '}
-              <a href="mailto:support@mestermind.com">support@mestermind.com</a> and we&apos;ll get back
-              to you within one business day.
+              {t('helpPage.more.bodyBefore')}{' '}
+              <a href="mailto:support@mestermind.com">support@mestermind.com</a> {t('helpPage.more.bodyAfter')}
             </p>
           </section>
         </div>
