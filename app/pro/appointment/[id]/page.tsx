@@ -4,10 +4,9 @@ import { use, useEffect, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { doc, getDoc, Timestamp } from 'firebase/firestore'
 import { MdCancel, MdCheckCircle, MdMap, MdMessage, MdSchedule, MdWork } from 'react-icons/md'
-import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import { requestAppointment, type AppointmentRequestInput } from '@/firebase/conversations'
 import {
   approximateLocationLabel,
@@ -21,6 +20,7 @@ import {
   type JobLocation,
   type ServiceRequestStatus,
 } from '@/firebase/serviceRequests'
+import type { InquiryTimestamp } from '@/lib/inquiryAccess'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 const actionButtonBase = 'inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold leading-5 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60'
@@ -43,8 +43,8 @@ type AppointmentRequest = {
   jobLocation?: JobLocation | null
   notes: string
   status: 'proposed' | 'confirmed'
-  requestedAt: Timestamp | null
-  confirmedAt?: Timestamp | null
+  requestedAt: InquiryTimestamp
+  confirmedAt?: InquiryTimestamp
 }
 
 type ServiceRequest = {
@@ -64,7 +64,8 @@ type ServiceRequest = {
   appointmentChangeRequest?: AppointmentRequest
   completion?: { status?: 'pro_marked_complete' | 'confirmed_complete' }
   cancelReason?: string
-  createdAt: Timestamp | null
+  createdAt: InquiryTimestamp
+  obfuscated?: boolean
 }
 
 function formatAppointmentDateTime(date: string, time: string): string {
@@ -328,7 +329,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
   const router = useRouter()
   const [req, setReq] = useState<ServiceRequest | null>(null)
   const [loading, setLoading] = useState(true)
-  const [forbidden, setForbidden] = useState(false)
+  const [forbidden] = useState(false)
   const [showReschedule, setShowReschedule] = useState(false)
   const [showCancel, setShowCancel] = useState(false)
   const [busyAction, setBusyAction] = useState<'complete' | null>(null)
@@ -342,16 +343,11 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
       }
 
       try {
-        const snap = await getDoc(doc(db, 'serviceRequests', id))
-        if (!snap.exists()) {
+        const res = await authenticatedFetch(`/api/pro/service-requests/${id}`)
+        const payload = await res.json()
+        const data = payload.request as ServiceRequest | undefined
+        if (!data || data.obfuscated === true) {
           setReq(null)
-          setLoading(false)
-          return
-        }
-
-        const data = { id: snap.id, ...snap.data() } as ServiceRequest
-        if (data.proUid !== user.uid) {
-          setForbidden(true)
           setLoading(false)
           return
         }
@@ -366,8 +362,9 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
   }, [id, router])
 
   async function refreshRequest() {
-    const snap = await getDoc(doc(db, 'serviceRequests', id))
-    if (snap.exists()) setReq({ id: snap.id, ...snap.data() } as ServiceRequest)
+    const res = await authenticatedFetch(`/api/pro/service-requests/${id}`)
+    const payload = await res.json()
+    if (payload.request && payload.request.obfuscated !== true) setReq(payload.request as ServiceRequest)
   }
 
   async function handleMarkComplete() {

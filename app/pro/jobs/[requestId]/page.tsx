@@ -3,9 +3,8 @@
 import { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { doc, getDoc, Timestamp } from 'firebase/firestore'
-import { db } from '@/firebase/index'
 import { onAuthChange, waitForAuthReady } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import { requestAppointment, type AppointmentRequestInput } from '@/firebase/conversations'
 import { cancelServiceRequest, declineServiceRequestAsPro, markServiceRequestComplete, quoteServiceRequest } from '@/firebase/serviceRequests'
 import {
@@ -16,6 +15,8 @@ import {
 } from '@/app/requests/shared'
 import districtsData from '@/public/districts.json'
 import { QuoteModal, DeclineModal, type QuoteFormData } from '../JobModals'
+import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
+import { FREE_CLEAR_INQUIRY_LIMIT, inquiryCreatedAtMillis, type InquiryTimestamp } from '@/lib/inquiryAccess'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
@@ -32,7 +33,7 @@ type Quote = {
   price: string
   timeline: string
   notes: string
-  quotedAt: Timestamp | null
+  quotedAt: InquiryTimestamp
 }
 
 type AcceptanceDetails = {
@@ -40,13 +41,13 @@ type AcceptanceDetails = {
   phone?: string
   address?: string
   preferredStart?: string
-  acceptedAt?: Timestamp | null
+  acceptedAt?: InquiryTimestamp
 }
 
 type AppointmentRequest = AppointmentRequestInput & {
   status: 'proposed' | 'confirmed'
-  requestedAt: Timestamp | null
-  confirmedAt?: Timestamp | null
+  requestedAt: InquiryTimestamp
+  confirmedAt?: InquiryTimestamp
 }
 
 type ServiceRequest = {
@@ -68,7 +69,8 @@ type ServiceRequest = {
   appointmentRequest?: AppointmentRequest
   completion?: { status?: 'pro_marked_complete' | 'confirmed_complete' }
   cancelReason?: string
-  createdAt: Timestamp | null
+  createdAt: InquiryTimestamp
+  obfuscated?: boolean
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -81,9 +83,9 @@ function formatVal(v: string) {
   return v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
-function timeAgo(ts: Timestamp | null) {
+function timeAgo(ts: InquiryTimestamp) {
   if (!ts) return ''
-  const s = Math.floor((Date.now() - ts.toMillis()) / 1000)
+  const s = Math.floor((Date.now() - inquiryCreatedAtMillis(ts)) / 1000)
   if (s < 60) return 'just now'
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`
@@ -116,9 +118,14 @@ function customerDisplayName(name: string): string {
   return lastInitial ? `${first} ${lastInitial.toUpperCase()}.` : first
 }
 
-function requestAgeLabel(ts: Timestamp | null): string {
+function requestAgeLabel(ts: InquiryTimestamp): string {
   const ago = timeAgo(ts)
   return ago ? `Posted ${ago}` : 'Posted recently'
+}
+
+function monthlyResetLabel(reference = new Date()): string {
+  const resetDate = new Date(reference.getFullYear(), reference.getMonth() + 1, 1)
+  return resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 function topDecisionDetails(details: Array<[string, string]>): Array<[string, string]> {
@@ -487,6 +494,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
   const [req, setReq] = useState<ServiceRequest | null>(null)
   const [loading, setLoading] = useState(true)
   const [forbidden, setForbidden] = useState(false)
+  const [obfuscated, setObfuscated] = useState(false)
   const [showQuoteModal, setShowQuoteModal] = useState(false)
   const [showDeclineModal, setShowDeclineModal] = useState(false)
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
@@ -508,18 +516,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
         }
 
         try {
-          const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-          if (!snap.exists()) { setForbidden(true); setLoading(false); return }
+          const res = await authenticatedFetch(`/api/pro/service-requests/${requestId}`)
+          const payload = await res.json()
+          const data = payload.request as ServiceRequest | undefined
+          if (!data) { setForbidden(true); setLoading(false); return }
+          const canViewInquiry = data.obfuscated !== true
+          setObfuscated(!canViewInquiry)
 
-          const data = { id: snap.id, ...snap.data() } as ServiceRequest
-
-          // Access control — only the intended pro can view this
-          if (data.proUid !== user.uid) {
-            router.replace(loginUrlFor(nextPath))
-            return
-          }
-
-          if (data.appointmentRequest?.status === 'confirmed') {
+          if (canViewInquiry && data.appointmentRequest?.status === 'confirmed') {
             router.replace(`/pro/appointment/${requestId}`)
             return
           }
@@ -610,6 +614,58 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
           Back to Jobs
         </button>
       </div>
+    )
+  }
+
+  if (obfuscated) {
+    const resetLabel = monthlyResetLabel()
+    return (
+      <main className="bg-gray-50 min-h-screen pb-16">
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          <button
+            onClick={() => router.push('/pro/jobs')}
+            className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+          >
+            ← Back to Jobs
+          </button>
+          <section className="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
+            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Inquiry hidden</p>
+            <h1 className="text-4xl font-black text-gray-900 leading-none mb-3" style={dg}>
+              Upgrade to view this request
+            </h1>
+            <p className="text-sm leading-relaxed text-gray-600 mb-5">
+              You can view {FREE_CLEAR_INQUIRY_LIMIT} inquiries per month for free. This inquiry is saved, but its job details, location, and customer context are hidden until you upgrade or your free views reset on {resetLabel}.
+            </p>
+            <div className="relative mb-5 overflow-hidden rounded-xl border border-orange-100 bg-orange-50 p-4">
+              <div className="pointer-events-none select-none blur-[3px]" aria-hidden="true">
+                <div className="mb-3 h-5 w-4/5 rounded bg-slate-300/80" />
+                <div className="mb-3 h-4 w-2/3 rounded bg-slate-300/70" />
+                <div className="h-4 w-1/2 rounded bg-slate-300/60" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-orange-50/80 px-4 text-center text-sm font-bold text-gray-900">
+                Details hidden until Pro or {resetLabel}
+              </div>
+            </div>
+            <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 text-sm">
+              <div className="flex justify-between gap-4 py-1.5">
+                <span className="text-gray-500">Category</span>
+                <span className="font-semibold text-gray-900">{req.categoryName}</span>
+              </div>
+              <div className="flex justify-between gap-4 py-1.5">
+                <span className="text-gray-500">Status</span>
+                <span className="font-semibold text-gray-900">{req.status}</span>
+              </div>
+              <div className="flex justify-between gap-4 py-1.5">
+                <span className="text-gray-500">Received</span>
+                <span className="font-semibold text-gray-900">{requestAgeLabel(req.createdAt)}</span>
+              </div>
+            </div>
+          </section>
+          <div className="mt-4">
+            <ProUpgradeCta />
+          </div>
+        </div>
+      </main>
     )
   }
 

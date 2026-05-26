@@ -3,16 +3,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { collection, getDocs, query, Timestamp, where } from 'firebase/firestore'
 import type { User } from 'firebase/auth'
-import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { uploadServiceRequestAttachment } from '@/firebase/storage'
 import districtsData from '@/public/districts.json'
 import servicesData from '@/public/services.json'
 import styles from '../account/account.module.css'
-import { dg, districtLabel, formatAnswers, timeAgo } from '../requests/shared'
+import { dg, districtLabel, formatAnswers, nowTimestamp, timeAgo, timestampMillis, type TimestampLike } from '../requests/shared'
 import {
   CATEGORY_QUESTIONS,
   MAX_ATTACHMENT_SIZE,
@@ -30,8 +28,8 @@ type ProjectDoc = {
   invitedProUids?: string[]
   hasAppointment?: boolean
   status?: string
-  createdAt: Timestamp | null
-  updatedAt?: Timestamp | null
+  createdAt: TimestampLike | null
+  updatedAt?: TimestampLike | null
 }
 
 type CreateProjectForm = {
@@ -51,10 +49,6 @@ function projectTitle(project: ProjectDoc): string {
 
 function shortText(value: string, max = 140): string {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
-}
-
-function requestHasAppointment(data: Record<string, unknown>): boolean {
-  return Boolean(data.appointmentRequest || data.appointmentChangeRequest)
 }
 
 function validAttachment(file: File): boolean {
@@ -149,8 +143,8 @@ function CreateProjectModal({
         invitedProUids: [],
         hasAppointment: false,
         status: 'active',
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
+        createdAt: nowTimestamp(),
+        updatedAt: nowTimestamp(),
       })
       onClose()
     } catch (err) {
@@ -450,46 +444,17 @@ export default function ProjectsPage() {
       setUser(user)
 
       try {
-        const snap = await getDocs(
-          query(collection(db, 'projects'), where('customerUid', '==', user.uid))
-        )
-        const activeProjects = snap.docs
-          .map(projectDoc => {
-            const data = projectDoc.data()
-            return {
-              id: projectDoc.id,
-              categoryName: typeof data.categoryName === 'string' ? data.categoryName : '',
-              answers: data.answers && typeof data.answers === 'object' && !Array.isArray(data.answers)
-                ? data.answers as Record<string, string>
-                : {},
-              customerDistrict: typeof data.customerDistrict === 'string' ? data.customerDistrict : undefined,
-              attachmentUrls: Array.isArray(data.attachmentUrls)
-                ? data.attachmentUrls.filter((url): url is string => typeof url === 'string')
-                : [],
-              invitedProUids: Array.isArray(data.invitedProUids)
-                ? data.invitedProUids.filter((uid): uid is string => typeof uid === 'string')
-                : [],
-              status: typeof data.status === 'string' ? data.status : '',
-              createdAt: data.createdAt instanceof Timestamp ? data.createdAt : null,
-              updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : null,
-            }
-          })
+        const response = await authenticatedFetch('/api/projects')
+        const data = (await response.json()) as { projects?: ProjectDoc[] }
+        const activeProjects = (data.projects ?? [])
           .filter(project => project.status === 'active' && project.categoryName)
-          .sort((a, b) => (b.updatedAt?.toMillis() ?? b.createdAt?.toMillis() ?? 0) - (a.updatedAt?.toMillis() ?? a.createdAt?.toMillis() ?? 0))
-
-        const projectsWithRequestState = await Promise.all(
-          activeProjects.map(async project => {
-            const requestsSnap = await getDocs(
-              query(collection(db, 'serviceRequests'), where('projectId', '==', project.id), where('customerUid', '==', user.uid))
-            )
-            return {
-              ...project,
-              hasAppointment: requestsSnap.docs.some(requestDoc => requestHasAppointment(requestDoc.data())),
-            }
+          .sort((a, b) => {
+            const aTime = timestampMillis(a.updatedAt) ?? timestampMillis(a.createdAt) ?? 0
+            const bTime = timestampMillis(b.updatedAt) ?? timestampMillis(b.createdAt) ?? 0
+            return bTime - aTime
           })
-        )
 
-        setProjects(projectsWithRequestState)
+        setProjects(activeProjects)
       } catch {
         setProjects([])
       } finally {

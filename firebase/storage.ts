@@ -1,26 +1,37 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { storage } from './index'
+import { authenticatedFetch } from './apiClient'
 
 /**
  * Upload a file to Firebase Storage under pros/{uid}/{path}
  * and return the public download URL.
  */
 export async function uploadProFile(
-  uid: string,
+  _uid: string,
   path: string,
   file: File,
 ): Promise<string> {
-  const storageRef = ref(storage, `pros/${uid}/${path}`)
-  await uploadBytes(storageRef, file)
-  return getDownloadURL(storageRef)
+  const form = new FormData()
+  form.set('scope', 'pro')
+  form.set('path', path)
+  form.set('file', file)
+  const response = await authenticatedFetch('/api/uploads', {
+    method: 'POST',
+    body: form,
+  })
+  const data = (await response.json()) as { url: string }
+  return data.url
 }
 
 export async function uploadServiceRequestAttachment(
-  uid: string,
+  _uid: string,
   file: File,
 ): Promise<string> {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const storageRef = ref(storage, `users/${uid}/request-attachments/${Date.now()}-${safeName}`)
-  await uploadBytes(storageRef, file)
-  return getDownloadURL(storageRef)
+  const form = new FormData()
+  form.set('scope', 'request-attachment')
+  form.set('file', file)
+  const response = await authenticatedFetch('/api/uploads', {
+    method: 'POST',
+    body: form,
+  })
+  const data = (await response.json()) as { url: string }
+  return data.url
 }

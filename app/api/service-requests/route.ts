@@ -4,6 +4,7 @@ import { adminAuth, adminDb } from '@/firebase/admin'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { JobLocation, NewServiceRequest } from '@/firebase/serviceRequests'
 import { hasPaidProFeatures } from '@/lib/billing'
+import { FREE_CLEAR_INQUIRY_LIMIT, clearInquiryIdsByMonth } from '@/lib/inquiryAccess'
 
 type ProjectDoc = {
   customerUid: string
@@ -47,13 +48,28 @@ function cleanStringArray(value: unknown): string[] {
     .slice(0, 8)
 }
 
+function timestampMillis(value: unknown): number {
+  if (!value || typeof value !== 'object') return 0
+  const timestamp = value as { toMillis?: () => number }
+  return typeof timestamp.toMillis === 'function' ? timestamp.toMillis() : 0
+}
+
 function estimateRequestEmailText(input: {
   customerName: string
   categoryName: string
   answers: Record<string, string>
   customerDistrict: string
   requestUrl: string
+  detailsHidden: boolean
+  resetLabel: string
 }): string {
+  if (input.detailsHidden) {
+    return [
+      `You received a new ${input.categoryName} inquiry on Mestermind.`,
+      `You can view ${FREE_CLEAR_INQUIRY_LIMIT} inquiries per month for free. Upgrade to Mestermind Pro to review this request's job details now, or wait until ${input.resetLabel} when your free views reset: ${input.requestUrl}`,
+    ].join('\n\n')
+  }
+
   const customerName = input.customerName || 'A customer'
   return [
     `${customerName} sent you a request for a ${input.categoryName} estimate on Mestermind.`,
@@ -86,6 +102,11 @@ function appUrl(path: string): string {
   return `${base.replace(/\/$/, '')}${path}`
 }
 
+function monthlyResetLabel(reference = new Date()): string {
+  const resetDate = new Date(reference.getFullYear(), reference.getMonth() + 1, 1)
+  return resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 function initials(name: string): string {
   const parts = name.split(/\s+/).filter(Boolean)
   const value = parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : name.slice(0, 2)
@@ -98,7 +119,39 @@ function estimateRequestEmailHtml(input: {
   answers: Record<string, string>
   customerDistrict: string
   requestUrl: string
+  detailsHidden: boolean
+  resetLabel: string
 }): string {
+  if (input.detailsHidden) {
+    return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      <tr>
+        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">New estimate request</div>
+          <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">This inquiry is saved in your Mestermind inbox</div>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:24px;">
+      <tr>
+        <td valign="middle" style="padding:0 0 20px;">
+          <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">You received a new ${escapeEmailHtml(input.categoryName)} inquiry</h1>
+          <p style="margin:10px 0 0;color:#676d73;font-size:15px;line-height:23px;">You can view ${FREE_CLEAR_INQUIRY_LIMIT} inquiries per month for free. Upgrade to Mestermind Pro to review this request&apos;s job details now, or wait until ${escapeEmailHtml(input.resetLabel)} when your free views reset.</p>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
+      <tr>
+        <td style="background:#f97316;border-radius:4px;">
+          <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request</a>
+        </td>
+      </tr>
+    </table>
+  `
+  }
+
   const customerName = input.customerName || 'A customer'
   const detailRows = Object.entries(input.answers)
     .filter(([, value]) => value.trim())
@@ -189,10 +242,7 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'This pro is not currently available for new requests.' }, { status: 400 })
     }
     const pro = proSnap.data()
-    if (!hasPaidProFeatures(pro?.subscriptionStatus, pro?.subscriptionCurrentPeriodEnd)) {
-      return Response.json({ error: 'This pro is not accepting direct customer inquiries yet.' }, { status: 400 })
-    }
-
+    const hasClearInquiryAccess = hasPaidProFeatures(pro?.subscriptionStatus, pro?.subscriptionCurrentPeriodEnd)
     const proAccountSnap = await adminDb.collection('pros').doc(proUid).collection('private').doc('account').get()
     const proEmail = cleanString(proAccountSnap.data()?.email)
 
@@ -267,14 +317,29 @@ export async function POST(request: NextRequest) {
     await batch.commit()
 
     const requestUrl = appUrl(`/pro/jobs/${requestRef.id}`)
+    const existingRequestsSnap = await adminDb
+      .collection('serviceRequests')
+      .where('proUid', '==', proUid)
+      .get()
+    const clearRequestIds = clearInquiryIdsByMonth(
+      existingRequestsSnap.docs.map(doc => ({ id: doc.id, createdAt: doc.data().createdAt })),
+      hasClearInquiryAccess,
+    )
+    const detailsHidden = !clearRequestIds.has(requestRef.id)
+    const emailCustomerName = detailsHidden ? 'A customer' : customerDisplayName
+    const resetLabel = monthlyResetLabel()
     await sendLifecycleEmail({
       to: proEmail,
       event: 'request.created',
       requestId: requestRef.id,
-      subject: `${customerDisplayName} requested a ${categoryName} estimate`,
-      previewText: `Review the ${categoryName} request and send your estimate on Mestermind.`,
-      text: estimateRequestEmailText({ customerName: customerDisplayName, categoryName, answers, customerDistrict, requestUrl }),
-      bodyHtml: estimateRequestEmailHtml({ customerName: customerDisplayName, categoryName, answers, customerDistrict, requestUrl }),
+      subject: detailsHidden
+        ? `New ${categoryName} inquiry received`
+        : `${customerDisplayName} requested a ${categoryName} estimate`,
+      previewText: detailsHidden
+        ? 'Upgrade to Mestermind Pro to review the full request details.'
+        : `Review the ${categoryName} request and send your estimate on Mestermind.`,
+      text: estimateRequestEmailText({ customerName: emailCustomerName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel }),
+      bodyHtml: estimateRequestEmailHtml({ customerName: emailCustomerName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel }),
       hideSubjectHeading: true,
       metadata: { proUid, customerUid: user.uid, categoryName, projectId, notificationType: 'estimate_request_sent_to_pro' },
     })
@@ -286,5 +351,29 @@ export async function POST(request: NextRequest) {
     }
     console.error('[/api/service-requests]', err)
     return Response.json({ error: 'Could not create request.' }, { status: 500 })
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = await requireUser(request)
+    const snap = await adminDb
+      .collection('serviceRequests')
+      .where('customerUid', '==', user.uid)
+      .get()
+
+    const requests = snap.docs
+      .map(doc => ({ id: doc.id, ...doc.data() } as Record<string, unknown>))
+      .sort((a, b) => {
+        return timestampMillis(b.createdAt) - timestampMillis(a.createdAt)
+      })
+
+    return Response.json({ requests })
+  } catch (err) {
+    if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+      return Response.json({ error: 'You must be signed in.' }, { status: 401 })
+    }
+    console.error('[/api/service-requests GET]', err)
+    return Response.json({ error: 'Could not load requests.' }, { status: 500 })
   }
 }

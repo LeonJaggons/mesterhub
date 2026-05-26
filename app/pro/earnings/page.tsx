@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import { db } from '@/firebase/index'
-import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
@@ -15,6 +13,7 @@ type RequestDoc = {
   categoryName?: string
   customerName?: string
   quote?: { price?: string }
+  obfuscated?: boolean
 }
 
 export default function ProEarningsPage() {
@@ -23,20 +22,25 @@ export default function ProEarningsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    return onAuthChange(async user => {
-      if (!user) {
-        router.replace('/login?next=/pro/earnings')
-        return
-      }
-      try {
-        const snap = await getDocs(query(collection(db, 'serviceRequests'), where('proUid', '==', user.uid)))
-        setRequests(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as RequestDoc)))
-      } catch {
+    let active = true
+    authenticatedFetch('/api/pro/service-requests')
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return
+        const nextRequests = Array.isArray(data.requests) ? data.requests as RequestDoc[] : []
+        setRequests(nextRequests.filter(request => !request.obfuscated))
+      })
+      .catch(() => {
+        if (!active) return
         setRequests([])
-      } finally {
-        setLoading(false)
-      }
-    })
+        router.replace('/login?next=/pro/earnings')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
   }, [router])
 
   const completed = requests.filter(req => req.status === 'completed')

@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { collection, getDocs, query, Timestamp, where } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import { db } from '@/firebase/index'
-import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import { approximateLocationLabel } from '@/app/requests/shared'
 import type { JobLocation } from '@/firebase/serviceRequests'
+import type { InquiryTimestamp } from '@/lib/inquiryAccess'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
@@ -21,8 +20,8 @@ type AppointmentRequest = {
   location: string
   notes: string
   status: 'proposed' | 'confirmed'
-  requestedAt: Timestamp | null
-  confirmedAt?: Timestamp | null
+  requestedAt: InquiryTimestamp
+  confirmedAt?: InquiryTimestamp
 }
 
 type ServiceRequest = {
@@ -36,7 +35,8 @@ type ServiceRequest = {
   jobLocation?: JobLocation
   status: RequestStatus
   appointmentRequest?: AppointmentRequest
-  createdAt: Timestamp | null
+  createdAt: InquiryTimestamp
+  obfuscated?: boolean
 }
 
 function appointmentDate(req: ServiceRequest): Date | null {
@@ -69,31 +69,33 @@ export default function WorkPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    return onAuthChange(async user => {
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      try {
-        const snap = await getDocs(
-          query(collection(db, 'serviceRequests'), where('proUid', '==', user.uid))
-        )
+    let active = true
+    authenticatedFetch('/api/pro/service-requests')
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return
+        const requests = Array.isArray(data.requests) ? data.requests as ServiceRequest[] : []
         setRequests(
-          snap.docs
-            .map(d => ({ id: d.id, ...d.data() } as ServiceRequest))
+          requests
+            .filter(request => !request.obfuscated)
             .sort((a, b) => {
               const aTime = appointmentDate(a)?.getTime() ?? Number.MAX_SAFE_INTEGER
               const bTime = appointmentDate(b)?.getTime() ?? Number.MAX_SAFE_INTEGER
               return aTime - bTime
             })
         )
-      } catch {
+      })
+      .catch(() => {
+        if (!active) return
         setRequests([])
-      } finally {
-        setLoading(false)
-      }
-    })
+        router.push('/login')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
   }, [router])
 
   const confirmedAppointments = requests.filter(r =>

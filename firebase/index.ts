@@ -1,7 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: "AIzaSyD4QBiEBod35DucAEV00LxHRHboWyIH084",
@@ -16,5 +14,3 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
-export const db = getFirestore(app, 'mesterhub')
-export const storage = getStorage(app)

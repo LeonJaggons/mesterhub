@@ -1,6 +1,6 @@
-import { Timestamp } from 'firebase/firestore'
 import { authenticatedFetch } from './apiClient'
 import type { JobLocation } from './serviceRequests'
+import type { TimestampLike } from '@/app/requests/shared'
 
 export type Conversation = {
   requestId: string
@@ -10,8 +10,8 @@ export type Conversation = {
   customerName: string
   categoryName: string
   lastMessage: string
-  lastMessageAt: Timestamp | null
-  createdAt: Timestamp | null
+  lastMessageAt: TimestampLike | null
+  createdAt: TimestampLike | null
 }
 
 export type Message = {
@@ -19,7 +19,7 @@ export type Message = {
   senderUid: string
   senderRole: 'customer' | 'pro'
   text: string
-  createdAt: Timestamp | null
+  createdAt: TimestampLike | null
 }
 
 export type AcceptQuoteInput = {
@@ -34,7 +34,7 @@ export type AcceptanceDetails = {
   phone: string
   address: string
   preferredStart: string
-  acceptedAt: Timestamp | null
+  acceptedAt: TimestampLike | null
 }
 
 export type AppointmentKind = 'quote' | 'service'

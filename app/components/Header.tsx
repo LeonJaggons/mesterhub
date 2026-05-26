@@ -4,10 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@base-ui/react/button'
-import { collection, getDocs, query, where } from 'firebase/firestore'
 import { onAuthChange, signOut } from '@/firebase/auth'
-import { db } from '@/firebase/index'
-import { resolveProClient } from '@/firebase/resolveProClient'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import type { User } from 'firebase/auth'
 import styles from './Header.module.css'
@@ -484,7 +481,7 @@ export default function Header() {
   const [confirmedProAppointments, setConfirmedProAppointments] = useState(0)
   const [activeAppointments, setActiveAppointments] = useState(0)
 
-  // Detect auth + pro status (client Firestore first; /api/me when Admin IAM allows)
+  // Detect auth + pro status through the shared API so every client sees the same account resolution.
   useEffect(() => {
     if (isSignupPath) return
     let cancelled = false
@@ -504,15 +501,9 @@ export default function Header() {
       const uid = u.uid
       if (!cancelled) setActiveAppointments(0)
       try {
-        let profile = await resolveProClient(u)
-        if (!profile) {
-          const token = await u.getIdToken()
-          const res = await fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
-          if (res.ok) {
-            const data = (await res.json()) as { pro: ProBasic | null }
-            profile = data.pro
-          }
-        }
+        const res = await authenticatedFetch('/api/me')
+        const data = (await res.json()) as { pro: ProBasic | null }
+        const profile = data.pro
         if (!cancelled && u.uid === uid) {
           setPro(profile)
           if (!profile) {
@@ -535,22 +526,31 @@ export default function Header() {
   // Fetch pending job count for the badge
   useEffect(() => {
     if (isSignupPath || !pro) return
-    getDocs(
-      query(collection(db, 'serviceRequests'), where('proUid', '==', pro.uid), where('status', '==', 'pending'))
-    )
-      .then(snap => setPendingJobs(snap.size))
+    let cancelled = false
+    authenticatedFetch('/api/pro/service-requests')
+      .then(res => res.json())
+      .then(data => {
+        if (cancelled) return
+        const requests = Array.isArray(data.requests) ? data.requests as Array<{ status?: string }> : []
+        setPendingJobs(requests.filter(request => request.status === 'pending').length)
+      })
       .catch(() => setPendingJobs(0))
+    return () => {
+      cancelled = true
+    }
   }, [isSignupPath, pro])
 
   // Fetch confirmed pro appointment count for the My Work badge
   useEffect(() => {
     if (isSignupPath || !pro) return
     let cancelled = false
-    getDocs(
-      query(collection(db, 'serviceRequests'), where('proUid', '==', pro.uid), where('status', '==', 'accepted'))
-    )
-      .then(snap => {
-        const count = snap.docs.filter(doc => doc.data().appointmentRequest?.status === 'confirmed').length
+    authenticatedFetch('/api/pro/service-requests')
+      .then(res => res.json())
+      .then(data => {
+        const requests = Array.isArray(data.requests)
+          ? data.requests as Array<{ status?: string; appointmentRequest?: { status?: string } }>
+          : []
+        const count = requests.filter(request => request.status === 'accepted' && request.appointmentRequest?.status === 'confirmed').length
         if (!cancelled) setConfirmedProAppointments(count)
       })
       .catch(() => {
@@ -565,11 +565,13 @@ export default function Header() {
   useEffect(() => {
     if (isSignupPath || resolvingAccount || !user || pro) return
     let cancelled = false
-    getDocs(
-      query(collection(db, 'serviceRequests'), where('customerUid', '==', user.uid), where('status', '==', 'accepted'))
-    )
-      .then(snap => {
-        const count = snap.docs.filter(doc => doc.data().appointmentRequest?.status === 'confirmed').length
+    authenticatedFetch('/api/service-requests')
+      .then(res => res.json())
+      .then(data => {
+        const requests = Array.isArray(data.requests)
+          ? data.requests as Array<{ status?: string; appointmentRequest?: { status?: string } }>
+          : []
+        const count = requests.filter(request => request.status === 'accepted' && request.appointmentRequest?.status === 'confirmed').length
         if (!cancelled) setActiveAppointments(count)
       })
       .catch(() => {

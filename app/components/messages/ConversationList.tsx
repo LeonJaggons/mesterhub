@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { collection, doc, query, where, getDoc, getDocs } from 'firebase/firestore'
-import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import type { Conversation } from '@/firebase/conversations'
 import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
+import { timestampMillis } from '@/app/requests/shared'
 import MessageAvatar from './MessageAvatar'
 import {
   formatListTime,
@@ -30,7 +30,6 @@ type Props = {
 }
 
 export default function ConversationList({
-  filterField,
   basePath,
   loginNext,
   subtitle,
@@ -51,32 +50,19 @@ export default function ConversationList({
         return
       }
       try {
-        const snap = await getDocs(
-          query(collection(db, 'conversations'), where(filterField, '==', user.uid))
-        )
-        const rows = snap.docs
-          .map(d => ({ id: d.id, ...d.data() } as ConversationRow))
+        const response = await authenticatedFetch(`/api/conversations?role=${role}`)
+        const data = (await response.json()) as { conversations?: ConversationRow[] }
+        const rows = (data.conversations ?? [])
           .filter(row => role !== 'customer' || !('customerDeletedAt' in row))
-          .sort((a, b) => (b.lastMessageAt?.toMillis() ?? 0) - (a.lastMessageAt?.toMillis() ?? 0))
-        if (role === 'customer') {
-          const proUids = [...new Set(rows.map(row => row.proUid).filter(Boolean))]
-          const proSnaps = await Promise.all(proUids.map(uid => getDoc(doc(db, 'pros', uid))))
-          const avatarMap = new Map(
-            proSnaps
-              .filter(proSnap => proSnap.exists())
-              .map(proSnap => [proSnap.id, (proSnap.data().avatarUrl as string | null) ?? null]),
-          )
-          setConversations(rows.map(row => ({ ...row, proAvatarUrl: avatarMap.get(row.proUid) ?? null })))
-        } else {
-          setConversations(rows)
-        }
+          .sort((a, b) => (timestampMillis(b.lastMessageAt) ?? 0) - (timestampMillis(a.lastMessageAt) ?? 0))
+        setConversations(rows)
       } catch {
         setConversations([])
       } finally {
         setLoading(false)
       }
     })
-  }, [router, filterField, loginNext, role])
+  }, [router, loginNext, role])
 
   const visibleConversations = useMemo(() => {
     const needle = search.trim().toLowerCase()

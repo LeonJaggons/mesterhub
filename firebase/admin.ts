@@ -3,6 +3,7 @@ import { resolve } from 'path'
 import { initializeApp, getApps, cert, type App, type ServiceAccount } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
+import { getStorage } from 'firebase-admin/storage'
 
 function parsePrivateKey(raw: string | undefined): string {
   if (!raw) return ''
@@ -37,8 +38,12 @@ function loadServiceAccount(): ServiceAccount {
 
 const app: App =
   getApps().length === 0
-    ? initializeApp({ credential: cert(loadServiceAccount()) })
+    ? initializeApp({
+        credential: cert(loadServiceAccount()),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? 'mesterhub-54626.firebasestorage.app',
+      })
     : getApps()[0]
 
 export const adminDb = getFirestore(app, 'mesterhub')
 export const adminAuth = getAuth(app)
+export const adminStorage = getStorage(app)

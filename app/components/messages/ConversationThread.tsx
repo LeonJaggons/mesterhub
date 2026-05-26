@@ -3,8 +3,6 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
-import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore'
-import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
 import {
   confirmAppointment,
@@ -22,6 +20,7 @@ import {
   type AppointmentKind,
   type ServiceRequest,
 } from '@/app/requests/shared'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import MessageAvatar from './MessageAvatar'
 import {
   groupMessagesByDay,
@@ -269,40 +268,41 @@ export default function ConversationThread({ role, basePath }: Props) {
 
     async function loadConversation() {
       try {
-        const [convSnap, requestSnap] = await Promise.all([
-          getDoc(doc(db, 'conversations', requestId)),
-          getDoc(doc(db, 'serviceRequests', requestId)),
-        ])
+        const response = await authenticatedFetch(`/api/conversations/${requestId}?role=${role}`)
+        const payload = (await response.json()) as {
+          conversation?: Conversation | null
+          request?: ServiceRequest | null
+          messages?: Message[]
+          partnerAvatarUrl?: string | null
+        }
         if (!active) return
 
-        if (!convSnap.exists()) {
+        if (!payload.conversation) {
           setConv(null)
           setRequest(null)
+          setMessages([])
           setLoading(false)
           return
         }
 
-        const data = convSnap.data() as Conversation
+        const data = payload.conversation
         if (data.customerUid !== userUid && data.proUid !== userUid) {
           setConv(null)
           setRequest(null)
+          setMessages([])
           setLoading(false)
           return
         }
 
         setConv(data)
-        setRequest(requestSnap.exists() ? ({ id: requestSnap.id, ...requestSnap.data() } as ServiceRequest) : null)
-        if (role === 'customer') {
-          const proSnap = await getDoc(doc(db, 'pros', data.proUid))
-          if (!active) return
-          setPartnerAvatarUrl(proSnap.exists() ? ((proSnap.data().avatarUrl as string | null) ?? null) : null)
-        } else {
-          setPartnerAvatarUrl(null)
-        }
+        setRequest(payload.request ?? null)
+        setMessages(payload.messages ?? [])
+        setPartnerAvatarUrl(role === 'customer' ? (payload.partnerAvatarUrl ?? null) : null)
       } catch {
         if (active) {
           setConv(null)
           setRequest(null)
+          setMessages([])
           setPartnerAvatarUrl(null)
         }
       } finally {
@@ -311,15 +311,11 @@ export default function ConversationThread({ role, basePath }: Props) {
     }
 
     loadConversation()
-
-    const unsub = onSnapshot(
-      query(collection(db, 'conversations', requestId, 'messages'), orderBy('createdAt', 'asc')),
-      snap => setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() } as Message)))
-    )
+    const interval = window.setInterval(loadConversation, 5000)
 
     return () => {
       active = false
-      unsub()
+      window.clearInterval(interval)
     }
   }, [requestId, role, userUid])
 
@@ -342,6 +338,9 @@ export default function ConversationThread({ role, basePath }: Props) {
       const senderRole = conv.customerUid === userUid ? 'customer' : 'pro'
       await sendMessage(requestId, userUid, senderRole, text)
       setText('')
+      const response = await authenticatedFetch(`/api/conversations/${requestId}?role=${role}`)
+      const payload = (await response.json()) as { messages?: Message[] }
+      setMessages(payload.messages ?? [])
       if (textareaRef.current) textareaRef.current.style.height = 'auto'
     } finally {
       setSending(false)

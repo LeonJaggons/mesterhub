@@ -3,7 +3,6 @@
 import { use, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { User } from 'firebase/auth'
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import {
   MdAccessTime,
   MdAccountBalanceWallet,
@@ -22,10 +21,12 @@ import {
   MdWorkspacePremium,
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
-import { auth, db } from '@/firebase/index'
+import { auth } from '@/firebase/index'
 import { signUp } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import { createServiceRequest, type JobLocation } from '@/firebase/serviceRequests'
 import { uploadServiceRequestAttachment } from '@/firebase/storage'
+import { timestampMillis } from '@/app/requests/shared'
 import districtsData from '@/public/districts.json'
 import {
   CATEGORY_QUESTIONS,
@@ -151,16 +152,7 @@ function statusLabel(status: string): string {
 }
 
 function periodEndMillis(value: ProProfile['subscriptionCurrentPeriodEnd']): number | null {
-  if (!value) return null
-  if (value instanceof Date) return value.getTime()
-  if (typeof value === 'number') return value
-  if (typeof value === 'string') {
-    const parsed = new Date(value).getTime()
-    return Number.isFinite(parsed) ? parsed : null
-  }
-  if (typeof value.toMillis === 'function') return value.toMillis()
-  if (typeof value.toDate === 'function') return value.toDate().getTime()
-  return null
+  return timestampMillis(value)
 }
 
 function hasPaidProFeatures(pro: Pick<ProProfile, 'subscriptionStatus' | 'subscriptionCurrentPeriodEnd'>): boolean {
@@ -798,7 +790,6 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
   const [signupError, setSignupError] = useState<string | null>(null)
 
   const hasPrice = pro.pricingType !== 'quote' && pro.hourlyRate
-  const paidPro = hasPaidProFeatures(pro)
   const reusableProjects = projects
     .filter(project => !project.invitedProUids?.includes(pro.uid))
     .sort((a, b) => Number(b.categoryName === pro.categoryName) - Number(a.categoryName === pro.categoryName))
@@ -812,24 +803,10 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
         return
       }
       try {
-        const snap = await getDocs(
-          query(collection(db, 'projects'), where('customerUid', '==', user.uid)),
-        )
-        const nextProjects = snap.docs.map(projectDoc => {
-          const data = projectDoc.data()
-          return {
-            id: projectDoc.id,
-            categoryName: typeof data.categoryName === 'string' ? data.categoryName : '',
-            answers: data.answers && typeof data.answers === 'object' && !Array.isArray(data.answers)
-              ? data.answers as Record<string, string>
-              : {},
-            customerDistrict: typeof data.customerDistrict === 'string' ? data.customerDistrict : undefined,
-            invitedProUids: Array.isArray(data.invitedProUids)
-              ? data.invitedProUids.filter((uid): uid is string => typeof uid === 'string')
-              : [],
-            status: typeof data.status === 'string' ? data.status : '',
-          }
-        }).filter(project => project.status === 'active' && project.categoryName && project.answers.project_details)
+        const response = await authenticatedFetch('/api/projects')
+        const data = (await response.json()) as { projects?: Array<ProjectSummary & { status?: string }> }
+        const nextProjects = (data.projects ?? [])
+          .filter(project => project.status === 'active' && project.categoryName && project.answers.project_details)
         if (!state.cancelled) setProjects(nextProjects)
       } catch {
         if (!state.cancelled) setProjects([])
@@ -1018,24 +995,6 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
         <p className="text-sm text-gray-500">
           {pro.fullName} will get back to you shortly.
         </p>
-      </div>
-    )
-  }
-
-  if (!paidPro) {
-    return (
-      <div className="bg-white border border-gray-200 shadow-sm rounded-sm p-5 border-t-4 border-t-gray-300">
-        <h2 className="text-2xl font-black leading-none text-gray-900 mb-2" style={dg}>Requests unavailable</h2>
-        <p className="text-sm leading-relaxed text-gray-500">
-          {pro.fullName} has not activated direct customer inquiries yet. Choose another verified pro from search to send your job details.
-        </p>
-        <Link
-          href={`/instant-results?q=${encodeURIComponent(pro.categoryName || '')}`}
-          className="mt-4 block w-full rounded-sm bg-orange-500 py-3 text-center text-base font-black text-white transition-colors hover:bg-orange-600"
-          style={dg}
-        >
-          Find available pros
-        </Link>
       </div>
     )
   }
@@ -1354,10 +1313,18 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
   }, [])
 
   useEffect(() => {
-    getDoc(doc(db, 'pros', uid))
-      .then(snap => {
-        if (!snap.exists()) { setNotFound(true); return }
-        setPro({ uid: snap.id, ...snap.data() } as ProProfile)
+    fetch(`/api/pros/${encodeURIComponent(uid)}`)
+      .then(async response => {
+        if (!response.ok) {
+          setNotFound(true)
+          return
+        }
+        const data = (await response.json()) as { pro?: ProProfile | null }
+        if (!data.pro) {
+          setNotFound(true)
+          return
+        }
+        setPro(data.pro)
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))

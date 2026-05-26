@@ -1,7 +1,14 @@
-import { doc, getDoc, Timestamp } from 'firebase/firestore'
-import { db } from '@/firebase/index'
 import type { JobLocation, ServiceRequestStatus } from '@/firebase/serviceRequests'
 import districtsData from '@/public/districts.json'
+
+export type TimestampLike = {
+  seconds?: number
+  nanoseconds?: number
+  _seconds?: number
+  _nanoseconds?: number
+  toMillis?: () => number
+  toDate?: () => Date
+} | number | string | Date
 
 export type Quote = { price: string; timeline: string; notes: string }
 
@@ -10,7 +17,7 @@ export type AcceptanceDetails = {
   phone?: string
   address?: string
   preferredStart?: string
-  acceptedAt: Timestamp | null
+  acceptedAt: TimestampLike | null
 }
 
 export type AppointmentKind = 'quote' | 'service'
@@ -18,14 +25,14 @@ export type AppointmentStatus = 'proposed' | 'confirmed'
 
 export type CompletionDetails = {
   status?: 'pro_marked_complete' | 'confirmed_complete'
-  proMarkedAt?: Timestamp | null
-  confirmedAt?: Timestamp | null
+  proMarkedAt?: TimestampLike | null
+  confirmedAt?: TimestampLike | null
 }
 
 export type RequestReview = {
   rating: number
   comment: string
-  reviewedAt?: Timestamp | null
+  reviewedAt?: TimestampLike | null
 }
 
 export type AppointmentRequest = {
@@ -37,8 +44,8 @@ export type AppointmentRequest = {
   jobLocation?: JobLocation | null
   notes: string
   status: AppointmentStatus
-  requestedAt: Timestamp | null
-  confirmedAt?: Timestamp | null
+  requestedAt: TimestampLike | null
+  confirmedAt?: TimestampLike | null
 }
 
 export type ServiceRequest = {
@@ -65,7 +72,7 @@ export type ServiceRequest = {
   declineReason?: string
   cancelledBy?: 'pro' | 'customer'
   cancelReason?: string
-  createdAt: Timestamp | null
+  createdAt: TimestampLike | null
 }
 
 export function requestStatusLabel(
@@ -97,9 +104,8 @@ export type ProSummary = {
   reviewCount?: number
 }
 
-function periodEndMillis(value: unknown): number | null {
+export function timestampMillis(value: unknown): number | null {
   if (!value) return null
-  if (value instanceof Timestamp) return value.toMillis()
   if (value instanceof Date) return value.getTime()
   if (typeof value === 'number') return value
   if (typeof value === 'string') {
@@ -107,18 +113,29 @@ function periodEndMillis(value: unknown): number | null {
     return Number.isFinite(parsed) ? parsed : null
   }
   if (typeof value === 'object') {
-    const maybeTimestamp = value as { toMillis?: () => number; toDate?: () => Date }
+    const maybeTimestamp = value as {
+      seconds?: number
+      nanoseconds?: number
+      _seconds?: number
+      _nanoseconds?: number
+      toMillis?: () => number
+      toDate?: () => Date
+    }
     if (typeof maybeTimestamp.toMillis === 'function') return maybeTimestamp.toMillis()
     if (typeof maybeTimestamp.toDate === 'function') return maybeTimestamp.toDate().getTime()
+    const seconds = typeof maybeTimestamp.seconds === 'number'
+      ? maybeTimestamp.seconds
+      : maybeTimestamp._seconds
+    const nanoseconds = typeof maybeTimestamp.nanoseconds === 'number'
+      ? maybeTimestamp.nanoseconds
+      : maybeTimestamp._nanoseconds
+    if (typeof seconds === 'number') return seconds * 1000 + Math.floor((nanoseconds ?? 0) / 1_000_000)
   }
   return null
 }
 
-function hasProFeatures(status: unknown, currentPeriodEnd: unknown): boolean {
-  if (status === 'active') return true
-  if (status !== 'trialing') return false
-  const end = periodEndMillis(currentPeriodEnd)
-  return end === null || end > Date.now()
+export function nowTimestamp(): TimestampLike {
+  return Date.now()
 }
 
 export const STATUS_LABELS: Record<ServiceRequestStatus, string> = {
@@ -159,9 +176,10 @@ const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 export { dg }
 
 
-export function timeAgo(ts: Timestamp | null): string {
-  if (!ts) return ''
-  const seconds = Math.floor((Date.now() - ts.toMillis()) / 1000)
+export function timeAgo(ts: TimestampLike | null): string {
+  const millis = timestampMillis(ts)
+  if (!millis) return ''
+  const seconds = Math.floor((Date.now() - millis) / 1000)
   if (seconds < 60) return 'just now'
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
@@ -228,29 +246,10 @@ export function pricingLabel(pro: ProSummary): string {
 
 export async function fetchProSummary(uid: string): Promise<ProSummary | null> {
   try {
-    const snap = await getDoc(doc(db, 'pros', uid))
-    if (!snap.exists()) return null
-    const d = snap.data()
-    const subscriptionActive = hasProFeatures(d.subscriptionStatus, d.subscriptionCurrentPeriodEnd)
-    return {
-      uid: snap.id,
-      fullName: (d.fullName as string) ?? '',
-      categoryName: (d.categoryName as string) ?? '',
-      bio: (d.bio as string) ?? '',
-      yearsExp: (d.yearsExp as string) ?? '',
-      pricingType: (d.pricingType as string) ?? 'quote',
-      hourlyRate: (d.hourlyRate as string) ?? '',
-      services: (d.services as string[]) ?? [],
-      districts: (d.districts as number[]) ?? [],
-      postcode: (d.postcode as string) ?? '',
-      avatarUrl: (d.avatarUrl as string | null) ?? null,
-      backgroundCheck: Boolean(d.backgroundCheck),
-      regulated: Boolean(d.regulated),
-      subscriptionActive,
-      subscriptionStatus: (d.subscriptionStatus as string) ?? 'inactive',
-      rating: subscriptionActive ? d.rating as number | undefined : undefined,
-      reviewCount: subscriptionActive ? d.reviewCount as number | undefined : undefined,
-    }
+    const response = await fetch(`/api/pros/${encodeURIComponent(uid)}`)
+    if (!response.ok) return null
+    const data = (await response.json()) as { pro?: ProSummary | null }
+    return data.pro ?? null
   } catch {
     return null
   }

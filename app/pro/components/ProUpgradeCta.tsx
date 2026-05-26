@@ -52,7 +52,7 @@ function ctaCopy(state: BillingState): { tone: Tone; title: string; body: string
       tone: 'trial',
       title: TRIAL_TITLE,
       body: days === null
-        ? 'Keep priority placement, visible reviews, and direct inquiries ready after your trial.'
+        ? 'Keep priority placement, visible reviews, and unlimited clear inquiry details after your trial.'
         : `${days} day${days === 1 ? '' : 's'} left. Add billing when you are ready to keep Pro benefits on.`,
       action: 'Set up billing',
     }
@@ -61,7 +61,7 @@ function ctaCopy(state: BillingState): { tone: Tone; title: string; body: string
   return {
     tone: 'inactive',
     title: INACTIVE_TITLE,
-    body: 'Get priority placement, visible reviews, verified badge, and direct customer inquiries.',
+    body: 'Get priority placement, visible reviews, verified badge, and unlimited clear inquiry details.',
     action: 'Start Pro',
   }
 }

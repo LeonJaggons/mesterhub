@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { load, clear, getStagedFile, getStagedFiles, type SignupData } from '../store'
 import { auth } from '@/firebase/index'
-import { createProProfile } from '@/firebase/pros'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import { uploadProFile } from '@/firebase/storage'
 import styles from '../signup.module.css'
 
@@ -77,7 +77,10 @@ export default function CompletePage() {
         }))
       }
 
-      await createProProfile(user.uid, { ...draft, password: '' })
+      await authenticatedFetch('/api/pro/signup', {
+        method: 'POST',
+        body: JSON.stringify({ ...draft, password: '' }),
+      })
     }
 
     submitProfile()

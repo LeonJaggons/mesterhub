@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from '../account/account.module.css'
 import {
   approximateLocationLabel,
@@ -138,11 +137,9 @@ export default function AppointmentsPage() {
       }
 
       try {
-        const snap = await getDocs(
-          query(collection(db, 'serviceRequests'), where('customerUid', '==', user.uid))
-        )
-        const confirmed = snap.docs
-          .map(d => ({ id: d.id, ...d.data() } as ServiceRequest))
+        const response = await authenticatedFetch('/api/service-requests')
+        const data = (await response.json()) as { requests?: ServiceRequest[] }
+        const confirmed = (data.requests ?? [])
           .filter((req): req is ServiceRequest & { appointmentRequest: AppointmentRequest & { status: 'confirmed' } } =>
             req.appointmentRequest?.status === 'confirmed'
           )

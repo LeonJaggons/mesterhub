@@ -705,6 +705,40 @@ function cancelledEmailHtml(input: {
   `
 }
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ requestId: string }> },
+) {
+  try {
+    const user = await requireUser(request)
+    const { requestId } = await params
+    const snap = await adminDb.collection('serviceRequests').doc(requestId).get()
+
+    if (!snap.exists) {
+      return Response.json({ error: 'Request not found.' }, { status: 404 })
+    }
+
+    const requestDoc = snap.data() as RequestDoc
+    assertParticipant(requestDoc, user.uid)
+
+    const conversationSnap = await adminDb.collection('conversations').doc(requestId).get()
+
+    return Response.json({
+      request: { id: snap.id, ...requestDoc },
+      hasConversation: conversationSnap.exists,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+      return Response.json({ error: 'You must be signed in.' }, { status: 401 })
+    }
+    if (err instanceof Error && err.message === 'FORBIDDEN') {
+      return Response.json({ error: 'Not allowed.' }, { status: 403 })
+    }
+    console.error('[/api/service-requests/[requestId] GET]', err)
+    return Response.json({ error: 'Could not load request.' }, { status: 500 })
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ requestId: string }> },

@@ -3,9 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import { MdLocationOn } from 'react-icons/md'
-import { db } from '@/firebase/index'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from '../account/account.module.css'
@@ -15,6 +13,7 @@ import {
   fetchProSummary,
   STATUS_COLORS,
   requestStatusLabel,
+  timestampMillis,
   timeAgo,
   type ProSummary,
   type ServiceRequest,
@@ -231,12 +230,10 @@ function RequestsPageContent() {
         return
       }
       try {
-        const snap = await getDocs(
-          query(collection(db, 'serviceRequests'), where('customerUid', '==', user.uid))
-        )
-        const docs = snap.docs
-          .map(d => ({ id: d.id, ...d.data() } as ServiceRequest))
-          .sort((a, b) => (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0))
+        const response = await authenticatedFetch('/api/service-requests')
+        const data = (await response.json()) as { requests?: ServiceRequest[] }
+        const docs = (data.requests ?? [])
+          .sort((a, b) => (timestampMillis(b.createdAt) ?? 0) - (timestampMillis(a.createdAt) ?? 0))
 
         const uids = [...new Set(docs.map(d => d.proUid))]
         const pros = await Promise.all(uids.map(uid => fetchProSummary(uid)))
@@ -265,7 +262,7 @@ function RequestsPageContent() {
   const filteredRequests = [...statusFilteredRequests].sort((a, b) => {
     const actionDelta = Number(nextAction(b).needsAction) - Number(nextAction(a).needsAction)
     if (actionDelta !== 0) return actionDelta
-    return (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0)
+    return (timestampMillis(b.createdAt) ?? 0) - (timestampMillis(a.createdAt) ?? 0)
   })
   const actionRequests = filteredRequests.filter(req => nextAction(req).needsAction)
   const otherRequests = filteredRequests.filter(req => !nextAction(req).needsAction)

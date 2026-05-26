@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import { db } from '@/firebase/index'
-import { onAuthChange } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import { declineServiceRequestAsPro, quoteServiceRequest } from '@/firebase/serviceRequests'
 import { QuoteModal, DeclineModal, type QuoteFormData } from './JobModals'
 import { approximateLocationLabel } from '@/app/requests/shared'
 import type { JobLocation } from '@/firebase/serviceRequests'
 import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
+import { FREE_CLEAR_INQUIRY_LIMIT, inquiryCreatedAtMillis, inquiryMonthKey, type InquiryTimestamp } from '@/lib/inquiryAccess'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
@@ -38,7 +37,8 @@ type ServiceRequest = {
   status: RequestStatus
   quote?: Quote
   acceptance?: AcceptanceDetails
-  createdAt: Timestamp | null
+  createdAt: InquiryTimestamp
+  obfuscated?: boolean
 }
 
 const STATUS_LABELS: Record<RequestStatus, string> = {
@@ -59,9 +59,9 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
   cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
 }
 
-function timeAgo(ts: Timestamp | null): string {
+function timeAgo(ts: InquiryTimestamp): string {
   if (!ts) return ''
-  const seconds = Math.floor((Date.now() - ts.toMillis()) / 1000)
+  const seconds = Math.floor((Date.now() - inquiryCreatedAtMillis(ts)) / 1000)
   if (seconds < 60) return 'just now'
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
@@ -100,6 +100,15 @@ function acceptedContactCount(requests: ServiceRequest[]): number {
   return requests.filter(r => r.status === 'accepted' && (r.acceptance?.phone || r.customerEmail)).length
 }
 
+function monthlyResetLabel(reference = new Date()): string {
+  const resetDate = new Date(reference.getFullYear(), reference.getMonth() + 1, 1)
+  return resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function hiddenInquiryCopy(resetLabel: string): string {
+  return `New inquiries are waiting with details hidden. Upgrade to unlock every request now, or your free views refresh on ${resetLabel}.`
+}
+
 function topCategories(requests: ServiceRequest[]): Array<{ name: string; count: number }> {
   const counts = new Map<string, number>()
   requests.forEach(req => counts.set(req.categoryName, (counts.get(req.categoryName) ?? 0) + 1))
@@ -123,10 +132,8 @@ function JobCard({
   const isAccepted = req.status === 'accepted'
   const isQuoted = req.status === 'quoted'
   const customerName = customerDisplayName(req.customerName)
-
-  return (
-    <Link href={`/pro/jobs/${req.id}`} className="block group">
-    <div className={`bg-white rounded-2xl border shadow-sm transition-shadow group-hover:shadow-md ${isPending ? 'border-orange-200' : isQuoted ? 'border-blue-200' : 'border-gray-200'}`}>
+  const card = (
+    <div className={`bg-white rounded-2xl border shadow-sm transition-shadow ${isPending ? 'border-orange-200' : isQuoted ? 'border-blue-200' : 'border-gray-200 group-hover:shadow-md'}`}>
       <div className="p-5">
         {/* Header row */}
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -142,8 +149,12 @@ function JobCard({
                 {customerName}
               </span>
             </div>
-            <p className="text-xs text-gray-400 ml-10">{req.categoryName} · {timeAgo(req.createdAt)}</p>
-            <p className="text-xs text-gray-400 ml-10">{districtCopy(req)}</p>
+            <p className="text-xs text-gray-400 ml-10">
+              {req.categoryName} · {timeAgo(req.createdAt)}
+            </p>
+            <p className="text-xs text-gray-400 ml-10">
+              {districtCopy(req)}
+            </p>
           </div>
           <span className={`text-xs font-semibold border rounded-full px-2.5 py-1 flex-shrink-0 ${STATUS_COLORS[req.status]}`}>
             {STATUS_LABELS[req.status]}
@@ -210,7 +221,43 @@ function JobCard({
         )}
       </div>
     </div>
-    </Link>
+  )
+
+  return <Link href={`/pro/jobs/${req.id}`} className="block group">{card}</Link>
+}
+
+function HiddenInquiryUpgradeCard({ resetLabel }: { resetLabel: string }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
+      <div className="relative border-b border-orange-100 bg-orange-50 p-5">
+        <div className="pointer-events-none select-none blur-[3px]" aria-hidden="true">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-slate-300/80" />
+            <div className="h-4 w-36 rounded bg-slate-300/80" />
+          </div>
+          <div className="mb-2 h-4 w-4/5 rounded bg-slate-300/70" />
+          <div className="h-4 w-2/3 rounded bg-slate-300/60" />
+        </div>
+        <div className="absolute inset-0 flex flex-col justify-center bg-orange-50/80 px-5">
+          <p className="text-sm font-bold text-gray-900">More inquiries are waiting</p>
+          <p className="mt-1 text-xs leading-relaxed text-gray-600">
+            Details are hidden after your monthly free clear views are used.
+          </p>
+        </div>
+      </div>
+      <div className="p-5">
+        <p className="text-sm leading-relaxed text-gray-600">
+          Upgrade to Mestermind Pro to unlock every new request immediately, or wait until {resetLabel} when your free views refresh.
+        </p>
+        <Link
+          href="/pro/settings"
+          className="mt-4 block rounded-lg bg-orange-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600"
+          style={dg}
+        >
+          Unlock new inquiries
+        </Link>
+      </div>
+    </div>
   )
 }
 
@@ -219,6 +266,7 @@ type Tab = 'all' | RequestStatus
 export default function JobsPage() {
   const router = useRouter()
   const [requests, setRequests] = useState<ServiceRequest[]>([])
+  const [hasProPlan, setHasProPlan] = useState(false)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('pending')
   const [quoteModalId, setQuoteModalId] = useState<string | null>(null)
@@ -226,25 +274,27 @@ export default function JobsPage() {
 
   // Auth guard + load requests
   useEffect(() => {
-    return onAuthChange(async user => {
-      if (!user) { router.push('/login'); return }
-      try {
-        const snap = await getDocs(
-          query(
-            collection(db, 'serviceRequests'),
-            where('proUid', '==', user.uid),
-          )
-        )
-        const docs = snap.docs
-          .map(d => ({ id: d.id, ...d.data() } as ServiceRequest))
-          .sort((a, b) => (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0))
-        setRequests(docs)
-      } catch {
-        // Firestore rules may need updating — show empty state gracefully
-      } finally {
-        setLoading(false)
-      }
-    })
+    let active = true
+    authenticatedFetch('/api/pro/service-requests')
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return
+        const nextRequests = Array.isArray(data.requests) ? data.requests as ServiceRequest[] : []
+        setRequests(nextRequests)
+        setHasProPlan(Boolean(data.access?.hasProPlan))
+      })
+      .catch(() => {
+        if (!active) return
+        setRequests([])
+        setHasProPlan(false)
+        router.push('/login')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
   }, [router])
 
   async function handleQuoteSubmit(id: string, data: QuoteFormData) {
@@ -262,11 +312,17 @@ export default function JobsPage() {
   const pendingCount = requests.filter(r => r.status === 'pending').length
   const quotedCount = requests.filter(r => r.status === 'quoted').length
   const acceptedCount = requests.filter(r => r.status === 'accepted').length
-  const filtered = tab === 'all' ? requests : requests.filter(r => r.status === tab)
-  const pendingRequests = requests.filter(r => r.status === 'pending')
+  const visibleRequests = requests.filter(req => !req.obfuscated)
+  const filtered = tab === 'all' ? visibleRequests : visibleRequests.filter(r => r.status === tab)
+  const currentMonthKey = inquiryMonthKey(new Date())
+  const currentMonthRequests = requests.filter(req => inquiryMonthKey(req.createdAt) === currentMonthKey)
+  const clearInquiryCount = currentMonthRequests.filter(req => !req.obfuscated).length
+  const obfuscatedCount = hasProPlan ? 0 : currentMonthRequests.filter(req => req.obfuscated).length
+  const resetLabel = monthlyResetLabel()
+  const pendingRequests = visibleRequests.filter(r => r.status === 'pending')
   const nextRequest = pendingRequests[0]
-  const categories = topCategories(requests)
-  const contactCount = acceptedContactCount(requests)
+  const categories = topCategories(visibleRequests)
+  const contactCount = acceptedContactCount(visibleRequests)
 
   const tabs: Array<{ id: Tab; label: string; count?: number }> = [
     { id: 'pending', label: 'New', count: pendingCount },
@@ -297,6 +353,11 @@ export default function JobsPage() {
               ? `${pendingCount} new request${pendingCount !== 1 ? 's' : ''} waiting for your response`
               : 'No new requests right now'}
           </p>
+          {!hasProPlan && obfuscatedCount > 0 && (
+            <p className="mt-2 max-w-2xl text-sm font-semibold text-orange-600">
+              You&apos;ve used {clearInquiryCount} free clear view{clearInquiryCount === 1 ? '' : 's'} this month. {hiddenInquiryCopy(resetLabel)}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -338,7 +399,7 @@ export default function JobsPage() {
                   </div>
                 ))}
               </div>
-            ) : filtered.length === 0 ? (
+            ) : filtered.length === 0 && obfuscatedCount === 0 ? (
               <div className="text-center py-16 text-gray-400">
                 <p className="text-base font-semibold mb-1">No {tab === 'all' ? '' : tab} requests</p>
                 <p className="text-sm">
@@ -357,6 +418,7 @@ export default function JobsPage() {
                     onDecline={id => setDeclineModalId(id)}
                   />
                 ))}
+                {obfuscatedCount > 0 && <HiddenInquiryUpgradeCard resetLabel={resetLabel} />}
               </div>
             )}
           </section>

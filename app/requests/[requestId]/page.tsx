@@ -1,12 +1,10 @@
 'use client'
 
-import { useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useRouter, useParams } from 'next/navigation'
-import { doc, getDoc } from 'firebase/firestore'
 import { MdLocationOn, MdStar } from 'react-icons/md'
-import { db } from '@/firebase/index'
 import { onAuthChange, waitForAuthReady } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { acceptServiceQuote, confirmAppointment, declineServiceQuote } from '@/firebase/conversations'
@@ -368,6 +366,14 @@ export default function RequestDetailPage() {
   const [showCancel, setShowCancel] = useState(false)
   const [hasConversation, setHasConversation] = useState(false)
 
+  const loadCurrentRequest = useCallback(async () => {
+    const response = await authenticatedFetch(`/api/service-requests/${requestId}`)
+    const data = (await response.json()) as { request?: ServiceRequest; hasConversation?: boolean }
+    if (!data.request) return null
+    setHasConversation(Boolean(data.hasConversation))
+    return data.request
+  }, [requestId])
+
   useEffect(() => {
     let cancelled = false
     let unsubscribe: (() => void) | undefined
@@ -383,25 +389,18 @@ export default function RequestDetailPage() {
           return
         }
         try {
-          const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-          if (!snap.exists()) {
+          const data = await loadCurrentRequest()
+          if (!data) {
             setReq(null)
             setLoading(false)
             return
           }
-          const data = { id: snap.id, ...snap.data() } as ServiceRequest
           if (data.customerUid !== user.uid) {
             router.replace(loginUrlFor(nextPath))
             return
           }
           setReq(data)
           setPro(await fetchProSummary(data.proUid))
-          try {
-            const conversationSnap = await getDoc(doc(db, 'conversations', requestId))
-            setHasConversation(conversationSnap.exists())
-          } catch {
-            setHasConversation(false)
-          }
         } catch {
           setReq(null)
         } finally {
@@ -416,13 +415,13 @@ export default function RequestDetailPage() {
       cancelled = true
       unsubscribe?.()
     }
-  }, [router, requestId])
+  }, [loadCurrentRequest, router, requestId])
 
   async function handleAccept(input: Parameters<typeof acceptServiceQuote>[2]) {
     if (!req) return
     await acceptServiceQuote(requestId, req.customerUid, input)
-    const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-    if (snap.exists()) setReq({ id: snap.id, ...snap.data() } as ServiceRequest)
+    const updated = await loadCurrentRequest()
+    if (updated) setReq(updated)
     setShowAccept(false)
     setHasConversation(true)
     router.push(`/messages/${requestId}`)
@@ -431,8 +430,8 @@ export default function RequestDetailPage() {
   async function handleDecline(reason: string) {
     if (!req) return
     await declineServiceQuote(requestId, req.customerUid, reason)
-    const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-    if (snap.exists()) setReq({ id: snap.id, ...snap.data() } as ServiceRequest)
+    const updated = await loadCurrentRequest()
+    if (updated) setReq(updated)
     setShowDecline(false)
   }
 
@@ -464,20 +463,20 @@ export default function RequestDetailPage() {
   async function handleConfirmComplete() {
     if (!req) return
     await confirmServiceRequestComplete(requestId)
-    const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-    if (snap.exists()) setReq({ id: snap.id, ...snap.data() } as ServiceRequest)
+    const updated = await loadCurrentRequest()
+    if (updated) setReq(updated)
   }
 
   async function refreshRequest() {
-    const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-    if (snap.exists()) setReq({ id: snap.id, ...snap.data() } as ServiceRequest)
+    const updated = await loadCurrentRequest()
+    if (updated) setReq(updated)
   }
 
   async function handleCancel(reason: string) {
     if (!req) return
     await cancelServiceRequest(requestId, reason)
-    const snap = await getDoc(doc(db, 'serviceRequests', requestId))
-    if (snap.exists()) setReq({ id: snap.id, ...snap.data() } as ServiceRequest)
+    const updated = await loadCurrentRequest()
+    if (updated) setReq(updated)
     setShowCancel(false)
   }
 

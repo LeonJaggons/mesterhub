@@ -1,7 +1,6 @@
-import type { Timestamp } from 'firebase/firestore'
 import type { Conversation } from '@/firebase/conversations'
 import type { Message } from '@/firebase/conversations'
-import { PRO_AVATAR_COLORS } from '@/app/requests/shared'
+import { PRO_AVATAR_COLORS, timestampMillis, type TimestampLike } from '@/app/requests/shared'
 
 export type MessageRole = 'customer' | 'pro'
 
@@ -28,9 +27,14 @@ export function requestHref(requestId: string, role: MessageRole): string {
   return role === 'customer' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`
 }
 
-export function formatListTime(ts: Timestamp | null): string {
-  if (!ts) return ''
-  const d = ts.toDate()
+function timestampDate(ts: TimestampLike | null | undefined): Date | null {
+  const millis = timestampMillis(ts)
+  return millis ? new Date(millis) : null
+}
+
+export function formatListTime(ts: TimestampLike | null): string {
+  const d = timestampDate(ts)
+  if (!d) return ''
   const now = new Date()
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const startOfMsg = new Date(d.getFullYear(), d.getMonth(), d.getDate())
@@ -46,9 +50,9 @@ export function formatListTime(ts: Timestamp | null): string {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
-export function daySeparatorLabel(ts: Timestamp | null): string {
-  if (!ts) return ''
-  const d = ts.toDate()
+export function daySeparatorLabel(ts: TimestampLike | null): string {
+  const d = timestampDate(ts)
+  if (!d) return ''
   const now = new Date()
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const startOfMsg = new Date(d.getFullYear(), d.getMonth(), d.getDate())
@@ -66,7 +70,7 @@ export function groupMessagesByDay(messages: Message[]): MessageGroup[] {
   let currentKey = ''
 
   for (const msg of messages) {
-    const d = msg.createdAt?.toDate()
+    const d = timestampDate(msg.createdAt)
     const key = d
       ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
       : 'unknown'

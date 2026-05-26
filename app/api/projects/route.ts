@@ -24,6 +24,12 @@ function cleanStringArray(value: unknown): string[] {
     .slice(0, 8)
 }
 
+function timestampMillis(value: unknown): number {
+  if (!value || typeof value !== 'object') return 0
+  const timestamp = value as { toMillis?: () => number }
+  return typeof timestamp.toMillis === 'function' ? timestamp.toMillis() : 0
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
@@ -58,5 +64,48 @@ export async function POST(request: NextRequest) {
     }
     console.error('[/api/projects POST]', err)
     return Response.json({ error: 'Could not create project.' }, { status: 500 })
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = await requireUser(request)
+    const snap = await adminDb
+      .collection('projects')
+      .where('customerUid', '==', user.uid)
+      .get()
+
+    const projects = await Promise.all(
+      snap.docs.map(async projectDoc => {
+        const requestsSnap = await adminDb
+          .collection('serviceRequests')
+          .where('projectId', '==', projectDoc.id)
+          .where('customerUid', '==', user.uid)
+          .get()
+
+        return {
+          id: projectDoc.id,
+          ...projectDoc.data(),
+          hasAppointment: requestsSnap.docs.some(requestDoc => {
+            const data = requestDoc.data()
+            return Boolean(data.appointmentRequest || data.appointmentChangeRequest)
+          }),
+        } as Record<string, unknown>
+      }),
+    )
+
+    projects.sort((a, b) => {
+      const aTime = timestampMillis(a.updatedAt) || timestampMillis(a.createdAt)
+      const bTime = timestampMillis(b.updatedAt) || timestampMillis(b.createdAt)
+      return bTime - aTime
+    })
+
+    return Response.json({ projects })
+  } catch (err) {
+    if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+      return Response.json({ error: 'You must be signed in.' }, { status: 401 })
+    }
+    console.error('[/api/projects GET]', err)
+    return Response.json({ error: 'Could not load projects.' }, { status: 500 })
   }
 }
