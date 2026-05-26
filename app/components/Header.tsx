@@ -208,9 +208,9 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
         </div>
         <div className={styles.ServicesGrid}>
           {detail?.services.map(service => (
-            <a key={service} href={`/instant-results?q=${encodeURIComponent(service)}`} className={styles.ServiceLink}>
+            <Link key={service} href={`/instant-results?q=${encodeURIComponent(service)}`} className={styles.ServiceLink}>
               {translateService(t, service)}
-            </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -659,6 +659,7 @@ export default function Header() {
   const currentLocale = getPathLocale(rawPathname) ?? defaultLocale
   const pathname = getPathnameWithoutLocale(rawPathname)
   const searchParams = useSearchParams()
+  const latestRoute = useRef({ currentLocale, pathname, queryString: searchParams.toString() })
   const isSignupPath = pathname.startsWith('/pro/signup')
   const [user, setUser] = useState<User | null>(null)
   const [pro, setPro] = useState<ProBasic | null>(null)
@@ -668,6 +669,8 @@ export default function Header() {
   const [confirmedProAppointments, setConfirmedProAppointments] = useState(0)
   const [activeAppointments, setActiveAppointments] = useState(0)
   const notifications = useNotifications(!isSignupPath && Boolean(user))
+
+  latestRoute.current = { currentLocale, pathname, queryString: searchParams.toString() }
 
   // Detect auth + pro status through the shared API so every client sees the same account resolution.
   useEffect(() => {
@@ -694,8 +697,9 @@ export default function Header() {
         const profile = data.pro
         if (!cancelled && u.uid === uid) {
           setPro(profile)
-          if (data.preferredLocale && data.preferredLocale !== currentLocale) {
-            const queryString = searchParams.toString()
+          const route = latestRoute.current
+          if (data.preferredLocale && data.preferredLocale !== route.currentLocale) {
+            const { pathname, queryString } = route
             const href = queryString ? `${pathname}?${queryString}` : pathname
             window.location.replace(localizeHref(href, data.preferredLocale))
           }
@@ -714,7 +718,7 @@ export default function Header() {
       cancelled = true
       unsub()
     }
-  }, [currentLocale, isSignupPath, pathname, searchParams])
+  }, [isSignupPath])
 
   // Fetch pending job count for the badge
   useEffect(() => {
