@@ -24,6 +24,22 @@ type AdminPro = {
   }
 }
 
+type ImportResult = {
+  name: string
+  email: string
+  uid?: string
+  status: 'created' | 'updated' | 'skipped' | 'error'
+  message?: string
+}
+
+type ImportProgressEvent =
+  | { type: 'start'; total: number }
+  | { type: 'row_start'; index: number; total: number; name: string; email: string }
+  | { type: 'step'; index: number; total: number; name: string; email: string; step: string; message: string }
+  | { type: 'result'; index: number; total: number; result: ImportResult }
+  | { type: 'done'; imported: number; updated: number; skipped: number; failed: number; results: ImportResult[] }
+  | { type: 'error'; message: string }
+
 const STATUSES = [
   { id: 'pending_verification', label: 'Pending' },
   { id: 'active', label: 'Active' },
@@ -38,6 +54,17 @@ export default function AdminProsPage() {
   const [error, setError] = useState('')
   const [reason, setReason] = useState('')
   const [busyUid, setBusyUid] = useState<string | null>(null)
+  const [passwordByUid, setPasswordByUid] = useState<Record<string, string>>({})
+  const [passwordMessage, setPasswordMessage] = useState('')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importStatus, setImportStatus] = useState('active')
+  const [imageDelayMs, setImageDelayMs] = useState('1200')
+  const [importing, setImporting] = useState(false)
+  const [importSummary, setImportSummary] = useState('')
+  const [importResults, setImportResults] = useState<ImportResult[]>([])
+  const [importCurrent, setImportCurrent] = useState(0)
+  const [importTotal, setImportTotal] = useState(0)
+  const [importLog, setImportLog] = useState<string[]>([])
 
   async function loadPros(nextStatus = status) {
     setLoading(true)
@@ -95,8 +122,223 @@ export default function AdminProsPage() {
     }
   }
 
+  async function setProPassword(pro: AdminPro) {
+    const password = passwordByUid[pro.uid]?.trim() ?? ''
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+
+    const label = pro.fullName || pro.account?.email || pro.uid
+    const confirmed = window.confirm(`Set a new password for ${label}? This will revoke existing sessions.`)
+    if (!confirmed) return
+
+    setBusyUid(pro.uid)
+    setError('')
+    setPasswordMessage('')
+    try {
+      await authenticatedFetch(`/api/admin/pros/${pro.uid}/password`, {
+        method: 'PATCH',
+        body: JSON.stringify({ password }),
+      })
+      setPasswordByUid(previous => ({ ...previous, [pro.uid]: '' }))
+      setPasswordMessage(`Password updated for ${label}.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update password.')
+    } finally {
+      setBusyUid(null)
+    }
+  }
+
+  async function importQjobPros() {
+    if (!importFile) {
+      setError('Choose a Qjob JSON file first.')
+      return
+    }
+
+    setImporting(true)
+    setError('')
+    setImportSummary('')
+    setImportResults([])
+    setImportCurrent(0)
+    setImportTotal(0)
+    setImportLog([])
+    try {
+      const form = new FormData()
+      form.set('file', importFile)
+      form.set('status', importStatus)
+      form.set('imageDelayMs', imageDelayMs)
+
+      const res = await authenticatedFetch('/api/admin/pros/import', {
+        method: 'POST',
+        body: form,
+      })
+      if (!res.body) {
+        throw new Error('Import response did not include progress stream.')
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      const appendLog = (line: string) => {
+        setImportLog(previous => [...previous.slice(-199), line])
+      }
+      const handleEvent = (event: ImportProgressEvent) => {
+        if (event.type === 'start') {
+          setImportTotal(event.total)
+          appendLog(`Starting import of ${event.total} executor records.`)
+        } else if (event.type === 'row_start') {
+          setImportCurrent(event.index)
+          setImportTotal(event.total)
+          appendLog(`[${event.index}/${event.total}] ${event.name || 'Unnamed'} -> ${event.email}`)
+        } else if (event.type === 'step') {
+          setImportCurrent(event.index)
+          appendLog(`[${event.index}/${event.total}] ${event.step}: ${event.message}`)
+        } else if (event.type === 'result') {
+          setImportResults(previous => [...previous, event.result])
+          appendLog(`[${event.index}/${event.total}] ${event.result.status}: ${event.result.name || event.result.email}${event.result.message ? ` (${event.result.message})` : ''}`)
+        } else if (event.type === 'done') {
+          setImportSummary(
+            `Created ${event.imported}, updated ${event.updated}, skipped ${event.skipped}, failed ${event.failed}.`,
+          )
+          setImportResults(event.results)
+          appendLog('Import complete.')
+        } else if (event.type === 'error') {
+          throw new Error(event.message)
+        }
+      }
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.trim()) continue
+          handleEvent(JSON.parse(line) as ImportProgressEvent)
+        }
+      }
+
+      buffer += decoder.decode()
+      if (buffer.trim()) {
+        handleEvent(JSON.parse(buffer) as ImportProgressEvent)
+      }
+
+      await loadPros()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not import Qjob pros.')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   return (
     <>
+      <section className="rounded-2xl border border-orange-100 bg-orange-50/40 p-5 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-3xl font-black text-gray-950" style={dg}>Import Qjob pros</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Upload the scraper JSON to create Firebase users and pro profiles. Emails are generated from the business name with accents stripped, ending in @mestermind.com.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={!importFile || importing}
+            onClick={importQjobPros}
+            className="cursor-pointer rounded-xl border-none bg-orange-500 px-5 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {importing ? 'Importing...' : 'Import JSON'}
+          </button>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr_1fr]">
+          <label className="text-sm font-semibold text-gray-700">
+            Qjob JSON file
+            <input
+              type="file"
+              accept="application/json,.json"
+              onChange={event => setImportFile(event.target.files?.[0] ?? null)}
+              className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-gray-900"
+            />
+          </label>
+          <label className="text-sm font-semibold text-gray-700">
+            Imported status
+            <select
+              value={importStatus}
+              onChange={event => setImportStatus(event.target.value)}
+              className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-gray-900"
+            >
+              {STATUSES.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
+            </select>
+          </label>
+          <label className="text-sm font-semibold text-gray-700">
+            Image throttle (ms)
+            <input
+              type="number"
+              min="0"
+              step="100"
+              value={imageDelayMs}
+              onChange={event => setImageDelayMs(event.target.value)}
+              className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-gray-900"
+            />
+          </label>
+        </div>
+
+        {importSummary && <p className="mt-3 text-sm font-semibold text-green-700">{importSummary}</p>}
+        {(importing || importLog.length > 0) && (
+          <div className="mt-4 rounded-xl border border-orange-100 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-bold text-gray-900">
+                Progress {importTotal ? `${importCurrent}/${importTotal}` : ''}
+              </p>
+              {importing && <span className="text-xs font-semibold text-orange-700">Running...</span>}
+            </div>
+            {importTotal > 0 && (
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-orange-100">
+                <div
+                  className="h-full rounded-full bg-orange-500 transition-all"
+                  style={{ width: `${Math.min(100, Math.round((importCurrent / importTotal) * 100))}%` }}
+                />
+              </div>
+            )}
+            <div className="mt-3 max-h-56 overflow-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-slate-100">
+              {importLog.length === 0 ? (
+                <div>Waiting for import progress...</div>
+              ) : (
+                importLog.map((line, index) => <div key={`${line}-${index}`}>{line}</div>)
+              )}
+            </div>
+          </div>
+        )}
+        {importResults.length > 0 && (
+          <div className="mt-4 max-h-64 overflow-auto rounded-xl border border-orange-100 bg-white">
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 bg-orange-50 text-xs uppercase text-orange-700">
+                <tr>
+                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Email</th>
+                  <th className="px-3 py-2">Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                {importResults.slice(0, 100).map((result, index) => (
+                  <tr key={`${result.email}-${index}`} className="border-t border-orange-50">
+                    <td className="px-3 py-2 font-semibold text-gray-900">{result.status}</td>
+                    <td className="px-3 py-2 text-gray-700">{result.name || '-'}</td>
+                    <td className="px-3 py-2 text-gray-700">{result.email}</td>
+                    <td className="px-3 py-2 text-gray-500">{result.message || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -129,6 +371,7 @@ export default function AdminProsPage() {
           </label>
         </div>
         {error && <p className="mt-3 text-sm font-semibold text-red-600">{error}</p>}
+        {passwordMessage && <p className="mt-3 text-sm font-semibold text-green-700">{passwordMessage}</p>}
       </section>
 
       {loading ? (
@@ -172,6 +415,30 @@ export default function AdminProsPage() {
                 <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'reject')} className="cursor-pointer rounded-xl border border-gray-200 bg-white py-2.5 font-semibold text-gray-700 disabled:opacity-60">Reject</button>
                 <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'suspend')} className="cursor-pointer rounded-xl border-none bg-slate-800 py-2.5 font-semibold text-white disabled:opacity-60">Suspend</button>
                 <button disabled={busyUid === pro.uid} onClick={() => deletePro(pro)} className="cursor-pointer rounded-xl border border-red-200 bg-red-50 py-2.5 font-semibold text-red-700 disabled:opacity-60">Delete</button>
+              </div>
+              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <label className="text-sm font-semibold text-gray-700">
+                  Set account password
+                  <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      value={passwordByUid[pro.uid] ?? ''}
+                      onChange={event => setPasswordByUid(previous => ({ ...previous, [pro.uid]: event.target.value }))}
+                      className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900"
+                      placeholder="Minimum 8 characters"
+                    />
+                    <button
+                      type="button"
+                      disabled={busyUid === pro.uid || (passwordByUid[pro.uid]?.trim().length ?? 0) < 8}
+                      onClick={() => setProPassword(pro)}
+                      className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Set password
+                    </button>
+                  </div>
+                </label>
+                <p className="mt-2 text-xs text-gray-500">Passwords are sent directly to Firebase Auth and are not stored in Firestore.</p>
               </div>
             </article>
           ))}

@@ -1,0 +1,124 @@
+{
+  "qjob_categories": {
+    "Építkezés és felújítás": {
+      "categories": ["Handyman"],
+      "services": ["General Repairs"]
+    },
+    "Construction and renovation": {
+      "categories": ["Handyman"],
+      "services": ["General Repairs"]
+    },
+    "Takarítás, házi- és ház körüli munkák": {
+      "categories": ["Cleaning", "Handyman"],
+      "services": ["House Cleaning", "General Repairs"]
+    },
+    "Cleaning, Housekeeping and Housework": {
+      "categories": ["Cleaning", "Handyman"],
+      "services": ["House Cleaning", "General Repairs"]
+    },
+    "Kertészkedés": {
+      "categories": ["Gardening"],
+      "services": ["Garden Clearance"]
+    },
+    "Gardening": {
+      "categories": ["Gardening"],
+      "services": ["Garden Clearance"]
+    },
+    "Teherszállítás": {
+      "categories": ["Moving"],
+      "services": ["Delivery", "Furniture Moving"]
+    },
+    "Freight transport": {
+      "categories": ["Moving"],
+      "services": ["Delivery", "Furniture Moving"]
+    },
+    "Korrepetálás és oktatás": {
+      "categories": ["Tutoring"],
+      "services": ["Languages"]
+    },
+    "Tutoring and Education": {
+      "categories": ["Tutoring"],
+      "services": ["Languages"]
+    },
+    "Rendezvények és promóciók": {
+      "categories": ["Photography"],
+      "services": ["Event Photography"]
+    },
+    "Events and Promotions": {
+      "categories": ["Photography"],
+      "services": ["Event Photography"]
+    },
+    "Design": {
+      "categories": ["Photography"],
+      "services": ["Product Photography", "Photo Editing"]
+    },
+    "Háztartási gépek helyezése és javítása": {
+      "categories": ["HVAC", "Handyman"],
+      "services": ["AC Installation", "AC Repair", "General Repairs"]
+    },
+    "Household appliance installation and repair": {
+      "categories": ["HVAC", "Handyman"],
+      "services": ["AC Installation", "AC Repair", "General Repairs"]
+    },
+    "Virtuális asszisztens": {
+      "categories": [],
+      "services": []
+    },
+    "Virtual Assistant": {
+      "categories": [],
+      "services": []
+    }
+  },
+  "keyword_rules": [
+    {
+      "contains": ["villanyszerel", "elektromos", "dugalj", "kapcsoló", "fi relé", "eon", "elmű", "mvm"],
+      "categories": ["Electrical"],
+      "services": ["Electrical Wiring", "Electrical Fault Finding", "Panel Upgrade"]
+    },
+    {
+      "contains": ["klíma", "klima", "légkondi", "hőszivattyú", "boiler", "fűtésszerel", "gázszerel"],
+      "categories": ["HVAC"],
+      "services": ["AC Installation", "AC Repair", "AC Maintenance", "Boiler Service"]
+    },
+    {
+      "contains": ["vízszerel", "vizszerel", "csap", "lefolyó", "dugulás", "wc", "mosdó"],
+      "categories": ["Plumbing"],
+      "services": ["Pipe Repair", "Leak Detection", "Drain Cleaning", "Tap Replacement"]
+    },
+    {
+      "contains": ["szobafest", "festés", "mázol", "tapét", "glett", "dryvit"],
+      "categories": ["Painting"],
+      "services": ["Interior Painting", "Exterior Painting", "Wallpapering"]
+    },
+    {
+      "contains": ["gipszkarton", "burkol", "parketta", "ajtó", "nyílászáró", "ács", "bútor"],
+      "categories": ["Carpentry", "Handyman"],
+      "services": ["Floor Installation", "Door Installation", "Furniture Assembly", "General Repairs"]
+    },
+    {
+      "contains": ["takarítás", "takarit", "tisztítás", "tisztit", "ablak", "iroda"],
+      "categories": ["Cleaning"],
+      "services": ["House Cleaning", "Office Cleaning", "Window Cleaning", "Deep Cleaning"]
+    },
+    {
+      "contains": ["kert", "metszés", "favágás", "fűnyírás", "sövény", "öntöz"],
+      "categories": ["Gardening"],
+      "services": ["Garden Clearance", "Tree Trimming", "Hedge Trimming", "Lawn Mowing"]
+    },
+    {
+      "contains": ["költöz", "szállítás", "teherszállítás", "fuvar", "bútor száll"],
+      "categories": ["Moving"],
+      "services": ["House Moving", "Delivery", "Furniture Moving"]
+    },
+    {
+      "contains": ["fotó", "fotózás", "rendezvény", "esküvő", "portré"],
+      "categories": ["Photography"],
+      "services": ["Event Photography", "Wedding Photography", "Portrait Photography"]
+    },
+    {
+      "contains": ["matek", "matematika", "nyelv", "angol", "oktatás", "korrepetál"],
+      "categories": ["Tutoring"],
+      "services": ["Mathematics", "Languages"]
+    }
+  ]
+}
