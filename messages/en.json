@@ -548,6 +548,140 @@
       "share": "Share my profile"
     }
   },
+  "proJobs": {
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago"
+    },
+    "location": {
+      "approximate": "Approximate job location",
+      "approximateKm": "Approximate job location within {distance} km",
+      "approximateM": "Approximate job location within {distance} m",
+      "district": "District {district}",
+      "notShared": "District not shared"
+    },
+    "customerFallback": "Customer",
+    "status": {
+      "pending": "New request",
+      "quoted": "Quote sent",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "tabs": {
+      "pending": "New",
+      "quoted": "Quoted",
+      "accepted": "Accepted",
+      "completed": "Completed",
+      "declined": "Declined",
+      "all": "All"
+    },
+    "header": {
+      "kicker": "Pro dashboard",
+      "title": "Jobs",
+      "pendingSingular": "{count} new request waiting for your response",
+      "pendingPlural": "{count} new requests waiting for your response",
+      "noPending": "No new requests right now"
+    },
+    "card": {
+      "contactDetails": "Contact details",
+      "sendQuote": "Send quote",
+      "decline": "Decline",
+      "declined": "You declined this request.",
+      "cancelled": "This request was cancelled.",
+      "completed": "Customer confirmed completion."
+    },
+    "hidden": {
+      "copy": "New inquiries are waiting with details hidden. Upgrade to unlock every request now, or your free views refresh on {resetLabel}.",
+      "freeViewsSingular": "You've used {count} free clear view this month.",
+      "freeViewsPlural": "You've used {count} free clear views this month.",
+      "title": "More inquiries are waiting",
+      "detailsHidden": "Details are hidden after your monthly free clear views are used.",
+      "upgradeBody": "Upgrade to Mestermind Pro to unlock every new request immediately, or wait until {resetLabel} when your free views refresh.",
+      "cta": "Unlock new inquiries"
+    },
+    "empty": {
+      "noRequests": "No requests",
+      "noStatusRequests": "No {status} requests",
+      "status": {
+        "pending": "new",
+        "quoted": "quoted",
+        "accepted": "accepted",
+        "declined": "declined",
+        "completed": "completed",
+        "cancelled": "cancelled"
+      },
+      "pendingHint": "New requests from customers will appear here.",
+      "defaultHint": "Nothing to show in this tab yet."
+    },
+    "sidebar": {
+      "briefKicker": "Mester brief",
+      "briefTitle": "Helpful to know",
+      "needQuotes": "Need quotes",
+      "acceptedJobs": "Accepted jobs",
+      "newestRequest": "Newest request",
+      "newestRequestValue": "{category} - {time}",
+      "noRequestsYet": "No requests yet",
+      "quotesWaiting": "Quotes waiting",
+      "contactsAvailable": "Contacts available",
+      "nextActionKicker": "Next best action",
+      "nextActionBody": "Check the scope, service area, availability, and whether materials or travel should be included before quoting.",
+      "reviewRequest": "Review request",
+      "beforeQuotesKicker": "Before sending quotes",
+      "askYourself": "Ask yourself",
+      "quoteChecklist": {
+        "coverage": "Can I cover the district and arrival window?",
+        "priceClear": "Is my price clear about labour, materials, travel, and disposal?",
+        "needDetails": "Do I need photos, measurements, or a call before giving a firm quote?",
+        "customerPrep": "What should the customer prepare before I arrive?"
+      },
+      "workMixKicker": "Work mix",
+      "commonRequests": "Common requests",
+      "noMix": "Your request mix will appear here once customers contact you."
+    },
+    "quoteModal": {
+      "kicker": "Send quote",
+      "title": "Your quote for {category}",
+      "close": "Close",
+      "priceLabel": "Your price",
+      "pricePlaceholder": "e.g. 15,000 HUF",
+      "priceHint": "Enter a starting price. You can adjust the final amount after discussing the full scope.",
+      "timelineLabel": "When can you start?",
+      "timelineOptions": {
+        "within24Hours": "Within 24 hours",
+        "twoToThreeDays": "2-3 days",
+        "thisWeek": "This week",
+        "nextWeek": "Next week",
+        "confirmAfterTalk": "I'll confirm once we talk"
+      },
+      "notesLabel": "Message to customer",
+      "optional": "optional",
+      "notesPlaceholder": "Describe your experience, what's included in the price, and any questions you have about the job.",
+      "sending": "Sending...",
+      "submit": "Send quote",
+      "cancel": "Cancel",
+      "errors": {
+        "priceRequired": "Please enter a price.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "declineModal": {
+      "title": "Decline this request?",
+      "subtitle": "This action cannot be undone.",
+      "beforeTitle": "Before you decline",
+      "bullets": {
+        "customerNotified": "The customer will be notified and will look for another professional.",
+        "visibility": "Declining frequently lowers your visibility in search results.",
+        "permanentlyClosed": "This request will be permanently closed - you won't be able to re-open it."
+      },
+      "keep": "Keep request",
+      "declining": "Declining...",
+      "confirm": "Yes, decline"
+    }
+  },
   "proLanding": {
     "hero": {
       "eyebrow": "For professionals",

@@ -5,13 +5,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { declineServiceRequestAsPro, quoteServiceRequest } from '@/firebase/serviceRequests'
-import { QuoteModal, DeclineModal, type QuoteFormData } from './JobModals'
-import { approximateLocationLabel } from '@/app/requests/shared'
+import { QuoteModal, DeclineModal, translateQuoteTimeline, type QuoteFormData } from './JobModals'
 import type { JobLocation } from '@/firebase/serviceRequests'
 import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 import { inquiryCreatedAtMillis, inquiryMonthKey, type InquiryTimestamp } from '@/lib/inquiryAccess'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
+type Translator = ReturnType<typeof useTranslations>
 
 type RequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled'
 
@@ -41,15 +43,6 @@ type ServiceRequest = {
   obfuscated?: boolean
 }
 
-const STATUS_LABELS: Record<RequestStatus, string> = {
-  pending: 'New request',
-  quoted: 'Quote sent',
-  accepted: 'Accepted',
-  declined: 'Declined',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-}
-
 const STATUS_COLORS: Record<RequestStatus, string> = {
   pending: 'bg-orange-50 text-orange-700 border-orange-200',
   quoted: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -59,13 +52,13 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
   cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
 }
 
-function timeAgo(ts: InquiryTimestamp): string {
+function timeAgo(t: Translator, ts: InquiryTimestamp): string {
   if (!ts) return ''
   const seconds = Math.floor((Date.now() - inquiryCreatedAtMillis(ts)) / 1000)
-  if (seconds < 60) return 'just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  return `${Math.floor(seconds / 86400)}d ago`
+  if (seconds < 60) return t('proJobs.time.justNow')
+  if (seconds < 3600) return t('proJobs.time.minutesAgo', { count: Math.floor(seconds / 60) })
+  if (seconds < 86400) return t('proJobs.time.hoursAgo', { count: Math.floor(seconds / 3600) })
+  return t('proJobs.time.daysAgo', { count: Math.floor(seconds / 86400) })
 }
 
 function formatAnswers(answers: Record<string, string>): Array<{ key: string; value: string }> {
@@ -77,36 +70,49 @@ function formatAnswers(answers: Record<string, string>): Array<{ key: string; va
     }))
 }
 
-function districtCopy(req: ServiceRequest): string {
-  if (req.jobLocation) return approximateLocationLabel(req.jobLocation)
-  return req.customerDistrict ? `District ${req.customerDistrict}` : 'District not shared'
+function districtCopy(t: Translator, req: ServiceRequest): string {
+  if (req.jobLocation) {
+    const accuracy = req.jobLocation.accuracy
+    if (!accuracy) return t('proJobs.location.approximate')
+    const meters = Math.max(Math.ceil(accuracy), 500)
+    if (meters >= 1000) {
+      return t('proJobs.location.approximateKm', { distance: (meters / 1000).toFixed(1) })
+    }
+    return t('proJobs.location.approximateM', { distance: meters })
+  }
+  return req.customerDistrict
+    ? t('proJobs.location.district', { district: req.customerDistrict })
+    : t('proJobs.location.notShared')
 }
 
-function customerDisplayName(name: string): string {
+function customerDisplayName(t: Translator, name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return 'Customer'
+  if (parts.length === 0) return t('proJobs.customerFallback')
   const [first, ...rest] = parts
   const lastInitial = rest.at(-1)?.[0]
   return lastInitial ? `${first} ${lastInitial.toUpperCase()}.` : first
 }
 
-function newestRequestLabel(requests: ServiceRequest[]): string {
+function newestRequestLabel(t: Translator, requests: ServiceRequest[]): string {
   const newest = requests[0]
-  if (!newest) return 'No requests yet'
-  return `${newest.categoryName} - ${timeAgo(newest.createdAt) || 'just now'}`
+  if (!newest) return t('proJobs.sidebar.noRequestsYet')
+  return t('proJobs.sidebar.newestRequestValue', {
+    category: translateCategory(t, newest.categoryName),
+    time: timeAgo(t, newest.createdAt) || t('proJobs.time.justNow'),
+  })
 }
 
 function acceptedContactCount(requests: ServiceRequest[]): number {
   return requests.filter(r => r.status === 'accepted' && (r.acceptance?.phone || r.customerEmail)).length
 }
 
-function monthlyResetLabel(reference = new Date()): string {
+function monthlyResetLabel(locale: string, reference = new Date()): string {
   const resetDate = new Date(reference.getFullYear(), reference.getMonth() + 1, 1)
-  return resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return resetDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
-function hiddenInquiryCopy(resetLabel: string): string {
-  return `New inquiries are waiting with details hidden. Upgrade to unlock every request now, or your free views refresh on ${resetLabel}.`
+function hiddenInquiryCopy(t: Translator, resetLabel: string): string {
+  return t('proJobs.hidden.copy', { resetLabel })
 }
 
 function topCategories(requests: ServiceRequest[]): Array<{ name: string; count: number }> {
@@ -127,11 +133,13 @@ function JobCard({
   onAccept: (id: string) => void
   onDecline: (id: string) => void
 }) {
+  const t = useTranslations()
   const details = formatAnswers(req.answers)
   const isPending = req.status === 'pending'
   const isAccepted = req.status === 'accepted'
   const isQuoted = req.status === 'quoted'
-  const customerName = customerDisplayName(req.customerName)
+  const customerName = customerDisplayName(t, req.customerName)
+  const categoryLabel = translateCategory(t, req.categoryName)
   const card = (
     <div className={`bg-white rounded-2xl border shadow-sm transition-shadow ${isPending ? 'border-orange-200' : isQuoted ? 'border-blue-200' : 'border-gray-200 group-hover:shadow-md'}`}>
       <div className="p-5">
@@ -150,14 +158,14 @@ function JobCard({
               </span>
             </div>
             <p className="text-xs text-gray-400 ml-10">
-              {req.categoryName} · {timeAgo(req.createdAt)}
+              {categoryLabel} · {timeAgo(t, req.createdAt)}
             </p>
             <p className="text-xs text-gray-400 ml-10">
-              {districtCopy(req)}
+              {districtCopy(t, req)}
             </p>
           </div>
           <span className={`text-xs font-semibold border rounded-full px-2.5 py-1 flex-shrink-0 ${STATUS_COLORS[req.status]}`}>
-            {STATUS_LABELS[req.status]}
+            {t(`proJobs.status.${req.status}`)}
           </span>
         </div>
 
@@ -178,14 +186,14 @@ function JobCard({
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-3 flex items-center gap-3 text-sm">
             <span className="text-blue-600 font-bold">{req.quote.price}</span>
             <span className="text-blue-400">·</span>
-            <span className="text-blue-600">{req.quote.timeline}</span>
+            <span className="text-blue-600">{translateQuoteTimeline(t, req.quote.timeline)}</span>
           </div>
         )}
 
         {/* Contact info — only visible after accepting */}
         {isAccepted && (
           <div className="bg-green-50 border border-green-100 rounded-xl p-3 mb-3 flex flex-col gap-1">
-            <p className="text-xs font-bold text-green-700 mb-1">Contact details</p>
+            <p className="text-xs font-bold text-green-700 mb-1">{t('proJobs.card.contactDetails')}</p>
             <p className="text-sm text-gray-700">{req.customerName}</p>
             <p className="text-sm text-orange-500">{req.customerEmail}</p>
           </div>
@@ -199,25 +207,25 @@ function JobCard({
               className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg py-2.5 text-sm transition-colors cursor-pointer border-none"
               style={dg}
             >
-              Send quote
+              {t('proJobs.card.sendQuote')}
             </button>
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDecline(req.id) }}
               className="px-4 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-lg text-sm transition-colors cursor-pointer bg-white"
             >
-              Decline
+              {t('proJobs.card.decline')}
             </button>
           </div>
         )}
 
         {req.status === 'declined' && (
-          <p className="text-xs text-gray-400 mt-1">You declined this request.</p>
+          <p className="text-xs text-gray-400 mt-1">{t('proJobs.card.declined')}</p>
         )}
         {req.status === 'cancelled' && (
-          <p className="text-xs text-gray-400 mt-1">This request was cancelled.</p>
+          <p className="text-xs text-gray-400 mt-1">{t('proJobs.card.cancelled')}</p>
         )}
         {req.status === 'completed' && (
-          <p className="text-xs text-green-700 mt-1">Customer confirmed completion.</p>
+          <p className="text-xs text-green-700 mt-1">{t('proJobs.card.completed')}</p>
         )}
       </div>
     </div>
@@ -227,6 +235,7 @@ function JobCard({
 }
 
 function HiddenInquiryUpgradeCard({ resetLabel }: { resetLabel: string }) {
+  const t = useTranslations()
   return (
     <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
       <div className="relative border-b border-orange-100 bg-orange-50 p-5">
@@ -239,22 +248,22 @@ function HiddenInquiryUpgradeCard({ resetLabel }: { resetLabel: string }) {
           <div className="h-4 w-2/3 rounded bg-slate-300/60" />
         </div>
         <div className="absolute inset-0 flex flex-col justify-center bg-orange-50/80 px-5">
-          <p className="text-sm font-bold text-gray-900">More inquiries are waiting</p>
+          <p className="text-sm font-bold text-gray-900">{t('proJobs.hidden.title')}</p>
           <p className="mt-1 text-xs leading-relaxed text-gray-600">
-            Details are hidden after your monthly free clear views are used.
+            {t('proJobs.hidden.detailsHidden')}
           </p>
         </div>
       </div>
       <div className="p-5">
         <p className="text-sm leading-relaxed text-gray-600">
-          Upgrade to Mestermind Pro to unlock every new request immediately, or wait until {resetLabel} when your free views refresh.
+          {t('proJobs.hidden.upgradeBody', { resetLabel })}
         </p>
         <Link
           href="/pro/settings"
           className="mt-4 block rounded-lg bg-orange-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600"
           style={dg}
         >
-          Unlock new inquiries
+          {t('proJobs.hidden.cta')}
         </Link>
       </div>
     </div>
@@ -265,6 +274,8 @@ type Tab = 'all' | RequestStatus
 
 export default function JobsPage() {
   const router = useRouter()
+  const t = useTranslations()
+  const locale = useLocale()
   const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [hasProPlan, setHasProPlan] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -318,19 +329,19 @@ export default function JobsPage() {
   const currentMonthRequests = requests.filter(req => inquiryMonthKey(req.createdAt) === currentMonthKey)
   const clearInquiryCount = currentMonthRequests.filter(req => !req.obfuscated).length
   const obfuscatedCount = hasProPlan ? 0 : currentMonthRequests.filter(req => req.obfuscated).length
-  const resetLabel = monthlyResetLabel()
+  const resetLabel = monthlyResetLabel(locale)
   const pendingRequests = visibleRequests.filter(r => r.status === 'pending')
   const nextRequest = pendingRequests[0]
   const categories = topCategories(visibleRequests)
   const contactCount = acceptedContactCount(visibleRequests)
 
   const tabs: Array<{ id: Tab; label: string; count?: number }> = [
-    { id: 'pending', label: 'New', count: pendingCount },
-    { id: 'quoted', label: 'Quoted', count: quotedCount },
-    { id: 'accepted', label: 'Accepted' },
-    { id: 'completed', label: 'Completed' },
-    { id: 'declined', label: 'Declined' },
-    { id: 'all', label: 'All' },
+    { id: 'pending', label: t('proJobs.tabs.pending'), count: pendingCount },
+    { id: 'quoted', label: t('proJobs.tabs.quoted'), count: quotedCount },
+    { id: 'accepted', label: t('proJobs.tabs.accepted') },
+    { id: 'completed', label: t('proJobs.tabs.completed') },
+    { id: 'declined', label: t('proJobs.tabs.declined') },
+    { id: 'all', label: t('proJobs.tabs.all') },
   ]
 
   const quoteModalRequest = quoteModalId ? requests.find(r => r.id === quoteModalId) : null
@@ -341,21 +352,28 @@ export default function JobsPage() {
       <div className="max-w-6xl mx-auto px-4 py-12">
 
         <div className="mb-8">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Pro dashboard</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proJobs.header.kicker')}</p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.02em' }}
           >
-            Jobs
+            {t('proJobs.header.title')}
           </h1>
           <p className="text-gray-500 text-base mt-2">
             {pendingCount > 0
-              ? `${pendingCount} new request${pendingCount !== 1 ? 's' : ''} waiting for your response`
-              : 'No new requests right now'}
+              ? t(
+                pendingCount === 1 ? 'proJobs.header.pendingSingular' : 'proJobs.header.pendingPlural',
+                { count: pendingCount }
+              )
+              : t('proJobs.header.noPending')}
           </p>
           {!hasProPlan && obfuscatedCount > 0 && (
             <p className="mt-2 max-w-2xl text-sm font-semibold text-orange-600">
-              You&apos;ve used {clearInquiryCount} free clear view{clearInquiryCount === 1 ? '' : 's'} this month. {hiddenInquiryCopy(resetLabel)}
+              {t(
+                clearInquiryCount === 1 ? 'proJobs.hidden.freeViewsSingular' : 'proJobs.hidden.freeViewsPlural',
+                { count: clearInquiryCount }
+              )}{' '}
+              {hiddenInquiryCopy(t, resetLabel)}
             </p>
           )}
         </div>
@@ -401,11 +419,15 @@ export default function JobsPage() {
               </div>
             ) : filtered.length === 0 && obfuscatedCount === 0 ? (
               <div className="text-center py-16 text-gray-400">
-                <p className="text-base font-semibold mb-1">No {tab === 'all' ? '' : tab} requests</p>
+                <p className="text-base font-semibold mb-1">
+                  {tab === 'all'
+                    ? t('proJobs.empty.noRequests')
+                    : t('proJobs.empty.noStatusRequests', { status: t(`proJobs.empty.status.${tab}`) })}
+                </p>
                 <p className="text-sm">
                   {tab === 'pending'
-                    ? 'New requests from customers will appear here.'
-                    : 'Nothing to show in this tab yet.'}
+                    ? t('proJobs.empty.pendingHint')
+                    : t('proJobs.empty.defaultHint')}
                 </p>
               </div>
             ) : (
@@ -427,23 +449,23 @@ export default function JobsPage() {
             <ProUpgradeCta />
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Mester brief</p>
-              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Helpful to know</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.briefKicker')}</p>
+              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.sidebar.briefTitle')}</h2>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
                   <p className="text-2xl font-black text-slate-800" style={dg}>{pendingCount}</p>
-                  <p className="text-xs text-slate-500">Need quotes</p>
+                  <p className="text-xs text-slate-500">{t('proJobs.sidebar.needQuotes')}</p>
                 </div>
                 <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
                   <p className="text-2xl font-black text-slate-800" style={dg}>{acceptedCount}</p>
-                  <p className="text-xs text-slate-500">Accepted jobs</p>
+                  <p className="text-xs text-slate-500">{t('proJobs.sidebar.acceptedJobs')}</p>
                 </div>
               </div>
               <div className="divide-y divide-gray-100 mt-4">
                 {[
-                  ['Newest request', newestRequestLabel(requests)],
-                  ['Quotes waiting', `${quotedCount}`],
-                  ['Contacts available', `${contactCount}`],
+                  [t('proJobs.sidebar.newestRequest'), newestRequestLabel(t, requests)],
+                  [t('proJobs.sidebar.quotesWaiting'), `${quotedCount}`],
+                  [t('proJobs.sidebar.contactsAvailable'), `${contactCount}`],
                 ].map(([label, value]) => (
                   <div key={label} className="py-2.5 flex justify-between gap-4 text-sm">
                     <span className="text-gray-500">{label}</span>
@@ -455,56 +477,51 @@ export default function JobsPage() {
 
             {nextRequest && (
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Next best action</p>
-                <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>{nextRequest.categoryName}</h2>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.nextActionKicker')}</p>
+                <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>{translateCategory(t, nextRequest.categoryName)}</h2>
                 <p className="text-sm text-gray-500 mb-3">
-                  {districtCopy(nextRequest)} · {timeAgo(nextRequest.createdAt) || 'just now'}
+                  {districtCopy(t, nextRequest)} · {timeAgo(t, nextRequest.createdAt) || t('proJobs.time.justNow')}
                 </p>
                 <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-sm text-gray-700 leading-relaxed mb-3">
-                  Check the scope, service area, availability, and whether materials or travel should be included before quoting.
+                  {t('proJobs.sidebar.nextActionBody')}
                 </div>
                 <Link
                   href={`/pro/jobs/${nextRequest.id}`}
                   className="block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-2.5 text-sm"
                   style={dg}
                 >
-                  Review request
+                  {t('proJobs.sidebar.reviewRequest')}
                 </Link>
               </div>
             )}
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Before sending quotes</p>
-              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Ask yourself</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.beforeQuotesKicker')}</p>
+              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.sidebar.askYourself')}</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
-                {[
-                  'Can I cover the district and arrival window?',
-                  'Is my price clear about labour, materials, travel, and disposal?',
-                  'Do I need photos, measurements, or a call before giving a firm quote?',
-                  'What should the customer prepare before I arrive?',
-                ].map(item => (
+                {['coverage', 'priceClear', 'needDetails', 'customerPrep'].map(item => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-slate-400 flex-shrink-0 mt-0.5">○</span>
-                    <span>{item}</span>
+                    <span>{t(`proJobs.sidebar.quoteChecklist.${item}`)}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Work mix</p>
-              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Common requests</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.workMixKicker')}</p>
+              <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.sidebar.commonRequests')}</h2>
               {categories.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {categories.map(category => (
                     <div key={category.name} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm">
-                      <span className="font-semibold text-gray-800">{category.name}</span>
+                      <span className="font-semibold text-gray-800">{translateCategory(t, category.name)}</span>
                       <span className="text-gray-400">{category.count}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">Your request mix will appear here once customers contact you.</p>
+                <p className="text-sm text-gray-400">{t('proJobs.sidebar.noMix')}</p>
               )}
             </div>
           </aside>

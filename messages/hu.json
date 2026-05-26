@@ -549,6 +549,140 @@
       "share": "Profilom megosztása"
     }
   },
+  "proJobs": {
+    "time": {
+      "justNow": "épp most",
+      "minutesAgo": "{count} perce",
+      "hoursAgo": "{count} órája",
+      "daysAgo": "{count} napja"
+    },
+    "location": {
+      "approximate": "Hozzávetőleges munkavégzési hely",
+      "approximateKm": "Hozzávetőleges munkavégzési hely {distance} km-en belül",
+      "approximateM": "Hozzávetőleges munkavégzési hely {distance} m-en belül",
+      "district": "{district}. kerület",
+      "notShared": "A kerület nincs megadva"
+    },
+    "customerFallback": "Ügyfél",
+    "status": {
+      "pending": "Új kérés",
+      "quoted": "Ajánlat elküldve",
+      "accepted": "Elfogadva",
+      "declined": "Elutasítva",
+      "completed": "Befejezve",
+      "cancelled": "Lemondva"
+    },
+    "tabs": {
+      "pending": "Új",
+      "quoted": "Ajánlatok",
+      "accepted": "Elfogadva",
+      "completed": "Befejezve",
+      "declined": "Elutasítva",
+      "all": "Összes"
+    },
+    "header": {
+      "kicker": "Szakember irányítópult",
+      "title": "Munkák",
+      "pendingSingular": "{count} új kérés vár a válaszodra",
+      "pendingPlural": "{count} új kérés vár a válaszodra",
+      "noPending": "Most nincs új kérés"
+    },
+    "card": {
+      "contactDetails": "Elérhetőségek",
+      "sendQuote": "Ajánlat küldése",
+      "decline": "Elutasítás",
+      "declined": "Elutasítottad ezt a kérést.",
+      "cancelled": "Ezt a kérést lemondták.",
+      "completed": "Az ügyfél megerősítette a befejezést."
+    },
+    "hidden": {
+      "copy": "Új megkeresések várnak rejtett részletekkel. Frissíts, hogy azonnal feloldj minden kérést, vagy várd meg a(z) {resetLabel} dátumot, amikor az ingyenes megtekintéseid frissülnek.",
+      "freeViewsSingular": "Ebben a hónapban {count} ingyenes teljes megtekintést használtál fel.",
+      "freeViewsPlural": "Ebben a hónapban {count} ingyenes teljes megtekintést használtál fel.",
+      "title": "További megkeresések várnak",
+      "detailsHidden": "A részletek elrejtve maradnak, miután felhasználtad a havi ingyenes teljes megtekintéseket.",
+      "upgradeBody": "Frissíts Mestermind Próra, hogy minden új kérést azonnal feloldj, vagy várj {resetLabel} dátumig, amikor az ingyenes megtekintéseid frissülnek.",
+      "cta": "Új megkeresések feloldása"
+    },
+    "empty": {
+      "noRequests": "Nincsenek kérések",
+      "noStatusRequests": "Nincs {status} kérés",
+      "status": {
+        "pending": "új",
+        "quoted": "ajánlatos",
+        "accepted": "elfogadott",
+        "declined": "elutasított",
+        "completed": "befejezett",
+        "cancelled": "lemondott"
+      },
+      "pendingHint": "Itt jelennek meg az ügyfelektől érkező új kérések.",
+      "defaultHint": "Ebben a fülben még nincs mit megjeleníteni."
+    },
+    "sidebar": {
+      "briefKicker": "Mester összefoglaló",
+      "briefTitle": "Hasznos tudnivalók",
+      "needQuotes": "Ajánlatra vár",
+      "acceptedJobs": "Elfogadott munkák",
+      "newestRequest": "Legújabb kérés",
+      "newestRequestValue": "{category} - {time}",
+      "noRequestsYet": "Még nincsenek kérések",
+      "quotesWaiting": "Várakozó ajánlatok",
+      "contactsAvailable": "Elérhető kontaktok",
+      "nextActionKicker": "Következő legjobb lépés",
+      "nextActionBody": "Ajánlatadás előtt ellenőrizd a feladat körét, a szolgáltatási területet, az elérhetőségedet, valamint hogy az anyagokat vagy az utazást bele kell-e számolni.",
+      "reviewRequest": "Kérés áttekintése",
+      "beforeQuotesKicker": "Ajánlatküldés előtt",
+      "askYourself": "Kérdezd meg magadtól",
+      "quoteChecklist": {
+        "coverage": "Vállalni tudom a kerületet és az érkezési idősávot?",
+        "priceClear": "Egyértelmű az áram a munkadíjról, anyagokról, utazásról és elszállításról?",
+        "needDetails": "Szükségem van fotókra, méretekre vagy telefonhívásra a végleges ajánlat előtt?",
+        "customerPrep": "Mit készítsen elő az ügyfél, mielőtt megérkezem?"
+      },
+      "workMixKicker": "Munkaösszetétel",
+      "commonRequests": "Gyakori kérések",
+      "noMix": "A kérésösszetétel akkor jelenik meg itt, amikor ügyfelek kapcsolatba lépnek veled."
+    },
+    "quoteModal": {
+      "kicker": "Ajánlat küldése",
+      "title": "Ajánlatod erre: {category}",
+      "close": "Bezárás",
+      "priceLabel": "Árad",
+      "pricePlaceholder": "pl. 15 000 Ft",
+      "priceHint": "Adj meg induló árat. A teljes kör egyeztetése után módosíthatod a végösszeget.",
+      "timelineLabel": "Mikor tudsz kezdeni?",
+      "timelineOptions": {
+        "within24Hours": "24 órán belül",
+        "twoToThreeDays": "2-3 nap",
+        "thisWeek": "Ezen a héten",
+        "nextWeek": "Jövő héten",
+        "confirmAfterTalk": "Egyeztetés után erősítem meg"
+      },
+      "notesLabel": "Üzenet az ügyfélnek",
+      "optional": "opcionális",
+      "notesPlaceholder": "Írd le a tapasztalatodat, mi tartozik az árba, és milyen kérdéseid vannak a munkával kapcsolatban.",
+      "sending": "Küldés...",
+      "submit": "Ajánlat küldése",
+      "cancel": "Mégse",
+      "errors": {
+        "priceRequired": "Adj meg egy árat.",
+        "generic": "Valami hiba történt. Próbáld újra."
+      }
+    },
+    "declineModal": {
+      "title": "Elutasítod ezt a kérést?",
+      "subtitle": "Ez a művelet nem vonható vissza.",
+      "beforeTitle": "Elutasítás előtt",
+      "bullets": {
+        "customerNotified": "Az ügyfelet értesítjük, és másik szakembert fog keresni.",
+        "visibility": "A gyakori elutasítás csökkenti a láthatóságodat a keresési eredményekben.",
+        "permanentlyClosed": "Ez a kérés végleg lezárul - nem fogod tudni újranyitni."
+      },
+      "keep": "Kérés megtartása",
+      "declining": "Elutasítás...",
+      "confirm": "Igen, elutasítom"
+    }
+  },
   "proLanding": {
     "hero": {
       "eyebrow": "Szakembereknek",
