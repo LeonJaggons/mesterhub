@@ -160,7 +160,7 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
   margin-bottom: 1rem;
   background: white;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .searchBarSticky {
@@ -169,7 +169,7 @@
   box-shadow: none;
   border: 1.5px solid #d3d4d5;
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
 }
 
@@ -195,7 +195,7 @@
   border: 1.5px solid #d3d4d5;
   border-right: none;
   border-radius: 0.5rem 0 0 0.5rem;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Wrapper so Autocomplete.Root fills the flex space */
