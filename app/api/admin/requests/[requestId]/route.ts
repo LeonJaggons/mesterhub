@@ -79,7 +79,13 @@ export async function PATCH(
         requestId,
         subject: `${serviceRequest.categoryName ?? 'Service'} request cancelled`,
         text: `Mestermind cancelled this request.${reason ? ` Reason: ${reason}` : ''}`,
-        metadata: { cancelledBy: 'admin', proUid: serviceRequest.proUid, customerUid: serviceRequest.customerUid },
+        localized: {
+          hu: {
+            subject: `${serviceRequest.categoryName ?? 'Szolgáltatás'} kérés törölve`,
+            text: `A Mestermind törölte ezt a kérést.${reason ? ` Indok: ${reason}` : ''}`,
+          },
+        },
+        metadata: { recipientUid: serviceRequest.customerUid, cancelledBy: 'admin', proUid: serviceRequest.proUid, customerUid: serviceRequest.customerUid },
       }),
       sendLifecycleEmail({
         to: await proEmail(serviceRequest.proUid),
@@ -87,7 +93,13 @@ export async function PATCH(
         requestId,
         subject: `${serviceRequest.categoryName ?? 'Service'} request cancelled`,
         text: `Mestermind cancelled this request.${reason ? ` Reason: ${reason}` : ''}`,
-        metadata: { cancelledBy: 'admin', proUid: serviceRequest.proUid, customerUid: serviceRequest.customerUid },
+        localized: {
+          hu: {
+            subject: `${serviceRequest.categoryName ?? 'Szolgáltatás'} kérés törölve`,
+            text: `A Mestermind törölte ezt a kérést.${reason ? ` Indok: ${reason}` : ''}`,
+          },
+        },
+        metadata: { recipientUid: serviceRequest.proUid, cancelledBy: 'admin', proUid: serviceRequest.proUid, customerUid: serviceRequest.customerUid },
       }),
     ])
 

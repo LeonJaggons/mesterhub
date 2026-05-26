@@ -2,8 +2,35 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { emailConfigured, sendEmail } from '@/firebase/email'
+import { defaultLocale, getSupportedLocale, type Locale } from '@/lib/i18n/config'
 
 type MailStatus = 'sent' | 'skipped' | 'error'
+
+const RESET_EMAIL: Record<Locale, {
+  subject: string
+  intro: string
+  instruction: string
+  cta: string
+  ignore: string
+  preview: string
+}> = {
+  en: {
+    subject: 'Reset your Mestermind password',
+    intro: 'We received a request to reset your Mestermind password.',
+    instruction: 'Use the button below to choose a new password.',
+    cta: 'Reset password',
+    ignore: 'If you did not request this, you can ignore this email.',
+    preview: 'Use this secure link to reset your Mestermind password.',
+  },
+  hu: {
+    subject: 'Állítsd vissza a Mestermind jelszavad',
+    intro: 'Kérést kaptunk a Mestermind jelszavad visszaállítására.',
+    instruction: 'Az alábbi gombbal választhatsz új jelszót.',
+    cta: 'Jelszó visszaállítása',
+    ignore: 'Ha nem te kérted ezt, nyugodtan figyelmen kívül hagyhatod ezt az e-mailt.',
+    preview: 'Ezzel a biztonságos linkkel visszaállíthatod a Mestermind jelszavad.',
+  },
+}
 
 function appOrigin(request: NextRequest): string {
   const origin =
@@ -63,15 +90,18 @@ function appResetLink(generatedLink: string, origin: string): string {
 
 async function recordEmail(input: {
   to: string
+  locale: Locale
   status: MailStatus
   resetUrl?: string
   error?: string
   providerId?: string
 }) {
+  const copy = RESET_EMAIL[input.locale]
   await adminDb.collection('mailEvents').add({
     to: input.to,
-    subject: 'Reset your Mestermind password',
+    subject: copy.subject,
     text: 'Password reset request',
+    locale: input.locale,
     event: 'auth.password_reset',
     requestId: null,
     metadata: {
@@ -83,6 +113,15 @@ async function recordEmail(input: {
     providerId: input.providerId ?? null,
     createdAt: FieldValue.serverTimestamp(),
   })
+}
+
+async function preferredLocaleForEmail(email: string): Promise<Locale> {
+  const user = await adminAuth.getUserByEmail(email).catch(() => null)
+  if (!user) return defaultLocale
+
+  const snap = await adminDb.collection('users').doc(user.uid).get()
+  if (!snap.exists) return defaultLocale
+  return getSupportedLocale(snap.data()?.preferredLocale as string | undefined)
 }
 
 export async function POST(request: NextRequest) {
@@ -99,45 +138,48 @@ export async function POST(request: NextRequest) {
 
   try {
     const origin = appOrigin(request)
+    const locale = await preferredLocaleForEmail(email)
+    const copy = RESET_EMAIL[locale]
     const generatedLink = await adminAuth.generatePasswordResetLink(email, {
       url: `${origin}/login/reset`,
       handleCodeInApp: true,
     })
     const resetUrl = appResetLink(generatedLink, origin)
-    const subject = 'Reset your Mestermind password'
     const text = [
-      'We received a request to reset your Mestermind password.',
+      copy.intro,
       '',
-      `Reset your password: ${resetUrl}`,
+      `${copy.cta}: ${resetUrl}`,
       '',
-      'If you did not request this, you can ignore this email.',
+      copy.ignore,
     ].join('\n')
     const result = await sendEmail({
       to: email,
-      subject,
+      subject: copy.subject,
       text,
       bodyHtml: `
-        <p style="margin:0 0 16px;color:#334155;font-size:16px;line-height:1.6;">We received a request to reset your Mestermind password.</p>
-        <p style="margin:0 0 20px;color:#334155;font-size:16px;line-height:1.6;">Use the button below to choose a new password.</p>
+        <p style="margin:0 0 16px;color:#334155;font-size:16px;line-height:1.6;">${escapeHtml(copy.intro)}</p>
+        <p style="margin:0 0 20px;color:#334155;font-size:16px;line-height:1.6;">${escapeHtml(copy.instruction)}</p>
         <p style="margin:0 0 20px;">
-          <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:11px 24px;border-radius:6px;background:#f97316;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Reset password</a>
+          <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:11px 24px;border-radius:6px;background:#f97316;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">${escapeHtml(copy.cta)}</a>
         </p>
-        <p style="margin:0;color:#676d73;font-size:14px;line-height:22px;">If you did not request this, you can ignore this email.</p>
+        <p style="margin:0;color:#676d73;font-size:14px;line-height:22px;">${escapeHtml(copy.ignore)}</p>
       `,
-      previewText: 'Use this secure link to reset your Mestermind password.',
+      previewText: copy.preview,
       hideSubjectHeading: true,
+      locale,
     })
 
-    await recordEmail({ to: email, status: 'sent', resetUrl, providerId: result.id })
+    await recordEmail({ to: email, locale, status: 'sent', resetUrl, providerId: result.id })
   } catch (err: unknown) {
     const code = firebaseErrorCode(err)
     if (code === 'auth/user-not-found') {
-      await recordEmail({ to: email, status: 'skipped', error: 'No Firebase user for email' })
+      await recordEmail({ to: email, locale: defaultLocale, status: 'skipped', error: 'No Firebase user for email' })
       return Response.json({ ok: true })
     }
 
     await recordEmail({
       to: email,
+      locale: defaultLocale,
       status: 'error',
       error: err instanceof Error ? err.message : 'Unknown password reset error',
     })

@@ -272,6 +272,62 @@ function detailRow(label: string, value: string): string {
   `
 }
 
+function huActorRole(role: 'customer' | 'pro'): string {
+  return role === 'pro' ? 'szakember' : 'ügyfél'
+}
+
+function emailCardHtml(input: {
+  eyebrow: string
+  title: string
+  intro?: string
+  rows?: Array<[string, string | undefined | null]>
+  ctaLabel: string
+  ctaUrl: string
+  tone?: 'orange' | 'green' | 'slate'
+}): string {
+  const tone = input.tone ?? 'orange'
+  const colors = {
+    orange: { bg: '#fff7ed', border: '#f1d8c7', accent: '#f97316' },
+    green: { bg: '#ecfdf5', border: '#bbf7d0', accent: '#16a34a' },
+    slate: { bg: '#fafafa', border: '#e9eced', accent: '#676d73' },
+  }[tone]
+  const rows = (input.rows ?? [])
+    .filter(([, value]) => typeof value === 'string' && value.trim())
+    .map(([label, value]) => detailRow(label, value ?? ''))
+    .join('')
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      <tr>
+        <td style="height:112px;background:${colors.bg};border-radius:4px 4px 0 0;border-bottom:1px solid ${colors.border};text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${colors.accent};">${escapeEmailHtml(input.eyebrow)}</div>
+          ${input.intro ? `<div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">${escapeEmailHtml(input.intro)}</div>` : ''}
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:24px;">
+      <tr>
+        <td valign="middle" style="padding:0 0 20px;">
+          <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${escapeEmailHtml(input.title)}</h1>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      ${rows}
+    </table>
+
+    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
+      <tr>
+        <td style="background:#f97316;border-radius:4px;">
+          <a href="${escapeEmailHtml(input.ctaUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">${escapeEmailHtml(input.ctaLabel)}</a>
+        </td>
+      </tr>
+    </table>
+  `
+}
+
 function acceptedQuoteEmailHtml(input: {
   customerName: string
   categoryName: string
@@ -788,8 +844,34 @@ export async function PATCH(
         previewText: `Review ${req.proName}'s ${req.categoryName} quote on Mestermind.`,
         text: quoteEmailText({ proName: req.proName, categoryName: req.categoryName, price, timeline, notes, requestUrl }),
         bodyHtml: quoteEmailHtml({ proName: req.proName, categoryName: req.categoryName, price, timeline, notes, requestUrl }),
+        localized: {
+          hu: {
+            subject: `${req.proName} ajánlatot küldött`,
+            previewText: `Nézd át ${req.proName} ${req.categoryName} ajánlatát a Mestermindben.`,
+            text: [
+              `${req.proName} ajánlatot küldött a(z) ${req.categoryName} kérésedre.`,
+              `Ár: ${price}`,
+              `Időzítés: ${timeline}`,
+              notes ? `${req.proName} üzenete:\n${notes}` : '',
+              `Nyisd meg a Mestermindet az elfogadáshoz, elutasításhoz vagy további kérdésekhez: ${requestUrl}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Új ajánlat érkezett',
+              title: `${req.proName} ajánlatot küldött a(z) ${req.categoryName} munkára`,
+              intro: 'Nézd át az árat, az időzítést és a szakember üzenetét.',
+              rows: [
+                ['Ár', price],
+                ['Időzítés', timeline],
+                [`${req.proName} üzenete`, notes],
+              ],
+              ctaLabel: 'Ajánlat megtekintése',
+              ctaUrl: requestUrl,
+              tone: 'orange',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.customerUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await createInAppNotification({
         recipientUid: req.customerUid,
@@ -826,8 +908,26 @@ export async function PATCH(
         previewText: `${req.proName} cannot take this ${req.categoryName} request.`,
         text: declinedEmailText({ proName: req.proName, categoryName: req.categoryName, requestUrl }),
         bodyHtml: declinedEmailHtml({ proName: req.proName, categoryName: req.categoryName, requestUrl }),
+        localized: {
+          hu: {
+            subject: `${req.proName} elutasította a kérésed`,
+            previewText: `${req.proName} nem tudja vállalni ezt a(z) ${req.categoryName} kérést.`,
+            text: `${req.proName} nem tudja vállalni ezt a(z) ${req.categoryName} kérést. Nyisd meg a Mestermindet a kérés áttekintéséhez és másik szakember kereséséhez: ${requestUrl}`,
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Kérés frissítése',
+              title: `${req.proName} elutasította a(z) ${req.categoryName} kérésed`,
+              intro: 'Ez a szakember most nem elérhető erre a munkára.',
+              rows: [
+                ['Mi történik most?', 'A kérésed továbbra is mentve van. Áttekintheted a részleteket, és másik szakembert hívhatsz meg a Mestermindben.'],
+              ],
+              ctaLabel: 'Kérés megtekintése',
+              ctaUrl: requestUrl,
+              tone: 'slate',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.customerUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       return Response.json({ ok: true })
     }
@@ -901,8 +1001,38 @@ export async function PATCH(
           details: acceptanceDetails,
           requestUrl: appUrl(`/pro/jobs/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.customerName} elfogadta az ajánlatod`,
+            previewText: `${req.customerName} elfogadta a(z) ${req.categoryName} ajánlatod.`,
+            text: [
+              `${req.customerName} elfogadta a(z) ${req.categoryName} ajánlatod.`,
+              `Üzenet:\n${acceptanceDetails.message}`,
+              acceptanceDetails.phone ? `Telefon: ${acceptanceDetails.phone}` : '',
+              acceptanceDetails.customerEmail ? `E-mail: ${acceptanceDetails.customerEmail}` : '',
+              acceptanceDetails.address ? `Cím: ${acceptanceDetails.address}` : '',
+              acceptanceDetails.preferredStart ? `Preferált kezdés: ${acceptanceDetails.preferredStart}` : '',
+              `Nyisd meg a Mestermindet az időpont egyeztetéséhez: ${appUrl(`/pro/jobs/${requestId}`)}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Ajánlat elfogadva',
+              title: `${req.customerName} elfogadta a(z) ${req.categoryName} ajánlatod`,
+              intro: 'Az ügyfél téged választott. Használd az adatait a következő lépések egyeztetéséhez.',
+              rows: [
+                ['Ügyfél üzenete', acceptanceDetails.message],
+                ['Telefon', acceptanceDetails.phone],
+                ['E-mail', acceptanceDetails.customerEmail],
+                ['Cím', acceptanceDetails.address],
+                ['Preferált kezdés', acceptanceDetails.preferredStart],
+              ],
+              ctaLabel: 'Munka megnyitása',
+              ctaUrl: appUrl(`/pro/jobs/${requestId}`),
+              tone: 'green',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.proUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await createInAppNotification({
         recipientUid: req.proUid,
@@ -950,8 +1080,31 @@ export async function PATCH(
           reason,
           requestUrl: appUrl(`/pro/jobs/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.customerName} elutasította az ajánlatod`,
+            previewText: `${req.customerName} elutasította a(z) ${req.categoryName} ajánlatod.`,
+            text: [
+              `${req.customerName} elutasította a(z) ${req.categoryName} ajánlatod.`,
+              reason ? `Indok:\n${reason}` : '',
+              `Nyisd meg a Mestermindet a kérés áttekintéséhez: ${appUrl(`/pro/jobs/${requestId}`)}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Ajánlat elutasítva',
+              title: `${req.customerName} elutasította a(z) ${req.categoryName} ajánlatod`,
+              intro: 'Az ügyfél nem ezt az ajánlatot választotta.',
+              rows: [
+                ['Indok', reason || 'Nem adott meg indokot.'],
+                ['Mi történik most?', 'Ez a kérés elutasítottként van megjelölve. Áttekintheted a Mestermindben, és más nyitott munkákra koncentrálhatsz.'],
+              ],
+              ctaLabel: 'Kérés megtekintése',
+              ctaUrl: appUrl(`/pro/jobs/${requestId}`),
+              tone: 'slate',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.proUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await createInAppNotification({
         recipientUid: req.proUid,
@@ -1039,8 +1192,39 @@ export async function PATCH(
           appointment: appointmentForEmail,
           requestUrl: appUrl(`/requests/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.proName} időpontot javasolt`,
+            previewText: `${req.proName} időpontot javasolt a(z) ${req.categoryName} kérésedhez.`,
+            text: [
+              `${req.proName} időpontot javasolt a(z) ${req.categoryName} kérésedhez.`,
+              `Dátum: ${appointmentForEmail.date}`,
+              `Idő: ${appointmentForEmail.time}`,
+              appointmentForEmail.duration ? `Időtartam: ${appointmentForEmail.duration}` : '',
+              appointmentForEmail.location ? `Helyszín: ${appointmentForEmail.location}` : '',
+              appointmentForEmail.notes ? `Megjegyzések:\n${appointmentForEmail.notes}` : '',
+              `Nyisd meg a Mestermindet az időpont megerősítéséhez: ${appUrl(`/requests/${requestId}`)}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Időpont javasolva',
+              title: `${req.proName} időpontot javasolt`,
+              intro: 'Nézd át a szakember által javasolt dátumot és időpontot.',
+              rows: [
+                ['Szolgáltatás', req.categoryName],
+                ['Dátum', appointmentForEmail.date],
+                ['Idő', appointmentForEmail.time],
+                ['Időtartam', appointmentForEmail.duration],
+                ['Helyszín', appointmentForEmail.location],
+                ['Megjegyzések', appointmentForEmail.notes],
+              ],
+              ctaLabel: 'Időpont megerősítése',
+              ctaUrl: appUrl(`/requests/${requestId}`),
+              tone: 'orange',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.customerUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await createInAppNotification({
         recipientUid: req.customerUid,
@@ -1101,8 +1285,39 @@ export async function PATCH(
           appointment: confirmedAppointment,
           requestUrl: appUrl(`/pro/appointments/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.customerName} megerősítette az időpontot`,
+            previewText: `${req.customerName} megerősítette a(z) ${req.categoryName} időpontját.`,
+            text: [
+              `${req.customerName} megerősítette a(z) ${req.categoryName} időpontját.`,
+              confirmedAppointment?.date ? `Dátum: ${confirmedAppointment.date}` : '',
+              confirmedAppointment?.time ? `Idő: ${confirmedAppointment.time}` : '',
+              confirmedAppointment?.duration ? `Időtartam: ${confirmedAppointment.duration}` : '',
+              confirmedAppointment?.location ? `Helyszín: ${confirmedAppointment.location}` : '',
+              confirmedAppointment?.notes ? `Megjegyzések:\n${confirmedAppointment.notes}` : '',
+              `Nyisd meg a Mestermindet a munka megtekintéséhez: ${appUrl(`/pro/appointments/${requestId}`)}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Időpont megerősítve',
+              title: `${req.customerName} megerősítette az időpontot`,
+              intro: 'Az ügyfél elfogadta a javasolt időpontot.',
+              rows: [
+                ['Szolgáltatás', req.categoryName],
+                ['Dátum', confirmedAppointment?.date],
+                ['Idő', confirmedAppointment?.time],
+                ['Időtartam', confirmedAppointment?.duration],
+                ['Helyszín', confirmedAppointment?.location],
+                ['Megjegyzések', confirmedAppointment?.notes],
+              ],
+              ctaLabel: 'Munka megnyitása',
+              ctaUrl: appUrl(`/pro/appointments/${requestId}`),
+              tone: 'green',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.proUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await createInAppNotification({
         recipientUid: req.proUid,
@@ -1218,8 +1433,26 @@ export async function PATCH(
           categoryName: req.categoryName,
           requestUrl: appUrl(`/requests/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.proName} késznek jelölte a munkát`,
+            previewText: `${req.proName} késznek jelölte a(z) ${req.categoryName} munkát.`,
+            text: `${req.proName} késznek jelölte a(z) ${req.categoryName} munkát. Nyisd meg a Mestermindet, és erősítsd meg, ha a munka befejeződött: ${appUrl(`/requests/${requestId}`)}`,
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Munka késznek jelölve',
+              title: `${req.proName} késznek jelölte a(z) ${req.categoryName} munkád`,
+              intro: 'Erősítsd meg, hogy a munka elkészült, amikor készen állsz.',
+              rows: [
+                ['Következő lépés', 'Nézd át a munkát, és erősítsd meg a befejezést, ha minden rendben van.'],
+              ],
+              ctaLabel: 'Munka áttekintése',
+              ctaUrl: appUrl(`/requests/${requestId}`),
+              tone: 'green',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.customerUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await createInAppNotification({
         recipientUid: req.customerUid,
@@ -1281,8 +1514,23 @@ export async function PATCH(
           categoryName: req.categoryName,
           requestUrl: appUrl(`/pro/jobs/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.customerName} megerősítette, hogy a munka kész`,
+            previewText: `${req.customerName} megerősítette, hogy a(z) ${req.categoryName} munka befejeződött.`,
+            text: `${req.customerName} megerősítette, hogy a(z) ${req.categoryName} munka befejeződött. Nézd meg a lezárt munkát a Mestermindben: ${appUrl(`/pro/jobs/${requestId}`)}`,
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Munka befejezve',
+              title: `${req.customerName} megerősítette, hogy a(z) ${req.categoryName} munka kész`,
+              intro: 'Az ügyfél megerősítette, hogy a munka befejeződött.',
+              ctaLabel: 'Lezárt munka megtekintése',
+              ctaUrl: appUrl(`/pro/jobs/${requestId}`),
+              tone: 'green',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid },
+        metadata: { recipientUid: req.proUid, proUid: req.proUid, customerUid: req.customerUid },
       })
       await sendLifecycleEmail({
         to: req.customerEmail,
@@ -1300,8 +1548,27 @@ export async function PATCH(
           categoryName: req.categoryName,
           requestUrl: appUrl(`/requests/${requestId}#review`),
         }),
+        localized: {
+          hu: {
+            subject: `Értékeld ${req.proName} szakembert a Mestermindben`,
+            previewText: `Mondd el más ügyfeleknek, hogyan sikerült a(z) ${req.categoryName} munka.`,
+            text: `A(z) ${req.categoryName} munka befejeződött. Kérjük, írj értékelést ${req.proName} szakemberről, hogy más ügyfelek magabiztosabban választhassanak: ${appUrl(`/requests/${requestId}#review`)}`,
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Hogy sikerült?',
+              title: `Értékeld ${req.proName} szakembert`,
+              intro: 'Az értékelésed segít más ügyfeleknek magabiztosabban választani.',
+              rows: [
+                ['Befejezett munka', req.categoryName],
+                ['Miért fontos az értékelés?', 'Egy rövid értékelés segít a jó szakembereknek bizalmat építeni, és a jövőbeli ügyfeleknek tudni, mire számíthatnak.'],
+              ],
+              ctaLabel: 'Értékelés írása',
+              ctaUrl: appUrl(`/requests/${requestId}#review`),
+              tone: 'orange',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid, categoryName: req.categoryName },
+        metadata: { recipientUid: req.customerUid, proUid: req.proUid, customerUid: req.customerUid, categoryName: req.categoryName },
       })
       await createInAppNotification({
         recipientUid: req.proUid,
@@ -1350,8 +1617,35 @@ export async function PATCH(
           reason,
           requestUrl: appUrl(actorRole === 'pro' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.categoryName} kérés törölve`,
+            previewText: `A(z) ${req.categoryName} kérést a(z) ${huActorRole(actorRole)} törölte.`,
+            text: [
+              `A(z) ${req.categoryName} kérést a(z) ${huActorRole(actorRole)} törölte.`,
+              reason ? `Indok:\n${reason}` : '',
+              `Nyisd meg a Mestermindet a kérés áttekintéséhez: ${appUrl(actorRole === 'pro' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`)}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Kérés törölve',
+              title: `${req.categoryName} kérés törölve`,
+              intro: `Törölte: ${huActorRole(actorRole)}.`,
+              rows: [
+                ['Indok', reason || 'Nem adott meg indokot.'],
+              ],
+              ctaLabel: 'Kérés megtekintése',
+              ctaUrl: appUrl(actorRole === 'pro' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`),
+              tone: 'slate',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid, cancelledBy: actorRole },
+        metadata: {
+          recipientUid: actorRole === 'pro' ? req.customerUid : req.proUid,
+          proUid: req.proUid,
+          customerUid: req.customerUid,
+          cancelledBy: actorRole,
+        },
       })
       await createInAppNotification({
         recipientUid: actorRole === 'pro' ? req.customerUid : req.proUid,
@@ -1463,8 +1757,30 @@ export async function DELETE(
           reason,
           requestUrl: appUrl(`/pro/jobs/${requestId}`),
         }),
+        localized: {
+          hu: {
+            subject: `${req.categoryName} kérés törölve`,
+            previewText: `A(z) ${req.categoryName} kérést az ügyfél törölte.`,
+            text: [
+              `A(z) ${req.categoryName} kérést az ügyfél törölte.`,
+              reason ? `Indok:\n${reason}` : '',
+              `Nyisd meg a Mestermindet a kérés áttekintéséhez: ${appUrl(`/pro/jobs/${requestId}`)}`,
+            ].filter(Boolean).join('\n\n'),
+            bodyHtml: emailCardHtml({
+              eyebrow: 'Kérés törölve',
+              title: `${req.categoryName} kérés törölve`,
+              intro: 'Az ügyfél törölte ezt a kérést.',
+              rows: [
+                ['Indok', reason || 'Nem adott meg indokot.'],
+              ],
+              ctaLabel: 'Kérés megtekintése',
+              ctaUrl: appUrl(`/pro/jobs/${requestId}`),
+              tone: 'slate',
+            }),
+          },
+        },
         hideSubjectHeading: true,
-        metadata: { proUid: req.proUid, customerUid: req.customerUid, cancelledBy: 'customer', deletedByCustomer: true },
+        metadata: { recipientUid: req.proUid, proUid: req.proUid, customerUid: req.customerUid, cancelledBy: 'customer', deletedByCustomer: true },
       })
     }
 

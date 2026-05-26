@@ -34,6 +34,12 @@ function digestSubject(input: { count: number; categoryName: string }): string {
     : `New message about ${input.categoryName}`
 }
 
+function digestSubjectHu(input: { count: number; categoryName: string }): string {
+  return input.count > 1
+    ? `${input.count} új üzenet ezzel kapcsolatban: ${input.categoryName}`
+    : `Új üzenet ezzel kapcsolatban: ${input.categoryName}`
+}
+
 export async function GET(request: Request) {
   const unauthorized = requireCron(request)
   if (unauthorized) return unauthorized
@@ -62,6 +68,8 @@ export async function GET(request: Request) {
       ? `/pro/messages/${data.requestId}`
       : `/messages/${data.requestId}`)
     const subject = digestSubject({ count, categoryName })
+    const subjectHu = digestSubjectHu({ count, categoryName })
+    const latestMessage = cleanString(data.lastMessage)
 
     await sendLifecycleEmail({
       to: cleanString(data.recipientEmail),
@@ -70,12 +78,12 @@ export async function GET(request: Request) {
       subject,
       previewText: count > 1
         ? `${senderName} and the latest message are waiting in Mestermind.`
-        : `${senderName}: ${cleanString(data.lastMessage).slice(0, 120)}`,
+        : `${senderName}: ${latestMessage.slice(0, 120)}`,
       text: [
         count > 1
           ? `You have ${count} new messages about ${categoryName}.`
           : `You have a new message about ${categoryName}.`,
-        `${senderName}: ${cleanString(data.lastMessage)}`,
+        `${senderName}: ${latestMessage}`,
         `Open Mestermind to reply: ${requestUrl}`,
       ].join('\n\n'),
       bodyHtml: emailCardHtml({
@@ -90,6 +98,33 @@ export async function GET(request: Request) {
         ctaUrl: requestUrl,
         tone: 'slate',
       }),
+      localized: {
+        hu: {
+          subject: subjectHu,
+          previewText: count > 1
+            ? `${senderName} és a legújabb üzenet vár rád a Mestermindben.`
+            : `${senderName}: ${latestMessage.slice(0, 120)}`,
+          text: [
+            count > 1
+              ? `${count} új üzeneted van ezzel kapcsolatban: ${categoryName}.`
+              : `Új üzeneted van ezzel kapcsolatban: ${categoryName}.`,
+            `${senderName}: ${latestMessage}`,
+            `Nyisd meg a Mestermindet a válaszhoz: ${requestUrl}`,
+          ].join('\n\n'),
+          bodyHtml: emailCardHtml({
+            eyebrow: 'Új üzenetek',
+            title: subjectHu,
+            intro: 'Nyisd meg a Mestermindet, hogy folytasd a beszélgetést.',
+            rows: [
+              ['Feladó', senderName],
+              ['Legutóbbi üzenet', data.lastMessage],
+            ],
+            ctaLabel: 'Beszélgetés megnyitása',
+            ctaUrl: requestUrl,
+            tone: 'slate',
+          }),
+        },
+      },
       hideSubjectHeading: true,
       metadata: {
         digestId: doc.id,

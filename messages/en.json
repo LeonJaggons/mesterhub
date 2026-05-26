@@ -1088,6 +1088,10 @@
         "reviews": "Most reviewed",
         "price": "Lowest starting price"
       },
+      "category": "Category",
+      "allCategories": "All categories",
+      "service": "Service",
+      "allServices": "All services",
       "minimumRating": "Minimum rating",
       "rating": {
         "any": "Any rating",
@@ -1108,7 +1112,11 @@
         "experienced": "5+ years experience"
       },
       "reset": "Reset filters",
-      "resetWithCount": "Reset filters ({count})"
+      "resetWithCount": "Reset filters ({count})",
+      "showingProfessionals": "Showing {shown} of {total} professionals",
+      "scrollForMore": "Scroll for more",
+      "loadMore": "Load more",
+      "allLoaded": "All matching professionals loaded."
     },
     "errors": {
       "loadTitle": "Could not load professionals",

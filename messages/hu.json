@@ -1088,6 +1088,10 @@
         "reviews": "Legtöbb értékelés",
         "price": "Legalacsonyabb induló ár"
       },
+      "category": "Kategória",
+      "allCategories": "Minden kategória",
+      "service": "Szolgáltatás",
+      "allServices": "Minden szolgáltatás",
       "minimumRating": "Minimum értékelés",
       "rating": {
         "any": "Bármilyen értékelés",
@@ -1108,7 +1112,11 @@
         "experienced": "5+ év tapasztalat"
       },
       "reset": "Szűrők törlése",
-      "resetWithCount": "Szűrők törlése ({count})"
+      "resetWithCount": "Szűrők törlése ({count})",
+      "showingProfessionals": "{shown} / {total} szakember megjelenítve",
+      "scrollForMore": "Görgess további találatokért",
+      "loadMore": "Továbbiak betöltése",
+      "allLoaded": "Minden megfelelő szakember betöltve."
     },
     "errors": {
       "loadTitle": "Nem sikerült betölteni a szakembereket",

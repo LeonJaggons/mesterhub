@@ -103,6 +103,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, onClose: () =
 
 function LanguageChooser({ compact = false }: { compact?: boolean }) {
   const t = useTranslations()
+  const router = useRouter()
   const rawPathname = usePathname()
   const locale = getPathLocale(rawPathname) ?? defaultLocale
   const pathname = getPathnameWithoutLocale(rawPathname)
@@ -113,6 +114,23 @@ function LanguageChooser({ compact = false }: { compact?: boolean }) {
 
   const queryString = searchParams.toString()
   const href = queryString ? `${pathname}?${queryString}` : pathname
+
+  async function chooseLocale(event: React.MouseEvent<HTMLAnchorElement>, nextLocale: Locale) {
+    event.preventDefault()
+    const nextHref = localizeHref(href, nextLocale)
+    setOpen(false)
+
+    try {
+      await authenticatedFetch('/api/me/locale', {
+        method: 'PATCH',
+        body: JSON.stringify({ preferredLocale: nextLocale }),
+      })
+    } catch {
+      // Signed-out visitors still get the locale cookie from the localized route.
+    } finally {
+      router.push(nextHref)
+    }
+  }
 
   return (
     <div ref={ref} className={compact ? styles.languageAnchorMobile : styles.languageAnchor}>
@@ -136,7 +154,7 @@ function LanguageChooser({ compact = false }: { compact?: boolean }) {
             role="menuitem"
             aria-current={locale === nextLocale ? 'true' : undefined}
             className={`${styles.languageOption} ${locale === nextLocale ? styles.languageOptionActive : ''}`}
-            onClick={() => setOpen(false)}
+            onClick={event => chooseLocale(event, nextLocale)}
           >
             <span className={styles.languageOptionName}>{LANGUAGE_LABELS[nextLocale].name}</span>
             <span className={styles.languageOptionCode}>{LANGUAGE_LABELS[nextLocale].short}</span>
@@ -638,7 +656,11 @@ function MobileMenu({
 
 export default function Header() {
   const t = useTranslations()
-  const pathname = getPathnameWithoutLocale(usePathname())
+  const router = useRouter()
+  const rawPathname = usePathname()
+  const currentLocale = getPathLocale(rawPathname) ?? defaultLocale
+  const pathname = getPathnameWithoutLocale(rawPathname)
+  const searchParams = useSearchParams()
   const isSignupPath = pathname.startsWith('/pro/signup')
   const [user, setUser] = useState<User | null>(null)
   const [pro, setPro] = useState<ProBasic | null>(null)
@@ -670,10 +692,15 @@ export default function Header() {
       if (!cancelled) setActiveAppointments(0)
       try {
         const res = await authenticatedFetch('/api/me')
-        const data = (await res.json()) as { pro: ProBasic | null }
+        const data = (await res.json()) as { pro: ProBasic | null; preferredLocale?: Locale | null }
         const profile = data.pro
         if (!cancelled && u.uid === uid) {
           setPro(profile)
+          if (data.preferredLocale && data.preferredLocale !== currentLocale) {
+            const queryString = searchParams.toString()
+            const href = queryString ? `${pathname}?${queryString}` : pathname
+            router.replace(localizeHref(href, data.preferredLocale))
+          }
           if (!profile) {
             setPendingJobs(0)
             setConfirmedProAppointments(0)
@@ -689,7 +716,7 @@ export default function Header() {
       cancelled = true
       unsub()
     }
-  }, [isSignupPath])
+  }, [currentLocale, isSignupPath, pathname, router, searchParams])
 
   // Fetch pending job count for the badge
   useEffect(() => {

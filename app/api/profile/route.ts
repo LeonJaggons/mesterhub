@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { isLocale } from '@/lib/i18n/config'
 
 function cleanString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value.trim() : fallback
@@ -46,6 +47,7 @@ export async function PATCH(request: NextRequest) {
     const verifiedPhone = typeof user.phone_number === 'string' ? user.phone_number : ''
     const phone = verifiedPhone || cleanString(body.phone)
     const preferredDistrict = cleanString(body.preferredDistrict)
+    const preferredLocale = cleanString(body.preferredLocale)
     const address = cleanString(body.address)
 
     if (!displayName) {
@@ -64,6 +66,7 @@ export async function PATCH(request: NextRequest) {
         phone,
         phoneVerified: Boolean(verifiedPhone),
         preferredDistrict,
+        ...(isLocale(preferredLocale) ? { preferredLocale } : {}),
         address,
         updatedAt: FieldValue.serverTimestamp(),
         createdAt: FieldValue.serverTimestamp(),

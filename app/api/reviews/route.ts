@@ -250,8 +250,57 @@ export async function POST(request: NextRequest) {
         comment: review.comment,
         profileUrl,
       }),
+      localized: {
+        hu: {
+          subject: `${review.customerName} értékelést írt rólad`,
+          previewText: `${review.rating}/5 értékelés ehhez: ${review.categoryName || 'a befejezett munkád'}.`,
+          text: [
+            `${review.customerName} ${review.rating}/5 értékelést írt a(z) ${review.categoryName || 'befejezett munkád'} kapcsán.`,
+            review.comment,
+            `Nézd meg a nyilvános értékeléseidet a Mestermindben: ${profileUrl}`,
+          ].join('\n\n'),
+          bodyHtml: `
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
+                  <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Új értékelés</div>
+                  <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Egy ügyfél értékelte a befejezett munkád</div>
+                </td>
+              </tr>
+            </table>
+
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:24px;">
+              <tr>
+                <td style="padding:0 0 18px;">
+                  <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${escapeEmailHtml(review.customerName)} értékelést írt rólad</h1>
+                  <div style="margin-top:10px;color:#f97316;font-size:24px;line-height:28px;letter-spacing:1px;">${stars(review.rating)}</div>
+                  <div style="margin-top:4px;color:#676d73;font-size:14px;line-height:20px;">${review.rating}/5 ehhez: ${escapeEmailHtml(review.categoryName || 'a befejezett munkád')}</div>
+                </td>
+              </tr>
+            </table>
+
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="padding:16px;background:#fafafa;border:1px solid #e9eced;border-radius:4px;">
+                  <div style="font-size:14px;line-height:20px;color:#2f3033;font-weight:700;">Ügyfél megjegyzése</div>
+                  <div style="margin-top:6px;font-size:15px;line-height:23px;color:#676d73;white-space:pre-line;">${escapeEmailHtml(review.comment)}</div>
+                </td>
+              </tr>
+            </table>
+
+            <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
+              <tr>
+                <td style="background:#f97316;border-radius:4px;">
+                  <a href="${escapeEmailHtml(profileUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Értékelések megtekintése</a>
+                </td>
+              </tr>
+            </table>
+          `,
+        },
+      },
       hideSubjectHeading: true,
       metadata: {
+        recipientUid: review.proUid,
         proUid: review.proUid,
         customerUid: user.uid,
         rating: review.rating,

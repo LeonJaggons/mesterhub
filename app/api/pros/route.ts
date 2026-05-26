@@ -4,7 +4,7 @@ import { hasPaidProFeatures } from '@/lib/billing'
 import servicesData from '@/public/services.json'
 import districtsData from '@/public/districts.json'
 
-const RESULT_LIMIT = 12
+const RESULT_LIMIT = 240
 
 type ProDoc = {
   id: string
@@ -108,8 +108,11 @@ export async function GET(request: NextRequest) {
       docs = docs.filter(p => (p.districts ?? []).includes(districtId))
     }
 
+    const limitedDocs = docs.slice(0, RESULT_LIMIT)
+
     return Response.json({
-      pros: docs.slice(0, RESULT_LIMIT).map(p => {
+      total: limitedDocs.length,
+      pros: limitedDocs.map(p => {
         const paid = isPaidPro(p)
         return {
           id: p.id,

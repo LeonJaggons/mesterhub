@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { defaultLocale, type Locale } from '@/lib/i18n/config'
 
 type SendEmailInput = {
   to: string
@@ -9,10 +10,16 @@ type SendEmailInput = {
   previewText?: string
   from?: string
   replyTo?: string
+  locale?: Locale
 }
 
 let resendClient: Resend | null = null
 const DEFAULT_FROM_EMAIL = 'Mestermind <hello@mestermind.com>'
+
+const EMAIL_FOOTER: Record<Locale, string> = {
+  en: 'This email was sent by Mestermind. If you were not expecting it, you can ignore this message.',
+  hu: 'Ezt az e-mailt a Mestermind küldte. Ha nem számítottál rá, nyugodtan figyelmen kívül hagyhatod.',
+}
 
 function getResendClient(): Resend | null {
   const apiKey = process.env.RESEND_API_KEY
@@ -50,16 +57,18 @@ function textToHtml(text: string): string {
     .join('')
 }
 
-function wrapMestermindEmail(input: Pick<SendEmailInput, 'subject' | 'text' | 'bodyHtml' | 'hideSubjectHeading' | 'previewText'>): string {
+function wrapMestermindEmail(input: Pick<SendEmailInput, 'subject' | 'text' | 'bodyHtml' | 'hideSubjectHeading' | 'previewText' | 'locale'>): string {
+  const locale = input.locale ?? defaultLocale
   const preview = escapeHtml(input.previewText ?? input.subject)
   const subject = escapeHtml(input.subject)
+  const footer = escapeHtml(EMAIL_FOOTER[locale])
   const body = input.bodyHtml ?? textToHtml(input.text)
   const heading = input.hideSubjectHeading
     ? ''
     : `<h1 style="margin:0 0 18px;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${subject}</h1>`
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${locale}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -95,7 +104,7 @@ function wrapMestermindEmail(input: Pick<SendEmailInput, 'subject' | 'text' | 'b
             <tr>
               <td style="padding:16px 20px;background:#fafafa;border-top:1px solid #e9eced;">
                 <p style="margin:0;color:#676d73;font-size:12px;line-height:18px;text-align:center;">
-                  This email was sent by Mestermind. If you were not expecting it, you can ignore this message.
+                  ${footer}
                 </p>
               </td>
             </tr>

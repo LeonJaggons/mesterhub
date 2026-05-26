@@ -1,10 +1,18 @@
 import { NextRequest } from 'next/server'
 import { adminAuth, adminDb } from '@/firebase/admin'
+import { isLocale, type Locale } from '@/lib/i18n/config'
 
 export type ProProfileSummary = {
   uid: string
   fullName: string
   categoryName: string
+}
+
+async function preferredLocaleForUser(uid: string): Promise<Locale | null> {
+  const snap = await adminDb.collection('users').doc(uid).get()
+  if (!snap.exists) return null
+  const preferredLocale = snap.data()?.preferredLocale
+  return typeof preferredLocale === 'string' && isLocale(preferredLocale) ? preferredLocale : null
 }
 
 /** Resolve a pro document for the signed-in user (doc id, uid field, or email). */
@@ -57,8 +65,11 @@ export async function GET(request: NextRequest) {
   try {
     const decoded = await adminAuth.verifyIdToken(header.slice(7))
     try {
-      const pro = await resolvePro(decoded.uid, decoded.email)
-      return Response.json({ pro })
+      const [pro, preferredLocale] = await Promise.all([
+        resolvePro(decoded.uid, decoded.email),
+        preferredLocaleForUser(decoded.uid),
+      ])
+      return Response.json({ pro, preferredLocale })
     } catch (dbErr) {
       console.error('[/api/me] firestore', dbErr)
       return Response.json({ pro: null })

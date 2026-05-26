@@ -80,6 +80,31 @@ function estimateRequestEmailText(input: {
   ].filter(Boolean).join('\n\n')
 }
 
+function estimateRequestEmailTextHu(input: {
+  customerName: string
+  categoryName: string
+  answers: Record<string, string>
+  customerDistrict: string
+  requestUrl: string
+  detailsHidden: boolean
+  resetLabel: string
+}): string {
+  if (input.detailsHidden) {
+    return [
+      `Új ${input.categoryName} érdeklődést kaptál a Mestermindben.`,
+      `Havonta ${FREE_CLEAR_INQUIRY_LIMIT} érdeklődést nézhetsz meg ingyen. Válts Mestermind Pro csomagra, hogy most átnézhesd ennek a kérésnek a részleteit, vagy várj ${input.resetLabel} dátumig, amikor az ingyenes megtekintések újraindulnak: ${input.requestUrl}`,
+    ].join('\n\n')
+  }
+
+  const customerName = input.customerName || 'Egy ügyfél'
+  return [
+    `${customerName} ${input.categoryName} árajánlatot kért tőled a Mestermindben.`,
+    input.answers.project_details ? `Projekt részletei:\n${input.answers.project_details}` : '',
+    input.customerDistrict ? `Kerület: ${input.customerDistrict}` : '',
+    `Nyisd meg a Mestermindet a teljes kérés áttekintéséhez és az ajánlat elküldéséhez: ${input.requestUrl}`,
+  ].filter(Boolean).join('\n\n')
+}
+
 function escapeEmailHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -103,9 +128,9 @@ function appUrl(path: string): string {
   return `${base.replace(/\/$/, '')}${path}`
 }
 
-function monthlyResetLabel(reference = new Date()): string {
+function monthlyResetLabel(reference = new Date(), locale?: string): string {
   const resetDate = new Date(reference.getFullYear(), reference.getMonth() + 1, 1)
-  return resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return resetDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
 function initials(name: string): string {
@@ -204,6 +229,106 @@ function estimateRequestEmailHtml(input: {
       <tr>
         <td style="background:#f97316;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request details</a>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      ${detailRows}
+    </table>
+  `
+}
+
+function estimateRequestEmailHtmlHu(input: {
+  customerName: string
+  categoryName: string
+  answers: Record<string, string>
+  customerDistrict: string
+  requestUrl: string
+  detailsHidden: boolean
+  resetLabel: string
+}): string {
+  if (input.detailsHidden) {
+    return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      <tr>
+        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Új árajánlatkérés</div>
+          <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Ez az érdeklődés mentve lett a Mestermind fiókodban</div>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:24px;">
+      <tr>
+        <td valign="middle" style="padding:0 0 20px;">
+          <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">Új ${escapeEmailHtml(input.categoryName)} érdeklődést kaptál</h1>
+          <p style="margin:10px 0 0;color:#676d73;font-size:15px;line-height:23px;">Havonta ${FREE_CLEAR_INQUIRY_LIMIT} érdeklődést nézhetsz meg ingyen. Válts Mestermind Pro csomagra, hogy most átnézhesd ennek a kérésnek a részleteit, vagy várj ${escapeEmailHtml(input.resetLabel)} dátumig, amikor az ingyenes megtekintések újraindulnak.</p>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
+      <tr>
+        <td style="background:#f97316;border-radius:4px;">
+          <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Kérés megtekintése</a>
+        </td>
+      </tr>
+    </table>
+  `
+  }
+
+  const customerName = input.customerName || 'Egy ügyfél'
+  const detailRows = Object.entries(input.answers)
+    .filter(([, value]) => value.trim())
+    .map(([key, value]) => `
+      <tr>
+        <td style="padding:16px 0;border-top:1px solid #e9eced;">
+          <div style="font-size:14px;line-height:20px;color:#2f3033;font-weight:700;">${escapeEmailHtml(answerLabel(key))}</div>
+          <div style="margin-top:4px;font-size:15px;line-height:23px;color:#676d73;white-space:pre-line;">${escapeEmailHtml(value)}</div>
+        </td>
+      </tr>
+    `)
+    .join('')
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      <tr>
+        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Új árajánlatkérés</div>
+          <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Egy ügyfél árat kér a Mestermind profilodtól</div>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:24px;">
+      <tr>
+        <td width="72" valign="middle" style="padding:0 16px 20px 0;">
+          <div style="width:72px;height:72px;border-radius:50%;background:#2f3033;color:#ffffff;text-align:center;font-size:24px;line-height:72px;font-weight:700;">${escapeEmailHtml(initials(customerName))}</div>
+        </td>
+        <td valign="middle" style="padding:0 0 20px;">
+          <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${escapeEmailHtml(customerName)} ${escapeEmailHtml(input.categoryName)} szakembert keres</h1>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:8px;">
+      ${input.customerDistrict ? `
+        <tr>
+          <td width="26" valign="top" style="padding:0 0 10px;color:#2f3033;font-size:16px;line-height:20px;">&#9679;</td>
+          <td valign="top" style="padding:0 0 10px;color:#676d73;font-size:14px;line-height:20px;">Budapest ${escapeEmailHtml(input.customerDistrict)}. kerület</td>
+        </tr>
+      ` : ''}
+      <tr>
+        <td width="26" valign="top" style="padding:0 0 10px;color:#2f3033;font-size:16px;line-height:20px;">&#9679;</td>
+        <td valign="top" style="padding:0 0 10px;color:#676d73;font-size:14px;line-height:20px;">Küldj ajánlatot, amikor készen állsz</td>
+      </tr>
+    </table>
+
+    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
+      <tr>
+        <td style="background:#f97316;border-radius:4px;">
+          <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Kérés részleteinek megtekintése</a>
         </td>
       </tr>
     </table>
@@ -329,6 +454,7 @@ export async function POST(request: NextRequest) {
     const detailsHidden = !clearRequestIds.has(requestRef.id)
     const emailCustomerName = detailsHidden ? 'A customer' : customerDisplayName
     const resetLabel = monthlyResetLabel()
+    const resetLabelHu = monthlyResetLabel(new Date(), 'hu-HU')
     await sendLifecycleEmail({
       to: proEmail,
       event: 'request.created',
@@ -341,8 +467,20 @@ export async function POST(request: NextRequest) {
         : `Review the ${categoryName} request and send your estimate on Mestermind.`,
       text: estimateRequestEmailText({ customerName: emailCustomerName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel }),
       bodyHtml: estimateRequestEmailHtml({ customerName: emailCustomerName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel }),
+      localized: {
+        hu: {
+          subject: detailsHidden
+            ? `Új ${categoryName} érdeklődés érkezett`
+            : `${customerDisplayName} ${categoryName} árajánlatot kért`,
+          previewText: detailsHidden
+            ? 'Válts Mestermind Pro csomagra a teljes kérés részleteinek megtekintéséhez.'
+            : `Nézd át a(z) ${categoryName} kérést, és küldd el az ajánlatod a Mestermindben.`,
+          text: estimateRequestEmailTextHu({ customerName: detailsHidden ? 'Egy ügyfél' : customerDisplayName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel: resetLabelHu }),
+          bodyHtml: estimateRequestEmailHtmlHu({ customerName: detailsHidden ? 'Egy ügyfél' : customerDisplayName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel: resetLabelHu }),
+        },
+      },
       hideSubjectHeading: true,
-      metadata: { proUid, customerUid: user.uid, categoryName, projectId, notificationType: 'estimate_request_sent_to_pro' },
+      metadata: { recipientUid: proUid, proUid, customerUid: user.uid, categoryName, projectId, notificationType: 'estimate_request_sent_to_pro' },
     })
     await createInAppNotification({
       recipientUid: proUid,

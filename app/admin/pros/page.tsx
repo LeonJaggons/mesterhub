@@ -52,6 +52,10 @@ export default function AdminProsPage() {
   const [pros, setPros] = useState<AdminPro[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [pageIndex, setPageIndex] = useState(0)
+  const [pageCursors, setPageCursors] = useState<string[]>([''])
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [hasNextPage, setHasNextPage] = useState(false)
   const [reason, setReason] = useState('')
   const [busyUid, setBusyUid] = useState<string | null>(null)
   const [passwordByUid, setPasswordByUid] = useState<Record<string, string>>({})
@@ -66,16 +70,27 @@ export default function AdminProsPage() {
   const [importTotal, setImportTotal] = useState(0)
   const [importLog, setImportLog] = useState<string[]>([])
 
-  async function loadPros(nextStatus = status) {
+  async function loadPros(
+    nextStatus = status,
+    cursor = pageCursors[pageIndex] ?? '',
+    nextPageIndex = pageIndex,
+  ) {
     setLoading(true)
     setError('')
     try {
-      const res = await authenticatedFetch(`/api/admin/pros?status=${nextStatus}`)
+      const params = new URLSearchParams({ status: nextStatus })
+      if (cursor) params.set('cursor', cursor)
+      const res = await authenticatedFetch(`/api/admin/pros?${params.toString()}`)
       const data = await res.json()
       setPros(data.pros ?? [])
+      setHasNextPage(Boolean(data.hasMore))
+      setNextCursor(data.nextCursor ?? null)
+      setPageIndex(nextPageIndex)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load pros.')
       setPros([])
+      setHasNextPage(false)
+      setNextCursor(null)
     } finally {
       setLoading(false)
     }
@@ -234,6 +249,28 @@ export default function AdminProsPage() {
     }
   }
 
+  async function changeStatus(nextStatus: string) {
+    setStatus(nextStatus)
+    setPageCursors([''])
+    setPageIndex(0)
+    await loadPros(nextStatus, '', 0)
+  }
+
+  async function goToPreviousPage() {
+    if (pageIndex === 0) return
+    const previousIndex = pageIndex - 1
+    await loadPros(status, pageCursors[previousIndex] ?? '', previousIndex)
+  }
+
+  async function goToNextPage() {
+    if (!hasNextPage || !nextCursor) return
+    const nextIndex = pageIndex + 1
+    const updatedCursors = [...pageCursors]
+    updatedCursors[nextIndex] = nextCursor
+    setPageCursors(updatedCursors)
+    await loadPros(status, nextCursor, nextIndex)
+  }
+
   return (
     <>
       <section className="rounded-2xl border border-orange-100 bg-orange-50/40 p-5 shadow-sm">
@@ -352,8 +389,7 @@ export default function AdminProsPage() {
             <select
               value={status}
               onChange={e => {
-                setStatus(e.target.value)
-                loadPros(e.target.value)
+                void changeStatus(e.target.value)
               }}
               className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900"
             >
@@ -373,6 +409,30 @@ export default function AdminProsPage() {
         {error && <p className="mt-3 text-sm font-semibold text-red-600">{error}</p>}
         {passwordMessage && <p className="mt-3 text-sm font-semibold text-green-700">{passwordMessage}</p>}
       </section>
+
+      <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-semibold text-gray-700">
+          Page {pageIndex + 1} · Showing {pros.length} pros
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={loading || pageIndex === 0}
+            onClick={goToPreviousPage}
+            className="cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            disabled={loading || !hasNextPage}
+            onClick={goToNextPage}
+            className="cursor-pointer rounded-xl border-none bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {loading ? (
         <div className="h-44 animate-pulse rounded-2xl border border-gray-200 bg-white" />

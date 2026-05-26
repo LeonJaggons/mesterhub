@@ -78,6 +78,14 @@ export async function PATCH(
       text: status === 'active'
         ? 'Your pro profile has been approved and is now visible to customers.'
         : `Your pro profile status is now ${status}.${reason ? ` Reason: ${reason}` : ''}`,
+      localized: {
+        hu: {
+          subject: status === 'active' ? 'A Mestermind profilod élő' : 'Megváltozott a Mestermind ellenőrzési státuszod',
+          text: status === 'active'
+            ? 'A szakember profilodat jóváhagytuk, és mostantól látható az ügyfelek számára.'
+            : `A szakember profilod státusza most: ${status}.${reason ? ` Indok: ${reason}` : ''}`,
+        },
+      },
       metadata: { proUid: uid, status },
     })
 

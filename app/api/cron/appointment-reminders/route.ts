@@ -63,6 +63,23 @@ function reminderText(input: {
   ].filter(Boolean).join('\n\n')
 }
 
+function reminderTextHu(input: {
+  recipientRole: 'customer' | 'pro'
+  otherParty: string
+  categoryName: string
+  appointment: Appointment
+  requestUrl: string
+}): string {
+  return [
+    `Emlékeztető: a(z) ${input.categoryName} időpontod ${input.otherParty} partnerrel holnap lesz.`,
+    `Dátum: ${input.appointment.date}`,
+    `Idő: ${input.appointment.time}`,
+    input.appointment.duration ? `Időtartam: ${input.appointment.duration}` : '',
+    input.appointment.location ? `Helyszín: ${input.appointment.location}` : '',
+    `Nyisd meg a Mestermindet az időpont áttekintéséhez: ${input.requestUrl}`,
+  ].filter(Boolean).join('\n\n')
+}
+
 async function sendReminder(input: {
   to: string
   recipientRole: 'customer' | 'pro'
@@ -98,8 +115,31 @@ async function sendReminder(input: {
       ctaUrl: requestUrl,
       tone: 'orange',
     }),
+    localized: {
+      hu: {
+        subject: `Emlékeztető: ${input.categoryName} időpont holnap`,
+        previewText: `Az időpontod ${input.otherParty} partnerrel holnap lesz.`,
+        text: reminderTextHu({ ...input, requestUrl }),
+        bodyHtml: emailCardHtml({
+          eyebrow: 'Időpont emlékeztető',
+          title: `${input.categoryName} időpont holnap`,
+          intro: `Közeledik az időpontod ${input.otherParty} partnerrel.`,
+          rows: [
+            ['Dátum', input.appointment.date],
+            ['Idő', input.appointment.time],
+            ['Időtartam', input.appointment.duration],
+            ['Helyszín', input.appointment.location],
+            ['Megjegyzések', input.appointment.notes],
+          ],
+          ctaLabel: 'Időpont megtekintése',
+          ctaUrl: requestUrl,
+          tone: 'orange',
+        }),
+      },
+    },
     hideSubjectHeading: true,
     metadata: {
+      recipientUid: input.recipientRole === 'pro' ? input.proUid : input.customerUid,
       recipientRole: input.recipientRole,
       proUid: input.proUid,
       customerUid: input.customerUid,

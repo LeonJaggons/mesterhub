@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import styles from './page.module.css'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
+import servicesData from '@/public/services.json'
 
 async function queryPros(searchQ: string, districtRoman: string | undefined): Promise<unknown[]> {
   const params = new URLSearchParams()
@@ -15,6 +18,8 @@ async function queryPros(searchQ: string, districtRoman: string | undefined): Pr
   const data = await response.json()
   return (data.pros as unknown[]) ?? []
 }
+
+const RESULTS_PER_PAGE = 12
 
 type Translator = ReturnType<typeof useTranslations>
 
@@ -42,6 +47,7 @@ type Pro = {
   responseTime: string
   startingPrice: number | null
   review: string
+  categoryName: string
   services: string[]
   yearsExp: number | null
   availability: string[]
@@ -61,6 +67,8 @@ type ResultsFilters = {
   hasProof: boolean
   backgroundCheck: boolean
   experienced: boolean
+  categoryName: string
+  serviceName: string
   sort: 'recommended' | 'rating' | 'price' | 'reviews'
 }
 
@@ -72,7 +80,53 @@ const DEFAULT_FILTERS: ResultsFilters = {
   hasProof: false,
   backgroundCheck: false,
   experienced: false,
+  categoryName: '',
+  serviceName: '',
   sort: 'recommended',
+}
+
+const QUALITY_FILTER_KEYS = ['hasReviews', 'hasPrice', 'hasProof', 'backgroundCheck', 'experienced'] as const
+
+function parseNumberParam(value: string | null): number | null {
+  if (!value) return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
+function filtersFromSearchParams(searchParams: { get(name: string): string | null }): ResultsFilters {
+  const sort = searchParams.get('sort')
+  return {
+    minRating: parseNumberParam(searchParams.get('minRating')) ?? DEFAULT_FILTERS.minRating,
+    maxPrice: parseNumberParam(searchParams.get('maxPrice')),
+    hasReviews: searchParams.get('hasReviews') === '1',
+    hasPrice: searchParams.get('hasPrice') === '1',
+    hasProof: searchParams.get('hasProof') === '1',
+    backgroundCheck: searchParams.get('backgroundCheck') === '1',
+    experienced: searchParams.get('experienced') === '1',
+    categoryName: searchParams.get('category') ?? '',
+    serviceName: searchParams.get('service') ?? '',
+    sort: sort === 'rating' || sort === 'price' || sort === 'reviews' ? sort : 'recommended',
+  }
+}
+
+function writeFilterParams(params: URLSearchParams, filters: ResultsFilters): URLSearchParams {
+  params.delete('minRating')
+  params.delete('maxPrice')
+  params.delete('category')
+  params.delete('service')
+  params.delete('sort')
+  for (const key of QUALITY_FILTER_KEYS) params.delete(key)
+
+  if (filters.minRating > 0) params.set('minRating', String(filters.minRating))
+  if (filters.maxPrice !== null) params.set('maxPrice', String(filters.maxPrice))
+  if (filters.categoryName) params.set('category', filters.categoryName)
+  if (filters.serviceName) params.set('service', filters.serviceName)
+  if (filters.sort !== 'recommended') params.set('sort', filters.sort)
+  for (const key of QUALITY_FILTER_KEYS) {
+    if (filters[key]) params.set(key, '1')
+  }
+
+  return params
 }
 
 // ---- Sub-components ----
@@ -426,6 +480,8 @@ function Sidebar({
     filters.hasProof,
     filters.backgroundCheck,
     filters.experienced,
+    Boolean(filters.categoryName),
+    Boolean(filters.serviceName),
     filters.sort !== 'recommended',
   ].filter(Boolean).length
 
@@ -450,6 +506,10 @@ function Sidebar({
     { key: 'backgroundCheck', label: t('instantResults.filters.quality.backgroundCheck') },
     { key: 'experienced', label: t('instantResults.filters.quality.experienced') },
   ]
+  const selectedCategory = servicesData.categories.find(category => category.name === filters.categoryName)
+  const serviceOptions = selectedCategory
+    ? selectedCategory.services
+    : [...new Set(servicesData.categories.flatMap(category => category.services))].sort()
 
   return (
     <aside className="hidden lg:flex flex-col border-r border-gray-200" style={{ width: 288 }}>
@@ -482,6 +542,34 @@ function Sidebar({
               <option value="rating">{t('instantResults.filters.sort.rating')}</option>
               <option value="reviews">{t('instantResults.filters.sort.reviews')}</option>
               <option value="price">{t('instantResults.filters.sort.price')}</option>
+            </select>
+          </div>
+
+          <div className="mb-5">
+            <p className="font-bold text-sm mb-2">{t('instantResults.filters.category')}</p>
+            <select
+              value={filters.categoryName}
+              onChange={e => patch({ categoryName: e.target.value, serviceName: '' })}
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
+            >
+              <option value="">{t('instantResults.filters.allCategories')}</option>
+              {servicesData.categories.map(category => (
+                <option key={category.name} value={category.name}>{translateCategory(t, category.name)}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-5">
+            <p className="font-bold text-sm mb-2">{t('instantResults.filters.service')}</p>
+            <select
+              value={filters.serviceName}
+              onChange={e => patch({ serviceName: e.target.value })}
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
+            >
+              <option value="">{t('instantResults.filters.allServices')}</option>
+              {serviceOptions.map(service => (
+                <option key={service} value={service}>{translateService(t, service)}</option>
+              ))}
             </select>
           </div>
 
@@ -579,6 +667,7 @@ function mapApiPro(doc: any, t: Translator): Pro {
     responseTime: doc.responseTime ?? t('instantResults.card.defaultResponseTime'),
     startingPrice,
     review: doc.bio ?? '',
+    categoryName: doc.categoryName ?? '',
     services: Array.isArray(doc.services) ? doc.services : [],
     yearsExp: !isNaN(yearsExp ?? NaN) ? yearsExp : null,
     availability: Array.isArray(doc.availability) ? doc.availability : [],
@@ -601,10 +690,22 @@ export default function InstantResults({
   district?: string
 }) {
   const t = useTranslations()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchParams])
   const [pros, setPros] = useState<Pro[]>([])
-  const [filters, setFilters] = useState<ResultsFilters>(DEFAULT_FILTERS)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [visibleCount, setVisibleCount] = useState(RESULTS_PER_PAGE)
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
+
+  function updateFilters(nextFilters: ResultsFilters) {
+    const params = writeFilterParams(new URLSearchParams(searchParams.toString()), nextFilters)
+    const queryString = params.toString()
+    setVisibleCount(RESULTS_PER_PAGE)
+    router.push(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
+  }
 
   useEffect(() => {
     let active = true
@@ -618,6 +719,7 @@ export default function InstantResults({
         const docs = await queryPros(q, district)
         if (!active) return
         setPros(docs.map(doc => mapApiPro(doc, t)))
+        setVisibleCount(RESULTS_PER_PAGE)
       } catch {
         if (!active) return
         setPros([])
@@ -635,6 +737,8 @@ export default function InstantResults({
 
   const filteredPros = useMemo(() => {
     const next = pros.filter(pro => {
+      if (filters.categoryName && pro.categoryName !== filters.categoryName) return false
+      if (filters.serviceName && !pro.services.includes(filters.serviceName)) return false
       if (filters.minRating > 0 && (!pro.rating || pro.rating < filters.minRating)) return false
       if (filters.maxPrice !== null && (pro.startingPrice === null || pro.startingPrice > filters.maxPrice)) return false
       if (filters.hasReviews && pro.reviewCount === 0) return false
@@ -666,12 +770,33 @@ export default function InstantResults({
     return Math.round(priced.reduce((sum, price) => sum + price, 0) / priced.length)
   }, [filteredPros])
 
+  const visiblePros = filteredPros.slice(0, visibleCount)
+  const hasMoreResults = visibleCount < filteredPros.length
+  const lastVisibleResult = Math.min(visibleCount, filteredPros.length)
+
+  useEffect(() => {
+    const node = loadMoreRef.current
+    if (!node || !hasMoreResults || loading || error) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          setVisibleCount(current => Math.min(current + RESULTS_PER_PAGE, filteredPros.length))
+        }
+      },
+      { rootMargin: '600px 0px' },
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [hasMoreResults, loading, error, filteredPros.length])
+
   return (
     <div className="flex bg-white min-h-screen">
       <Sidebar
         q={q}
         filters={filters}
-        onChange={setFilters}
+        onChange={updateFilters}
         resultCount={filteredPros.length}
         averagePrice={averagePrice}
       />
@@ -718,9 +843,32 @@ export default function InstantResults({
                 </div>
               ) : (
                 <div>
-                  {filteredPros.map(pro => (
+                  <div className="mb-3 flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+                    <span>
+                      {t('instantResults.filters.showingProfessionals', {
+                        shown: lastVisibleResult,
+                        total: filteredPros.length,
+                      })}
+                    </span>
+                    {hasMoreResults && <span className="font-semibold text-gray-700">{t('instantResults.filters.scrollForMore')}</span>}
+                  </div>
+                  {visiblePros.map(pro => (
                     <ProCard key={pro.id} pro={pro} />
                   ))}
+                  <div ref={loadMoreRef} className="h-8" />
+                  {hasMoreResults ? (
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => setVisibleCount(current => Math.min(current + RESULTS_PER_PAGE, filteredPros.length))}
+                        className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {t('instantResults.filters.loadMore')}
+                      </button>
+                    </div>
+                  ) : filteredPros.length > RESULTS_PER_PAGE ? (
+                    <p className="mt-4 text-center text-sm text-gray-400">{t('instantResults.filters.allLoaded')}</p>
+                  ) : null}
                 </div>
               )}
             </>

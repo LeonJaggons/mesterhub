@@ -93,8 +93,34 @@ export async function GET(request: Request) {
         ctaUrl: requestUrl,
         tone: 'orange',
       }),
+      localized: {
+        hu: {
+          subject: `Emlékeztető: ${proName} ajánlatot küldött`,
+          previewText: `Nézd át a(z) ${categoryName} ajánlatod a Mestermindben.`,
+          text: [
+            `${proName} ajánlatot küldött a(z) ${categoryName} kérésedre.`,
+            `Ár: ${price}`,
+            timeline ? `Időzítés: ${timeline}` : '',
+            `Nyisd meg a Mestermindet az ajánlat elfogadásához, elutasításához vagy további kérdésekhez: ${requestUrl}`,
+          ].filter(Boolean).join('\n\n'),
+          bodyHtml: emailCardHtml({
+            eyebrow: 'Ajánlat emlékeztető',
+            title: `${proName} ajánlatot küldött`,
+            intro: 'Nézd át, amikor készen állsz.',
+            rows: [
+              ['Szolgáltatás', categoryName],
+              ['Ár', price],
+              ['Időzítés', timeline],
+              ['Üzenet', quote?.notes],
+            ],
+            ctaLabel: 'Ajánlat áttekintése',
+            ctaUrl: requestUrl,
+            tone: 'orange',
+          }),
+        },
+      },
       hideSubjectHeading: true,
-      metadata: { proUid: data.proUid, customerUid: data.customerUid, categoryName, reminderKey: key },
+      metadata: { recipientUid: data.customerUid, proUid: data.proUid, customerUid: data.customerUid, categoryName, reminderKey: key },
     })
 
     await doc.ref.update({

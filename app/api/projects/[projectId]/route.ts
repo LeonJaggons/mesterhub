@@ -76,6 +76,20 @@ function cancellationHtml(categoryName: string, requestUrl: string): string {
   `
 }
 
+function cancellationTextHu(categoryName: string, requestUrl: string): string {
+  return [
+    `A(z) ${categoryName} kérés törölve lett, mert az ügyfél törölte a projektet.`,
+    `Nyisd meg a Mestermindet a törölt kérés áttekintéséhez: ${requestUrl}`,
+  ].join('\n\n')
+}
+
+function cancellationHtmlHu(categoryName: string, requestUrl: string): string {
+  return `
+    <p>A(z) ${escapeEmailHtml(categoryName)} kérés törölve lett, mert az ügyfél törölte a projektet.</p>
+    <p><a href="${escapeEmailHtml(requestUrl)}">Törölt kérés áttekintése</a></p>
+  `
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> },
@@ -162,8 +176,17 @@ export async function DELETE(
             previewText: `The ${req.categoryName} request was cancelled because the customer deleted the project.`,
             text: cancellationText(req.categoryName, requestUrl),
             bodyHtml: cancellationHtml(req.categoryName, requestUrl),
+            localized: {
+              hu: {
+                subject: `${req.categoryName} kérés törölve`,
+                previewText: `A(z) ${req.categoryName} kérés törölve lett, mert az ügyfél törölte a projektet.`,
+                text: cancellationTextHu(req.categoryName, requestUrl),
+                bodyHtml: cancellationHtmlHu(req.categoryName, requestUrl),
+              },
+            },
             hideSubjectHeading: true,
             metadata: {
+              recipientUid: req.proUid,
               proUid: req.proUid,
               customerUid: req.customerUid,
               projectId,
