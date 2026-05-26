@@ -31,6 +31,7 @@ export type SignupData = {
     advice?: string
   }
   backgroundCheck?: boolean
+  licenceNumber?: string
   iban?: string
   // Storage download URLs
   avatarUrl?: string

@@ -25,12 +25,14 @@ export default function CompletePage() {
   const submittedRef = useRef(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [profileUrl, setProfileUrl] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
 
   useEffect(() => {
     if (submittedRef.current) return
     submittedRef.current = true
 
-    async function submitProfile() {
+    async function submitProfile(): Promise<string> {
       const draft: SignupData = { ...data }
       let user = auth.currentUser
 
@@ -81,10 +83,13 @@ export default function CompletePage() {
         method: 'POST',
         body: JSON.stringify({ ...draft, password: '' }),
       })
+
+      return `${window.location.origin}/pro/${user.uid}`
     }
 
     submitProfile()
-      .then(() => {
+      .then((url) => {
+        setProfileUrl(url)
         clear()
         setSaved(true)
         router.refresh()
@@ -95,6 +100,27 @@ export default function CompletePage() {
   }, [data, router])
 
   const firstName = data.fullName?.split(' ')[0] ?? 'there'
+
+  async function handleShareProfile() {
+    if (!profileUrl) {
+      setShareMessage('Your profile link is not ready yet.')
+      return
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'My Mestermind profile', url: profileUrl })
+        setShareMessage('')
+        return
+      }
+
+      await navigator.clipboard.writeText(profileUrl)
+      setShareMessage('Profile link copied.')
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') return
+      setShareMessage('Could not share automatically. Copy the profile link from your browser after opening it.')
+    }
+  }
 
   if (error) {
     return (
@@ -153,7 +179,7 @@ export default function CompletePage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <Link
-          href="/"
+          href="/pro/jobs"
           style={{
             display: 'block', width: '100%', padding: '0.9rem', background: '#f97316', color: 'white',
             textAlign: 'center', fontWeight: 700, borderRadius: '0.625rem', textDecoration: 'none',
@@ -166,16 +192,15 @@ export default function CompletePage() {
         </Link>
 
         <button
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({ title: 'My Mestermind profile', url: window.location.origin + '/pro/' + data.fullName?.toLowerCase().replace(/\s+/g, '-') })
-            }
-          }}
+          onClick={handleShareProfile}
           className={styles.secondaryBtn}
           style={dg}
         >
           Share my profile
         </button>
+        {shareMessage && (
+          <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem', textAlign: 'center' }}>{shareMessage}</p>
+        )}
       </div>
     </div>
   )

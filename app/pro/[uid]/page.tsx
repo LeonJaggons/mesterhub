@@ -1092,7 +1092,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           </div>
           <p className="text-xs text-gray-500 leading-relaxed">
             If you hire this pro, you&apos;re covered by our satisfaction guarantee.{' '}
-            <a href="#" className="text-orange-500 hover:underline">Learn more</a>
+            <Link href="/help#mestermind-guarantee" className="text-orange-500 hover:underline">Learn more</Link>
           </p>
         </div>
       </div>

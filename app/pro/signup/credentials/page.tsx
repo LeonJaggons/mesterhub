@@ -55,7 +55,7 @@ export default function CredentialsPage() {
   const certInputRef = useRef<HTMLInputElement>(null)
   const insuranceInputRef = useRef<HTMLInputElement>(null)
 
-  const [licenceNumber, setLicenceNumber] = useState('')
+  const [licenceNumber, setLicenceNumber] = useState(data.licenceNumber ?? '')
   const [certState, setCertState] = useState<UploadState>('idle')
   const [certFileName, setCertFileName] = useState<string | null>(null)
   const [insuranceState, setInsuranceState] = useState<UploadState>('idle')
@@ -128,11 +128,26 @@ export default function CredentialsPage() {
         </div>
       )}
 
-      <button className={styles.continueBtn} style={dg} disabled={!canContinue} onClick={() => router.push('/pro/signup/background')}>
+      <button
+        className={styles.continueBtn}
+        style={dg}
+        disabled={!canContinue}
+        onClick={() => {
+          save({ licenceNumber: licenceNumber.trim() })
+          router.push('/pro/signup/background')
+        }}
+      >
         {(certState === 'uploading' || insuranceState === 'uploading') ? 'Uploading…' : 'Continue'}
       </button>
 
-      <button className={styles.secondaryBtn} style={dg} onClick={() => router.push('/pro/signup/background')}>
+      <button
+        className={styles.secondaryBtn}
+        style={dg}
+        onClick={() => {
+          save({ licenceNumber: licenceNumber.trim() })
+          router.push('/pro/signup/background')
+        }}
+      >
         I&apos;ll upload these later
       </button>
     </div>

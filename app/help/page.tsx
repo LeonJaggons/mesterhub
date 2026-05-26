@@ -28,6 +28,15 @@ export default function HelpPage() {
             </p>
           </section>
 
+          <section id="mestermind-guarantee" className={styles.helpSection}>
+            <h2>Mestermind Guarantee</h2>
+            <p>
+              Keep job details, quote decisions, appointment updates, and completion confirmations
+              in Mestermind so support can review the history if something goes wrong. During launch,
+              our team helps resolve disputes case by case.
+            </p>
+          </section>
+
           <section className={styles.helpSection}>
             <h2>Want to offer services?</h2>
             <p>
@@ -40,7 +49,7 @@ export default function HelpPage() {
             <h2>Need more help?</h2>
             <p>
               Email us at{' '}
-              <a href="mailto:support@mestermind.hu">support@mestermind.hu</a> and we&apos;ll get back
+              <a href="mailto:support@mestermind.com">support@mestermind.com</a> and we&apos;ll get back
               to you within one business day.
             </p>
           </section>

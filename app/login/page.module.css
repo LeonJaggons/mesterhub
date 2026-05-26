@@ -120,6 +120,12 @@
   &:hover {
     text-decoration: underline;
   }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    text-decoration: none;
+  }
 }
 
 .submitBtn {
@@ -133,6 +139,10 @@
   border: none;
   cursor: pointer;
   margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 
   &:hover {
     background-color: #ea580c;
@@ -148,6 +158,19 @@
   font-size: 0.875rem;
   color: var(--color-red-600);
   margin: 0.5rem 0 0;
+}
+
+.successText {
+  font-size: 0.875rem;
+  color: #15803d;
+  margin: 0.5rem 0 0;
+}
+
+.statusText {
+  font-size: 0.95rem;
+  color: var(--color-gray-600);
+  margin: 0 0 1rem;
+  line-height: 1.5;
 }
 
 .divider {

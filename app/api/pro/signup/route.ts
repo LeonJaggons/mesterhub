@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
     batch.set(proRef.collection('private').doc('verification'), {
       idDocumentUrl: data.idDocumentUrl ?? null,
       selfieUrl: data.selfieUrl ?? null,
+      licenceNumber: cleanString(data.licenceNumber),
       certificateUrl: data.certificateUrl ?? null,
       insuranceUrl: data.insuranceUrl ?? null,
       backgroundCheck: data.backgroundCheck ?? false,

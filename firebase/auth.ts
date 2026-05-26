@@ -1,11 +1,15 @@
 import {
+  browserLocalPersistence,
+  browserSessionPersistence,
+  confirmPasswordReset,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
+  setPersistence,
   updateProfile,
-  sendPasswordResetEmail,
   sendSignInLinkToEmail,
+  verifyPasswordResetCode,
   GoogleAuthProvider,
   FacebookAuthProvider,
   onAuthStateChanged,
@@ -13,12 +17,18 @@ import {
 } from 'firebase/auth'
 import { auth } from './index'
 
+async function applyPersistence(remember: boolean): Promise<void> {
+  await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence)
+}
+
 export async function signUp(
   email: string,
   password: string,
   firstName: string,
-  lastName: string
+  lastName: string,
+  remember = true
 ): Promise<User> {
+  await applyPersistence(remember)
   const credential = await createUserWithEmailAndPassword(auth, email, password)
   await updateProfile(credential.user, {
     displayName: `${firstName} ${lastName}`.trim(),
@@ -26,7 +36,8 @@ export async function signUp(
   return credential.user
 }
 
-export async function signIn(email: string, password: string): Promise<User> {
+export async function signIn(email: string, password: string, remember = true): Promise<User> {
+  await applyPersistence(remember)
   const credential = await signInWithEmailAndPassword(auth, email, password)
   return credential.user
 }
@@ -44,7 +55,26 @@ export async function signInWithFacebook(): Promise<User> {
 }
 
 export async function forgotPassword(email: string): Promise<void> {
-  await sendPasswordResetEmail(auth, email)
+  const response = await fetch('/api/auth/password-reset', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email: email.trim() }),
+  })
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null)
+    throw new Error(data?.error ?? 'Could not send reset email.')
+  }
+}
+
+export async function verifyResetCode(oobCode: string): Promise<string> {
+  return verifyPasswordResetCode(auth, oobCode)
+}
+
+export async function resetPassword(oobCode: string, password: string): Promise<void> {
+  await confirmPasswordReset(auth, oobCode, password)
 }
 
 export async function waitForAuthReady(): Promise<User | null> {

@@ -505,7 +505,7 @@ function MobileMenu({
               <MobileNavLink href="/pro/jobs" label="Jobs" badge={pendingJobs} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/work" label="My Work" badge={confirmedAppointments} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/messages" label="Messages" onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/jobs" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/notifications" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/earnings" label="Earnings" onClick={() => setOpen(false)} />
               <MobileNavLink href={`/pro/${pro.uid}`} label="Profile" onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/settings" label="Settings" onClick={() => setOpen(false)} />
@@ -520,7 +520,7 @@ function MobileMenu({
                   <MobileNavLink href="/projects" label="Projects" onClick={() => setOpen(false)} />
                   <MobileNavLink href="/appointments" label="Appointments" badge={activeAppointments} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/messages" label="Messages" onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/requests" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/notifications" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/settings" label="Account settings" onClick={() => setOpen(false)} />
                 </>
               )}

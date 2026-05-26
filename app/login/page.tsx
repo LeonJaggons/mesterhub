@@ -32,14 +32,18 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [resetMessage, setResetMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setResetMessage(null)
     setLoading(true)
     try {
-      await signIn(email, password)
+      await signIn(email, password, rememberMe)
       router.push(redirectTo)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Invalid email or password.')
@@ -53,12 +57,16 @@ function LoginForm() {
       setError('Enter your email address first.')
       return
     }
+    setError(null)
+    setResetMessage(null)
+    setResetLoading(true)
     try {
       await forgotPassword(email)
-      setError(null)
-      alert(`Password reset email sent to ${email}`)
+      setResetMessage(`If an account exists for ${email.trim()}, a password reset email has been sent.`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Could not send reset email.')
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -101,10 +109,16 @@ function LoginForm() {
             </div>
 
             {error && <p className={styles.errorText}>{error}</p>}
+            {resetMessage && <p className={styles.successText}>{resetMessage}</p>}
 
             <div className={styles.rememberRow}>
               <label className={styles.checkboxLabel}>
-                <Checkbox.Root className={styles.checkboxRoot} name="remember_me" defaultChecked>
+                <Checkbox.Root
+                  className={styles.checkboxRoot}
+                  name="remember_me"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                >
                   <Checkbox.Indicator className={styles.checkboxIndicator}>
                     <CheckIcon />
                   </Checkbox.Indicator>
@@ -115,8 +129,9 @@ function LoginForm() {
                 type="button"
                 className={styles.forgotBtn}
                 onClick={handleForgotPassword}
+                disabled={resetLoading}
               >
-                Forgot password?
+                {resetLoading ? 'Sending...' : 'Forgot password?'}
               </button>
             </div>
 

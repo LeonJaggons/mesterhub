@@ -30,6 +30,7 @@ export default function RegisterPage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -40,7 +41,7 @@ export default function RegisterPage() {
     setError(null)
     setLoading(true)
     try {
-      await signUp(form.email, form.password, form.firstName, form.lastName)
+      await signUp(form.email, form.password, form.firstName, form.lastName, rememberMe)
       router.push('/')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
@@ -145,7 +146,12 @@ export default function RegisterPage() {
 
             <li>
               <label className={styles.checkboxLabel}>
-                <Checkbox.Root className={styles.checkboxRoot} name="remember_me" defaultChecked>
+                <Checkbox.Root
+                  className={styles.checkboxRoot}
+                  name="remember_me"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                >
                   <Checkbox.Indicator className={styles.checkboxIndicator}>
                     <CheckIcon />
                   </Checkbox.Indicator>
