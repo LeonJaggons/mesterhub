@@ -659,7 +659,8 @@ export default function Header() {
   const currentLocale = getPathLocale(rawPathname) ?? defaultLocale
   const pathname = getPathnameWithoutLocale(rawPathname)
   const searchParams = useSearchParams()
-  const latestRoute = useRef({ currentLocale, pathname, queryString: searchParams.toString() })
+  const queryString = searchParams.toString()
+  const latestRoute = useRef({ currentLocale, pathname, queryString })
   const isSignupPath = pathname.startsWith('/pro/signup')
   const [user, setUser] = useState<User | null>(null)
   const [pro, setPro] = useState<ProBasic | null>(null)
@@ -670,7 +671,9 @@ export default function Header() {
   const [activeAppointments, setActiveAppointments] = useState(0)
   const notifications = useNotifications(!isSignupPath && Boolean(user))
 
-  latestRoute.current = { currentLocale, pathname, queryString: searchParams.toString() }
+  useEffect(() => {
+    latestRoute.current = { currentLocale, pathname, queryString }
+  }, [currentLocale, pathname, queryString])
 
   // Detect auth + pro status through the shared API so every client sees the same account resolution.
   useEffect(() => {

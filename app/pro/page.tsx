@@ -1,5 +1,9 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+import JsonLd from '@/app/components/JsonLd'
 import { getTranslations } from '@/lib/i18n/server'
+import { getRequestLocale } from '@/lib/i18n/server'
+import { faqJsonLd, localizedMetadata, localizedPath, siteName, siteUrl } from '@/lib/seo'
 
 const BENEFITS = [
   'found',
@@ -30,11 +34,47 @@ const FAQ = [
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale()
+  return localizedMetadata({
+    locale,
+    paths: {
+      en: localizedPath('en', '/pro'),
+      hu: localizedPath('hu', '/pro'),
+    },
+    title: locale === 'hu'
+      ? 'Csatlakozz szakemberként Budapesten | Mestermind'
+      : 'Join Mestermind as a Budapest professional',
+    description: locale === 'hu'
+      ? 'Szerezz több budapesti munkát, építs értékeléseket, és kezeld az ajánlatkéréseket a Mestermind szakember platformján.'
+      : 'Get more Budapest jobs, build reviews, and manage quote requests on the Mestermind professional marketplace.',
+  })
+}
+
 export default async function JoinAsProPage() {
   const t = await getTranslations()
+  const locale = await getRequestLocale()
+  const proFaq = FAQ.map(item => ({
+    question: t(`proLanding.faq.${item}.question`),
+    answer: t(`proLanding.faq.${item}.answer`),
+  }))
 
   return (
     <main>
+      <JsonLd data={[
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: locale === 'hu' ? 'Mestermind szakembereknek' : 'Mestermind for professionals',
+          url: `${siteUrl}${localizedPath(locale, '/pro')}`,
+          isPartOf: {
+            '@type': 'WebSite',
+            name: siteName,
+            url: siteUrl,
+          },
+        },
+        faqJsonLd(proFaq),
+      ]} />
       {/* ── Hero ── */}
       <section
         className="relative overflow-hidden bg-gray-950 bg-cover bg-center px-4 py-28 text-white"

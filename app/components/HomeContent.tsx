@@ -7,7 +7,14 @@ import {
   MdPriceCheck,
   MdFlashOn,
 } from 'react-icons/md'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import {
+  districtPath,
+  districtServicePath,
+  seoCategoryEntries,
+  seoDistricts,
+  servicePath,
+} from '@/lib/seo'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +77,19 @@ const STEPS = [
   { number: '3', key: 'book' },
 ] as const
 
+const SEO_SERVICE_ORDER = ['Handyman', 'Plumbing', 'Electrical', 'Painting', 'Cleaning', 'Moving'] as const
+const SEO_DISTRICT_NAMES = ['Belváros-Lipótváros', 'Újbuda', 'Terézváros', 'Erzsébetváros', 'Angyalföld', 'Zugló'] as const
+const CATEGORY_SEO_TARGETS: Record<string, string> = {
+  homeImprovement: 'Handyman',
+  events: 'Photography',
+  wellness: 'Fitness',
+  lessons: 'Tutoring',
+  auto: 'Handyman',
+  photography: 'Photography',
+  pets: 'Cleaning',
+  business: 'Cleaning',
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' }
@@ -98,6 +118,12 @@ function Stars({ rating }: { rating: number }) {
 
 export default function HomeContent() {
   const t = useTranslations()
+  const locale = useLocale()
+  const serviceLinks = SEO_SERVICE_ORDER
+    .map(name => seoCategoryEntries.find(entry => entry.categoryName === name))
+    .filter((entry): entry is (typeof seoCategoryEntries)[number] => Boolean(entry))
+  const districtLinks = seoDistricts.filter(district => SEO_DISTRICT_NAMES.includes(district.name as typeof SEO_DISTRICT_NAMES[number]))
+  const handyman = seoCategoryEntries.find(entry => entry.categoryName === 'Handyman') ?? seoCategoryEntries[0]
 
   return (
     <>
@@ -191,10 +217,11 @@ export default function HomeContent() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {CATEGORIES.map((cat) => {
               const categoryName = t(`home.content.categories.${cat.nameKey}`)
+              const seoTarget = seoCategoryEntries.find(entry => entry.categoryName === CATEGORY_SEO_TARGETS[cat.nameKey]) ?? seoCategoryEntries[0]
               return (
               <Link
                 key={cat.nameKey}
-                href={`/instant-results?q=${encodeURIComponent(categoryName)}`}
+                href={servicePath(seoTarget, locale)}
                 className="group relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-gray-200 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
               >
                 <Image
@@ -214,6 +241,51 @@ export default function HomeContent() {
               </Link>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SEO landing links ── */}
+      <section className="border-t border-gray-100 bg-gray-50 px-4 py-20">
+        <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-2">
+          <div>
+            <Eyebrow>{locale === 'hu' ? 'Budapesti szolgáltatások' : 'Budapest service guides'}</Eyebrow>
+            <h2 className="text-4xl font-black text-gray-900 mb-3" style={{ ...dg, letterSpacing: '-0.02em' }}>
+              {locale === 'hu' ? 'Találj szakembert szolgáltatás szerint.' : 'Find pros by service.'}
+            </h2>
+            <p className="text-gray-500 text-base leading-relaxed mb-6">
+              {locale === 'hu'
+                ? 'Kezdd a leggyakoribb budapesti keresésekkel: ezermester, vízszerelő, villanyszerelő, festő, takarítás és költöztetés.'
+                : 'Start with the most common Budapest searches: handyman, plumbing, electrical, painting, cleaning, and moving.'}
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {serviceLinks.map(entry => (
+                <Link key={entry.id} href={servicePath(entry, locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                  {entry.labels[locale]}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Eyebrow>{locale === 'hu' ? 'Kerület szerinti keresés' : 'Search by district'}</Eyebrow>
+            <h2 className="text-4xl font-black text-gray-900 mb-3" style={{ ...dg, letterSpacing: '-0.02em' }}>
+              {locale === 'hu' ? 'Ezermester a közeledben.' : 'Handyman help near you.'}
+            </h2>
+            <p className="text-gray-500 text-base leading-relaxed mb-6">
+              {locale === 'hu'
+                ? 'Keress helyi ezermestert Budapest legforgalmasabb kerületeiben, vagy böngéssz minden kerületi szakember között.'
+                : 'Search for local handyman help in key Budapest districts, or browse every district page.'}
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {districtLinks.map(district => (
+                <Link key={district.id} href={districtServicePath(district, handyman, locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                  {locale === 'hu' ? `${district.name} ezermester` : `Handyman in ${district.name}`}
+                </Link>
+              ))}
+              <Link href={districtPath(seoDistricts[0], locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                {locale === 'hu' ? 'Összes budapesti kerület' : 'All Budapest districts'}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
