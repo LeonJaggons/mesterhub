@@ -28,6 +28,7 @@ import {
   requestHref,
   type MessageRole,
 } from './utils'
+import ReportUserButton from '@/app/components/reports/ReportUserButton'
 import styles from './messages.module.css'
 
 type Props = {
@@ -424,6 +425,8 @@ export default function ConversationThread({ role, basePath }: Props) {
   }
 
   const name = partnerDisplayName(conv, role)
+  const reportTargetUid = role === 'customer' ? conv.proUid : conv.customerUid
+  const reportTargetRole = role === 'customer' ? 'pro' : 'customer'
   const groups = groupMessagesByDay(messages)
   const details = request ? formatAnswers(request.answers) : []
   const statusLabel = request ? conversationStatusLabel(request, role) : 'Conversation open'
@@ -448,6 +451,16 @@ export default function ConversationThread({ role, basePath }: Props) {
             <Link href={requestHref(requestId, role)} className={styles.headerAction}>
               Open {role === 'customer' ? 'request' : 'job'}
             </Link>
+            <ReportUserButton
+              targetUid={reportTargetUid}
+              targetRole={reportTargetRole}
+              targetName={name}
+              reporterRole={role}
+              contextType="conversation"
+              requestId={requestId}
+              buttonLabel="Report"
+              className={styles.headerReportAction}
+            />
           </header>
 
           <div className={styles.messageArea}>

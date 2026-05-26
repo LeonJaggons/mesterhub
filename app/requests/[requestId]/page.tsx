@@ -24,6 +24,7 @@ import {
 } from '../shared'
 import styles from '../../account/account.module.css'
 import { ProDetailCard } from '../components/ProCard'
+import ReportUserButton from '@/app/components/reports/ReportUserButton'
 import StatusTimeline from '../components/StatusTimeline'
 import { AcceptQuoteModal, DeclineQuoteModal } from '../QuoteDecisionModals'
 
@@ -845,6 +846,15 @@ export default function RequestDetailPage() {
                 Cancel request
               </button>
             )}
+            <ReportUserButton
+              targetUid={req.proUid}
+              targetRole="pro"
+              targetName={displayName}
+              reporterRole="customer"
+              contextType="request"
+              requestId={requestId}
+              buttonLabel="Report this pro"
+            />
             <NeedHelpCard requestId={requestId} status={req.status} proName={displayName} />
           </div>
         </div>

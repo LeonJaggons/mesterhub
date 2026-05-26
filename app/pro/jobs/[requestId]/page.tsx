@@ -7,6 +7,7 @@ import { onAuthChange, waitForAuthReady } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { requestAppointment, type AppointmentRequestInput } from '@/firebase/conversations'
 import { cancelServiceRequest, declineServiceRequestAsPro, markServiceRequestComplete, quoteServiceRequest } from '@/firebase/serviceRequests'
+import ReportUserButton from '@/app/components/reports/ReportUserButton'
 import {
   approximateLocationLabel,
   approximateRadiusMeters,
@@ -1015,6 +1016,15 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   Cancel request
                 </button>
               )}
+              <ReportUserButton
+                targetUid={req.customerUid}
+                targetRole="customer"
+                targetName={customerName}
+                reporterRole="pro"
+                contextType="request"
+                requestId={requestId}
+                buttonLabel="Report this customer"
+              />
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5">

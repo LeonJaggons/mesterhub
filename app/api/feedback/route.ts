@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
+import { sendAdminNotification } from '@/firebase/adminNotifications'
 
 type FeedbackType = 'problem' | 'feature' | 'general'
 
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Please keep feedback under 2,000 characters.' }, { status: 400 })
     }
 
-    await adminDb.collection('feedback').add({
+    const ref = await adminDb.collection('feedback').add({
       type,
       message,
       path,
@@ -61,6 +62,28 @@ export async function POST(request: NextRequest) {
       viewport: cleanString(body.viewport).slice(0, 64),
       createdAt: FieldValue.serverTimestamp(),
     })
+
+    if (type === 'problem') {
+      await sendAdminNotification({
+        event: 'admin.feedback.problem_created',
+        subject: `Problem feedback: ${path}`,
+        previewText: `A user reported a product problem on ${path}.`,
+        text: [
+          'A user submitted problem feedback.',
+          `Path: ${path}`,
+          `Reporter: ${user?.name ?? 'Anonymous'} (${user?.email ?? (email || 'no email')})`,
+          `Viewport: ${cleanString(body.viewport).slice(0, 64) || 'Not provided'}`,
+          `Message:\n${message}`,
+        ].join('\n\n'),
+        actionPath: '/admin/feedback',
+        metadata: {
+          feedbackId: ref.id,
+          type,
+          userUid: user?.uid ?? null,
+          path,
+        },
+      })
+    }
 
     return Response.json({ ok: true })
   } catch (err) {

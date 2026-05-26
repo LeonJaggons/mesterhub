@@ -268,10 +268,10 @@
 }
 
 .headerAction,
+.headerReportAction,
 .textLink {
   font-size: 0.82rem;
   font-weight: 800;
-  color: #f97316;
   text-decoration: none;
 }
 
@@ -280,11 +280,32 @@
   padding: 0.55rem 0.75rem;
   border-radius: 999px;
   background: #fff7ed;
+  color: #f97316;
+}
+
+.headerReportAction {
+  flex-shrink: 0;
+  border: 1px solid #fee2e2;
+  border-radius: 999px;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 0.55rem 0.75rem;
+}
+
+.textLink {
+  color: #f97316;
 }
 
 .headerAction:hover,
+.headerReportAction:hover,
 .textLink:hover {
   color: #ea580c;
+}
+
+.headerReportAction:hover {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .messageArea {

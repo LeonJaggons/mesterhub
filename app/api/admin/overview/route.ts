@@ -7,6 +7,7 @@ const proStatuses = ['pending_verification', 'active', 'suspended', 'rejected'] 
 const requestStatuses = ['pending', 'quoted', 'accepted', 'declined', 'completed', 'cancelled'] as const
 const projectStatuses = ['active', 'closed', 'cancelled'] as const
 const feedbackStatuses = ['new', 'reviewing', 'planned', 'resolved', 'closed'] as const
+const reportStatuses = ['new', 'reviewing', 'action_taken', 'resolved', 'dismissed'] as const
 
 async function countCollection(collection: string): Promise<number> {
   const snap = await adminDb.collection(collection).count().get()
@@ -31,12 +32,15 @@ export async function GET(request: NextRequest) {
       projects,
       serviceRequests,
       feedback,
+      reports,
       conversations,
       mailEvents,
       prosByStatus,
       requestsByStatus,
       projectsByStatus,
       feedbackByStatus,
+      reportsByStatus,
+      latestReportsSnap,
       latestFeedbackSnap,
       latestRequestsSnap,
       latestProsSnap,
@@ -46,24 +50,29 @@ export async function GET(request: NextRequest) {
       countCollection('projects'),
       countCollection('serviceRequests'),
       countCollection('feedback'),
+      countCollection('reports'),
       countCollection('conversations'),
       countCollection('mailEvents'),
       countByStatus('pros', proStatuses),
       countByStatus('serviceRequests', requestStatuses),
       countByStatus('projects', projectStatuses),
       countByStatus('feedback', feedbackStatuses),
+      countByStatus('reports', reportStatuses),
+      adminDb.collection('reports').orderBy('createdAt', 'desc').limit(5).get(),
       adminDb.collection('feedback').orderBy('createdAt', 'desc').limit(5).get(),
       adminDb.collection('serviceRequests').orderBy('createdAt', 'desc').limit(5).get(),
       adminDb.collection('pros').orderBy('createdAt', 'desc').limit(5).get(),
     ])
 
     return Response.json({
-      totals: { pros, users, projects, serviceRequests, feedback, conversations, mailEvents },
+      totals: { pros, users, projects, serviceRequests, feedback, reports, conversations, mailEvents },
       prosByStatus,
       requestsByStatus,
       projectsByStatus,
       feedbackByStatus,
+      reportsByStatus,
       latest: {
+        reports: latestReportsSnap.docs.map(serializeDoc),
         feedback: latestFeedbackSnap.docs.map(serializeDoc),
         serviceRequests: latestRequestsSnap.docs.map(serializeDoc),
         pros: latestProsSnap.docs.map(serializeDoc),

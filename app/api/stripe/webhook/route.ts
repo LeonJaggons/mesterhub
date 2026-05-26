@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import { sendAdminNotification } from '@/firebase/adminNotifications'
 import { stripe } from '@/lib/stripe'
 import { invoiceSubscriptionId, syncStripeSubscription } from '@/lib/stripeSubscription'
 
@@ -40,11 +41,33 @@ export async function POST(request: Request) {
         await syncStripeSubscription(event.data.object)
         break
       case 'invoice.payment_failed': {
-        const subscriptionId = invoiceSubscriptionId(event.data.object)
+        const invoice = event.data.object
+        const subscriptionId = invoiceSubscriptionId(invoice)
         if (subscriptionId) {
           const subscription = await stripe().subscriptions.retrieve(subscriptionId)
           await syncStripeSubscription(subscription)
         }
+        await sendAdminNotification({
+          event: 'admin.stripe.invoice_payment_failed',
+          subject: 'Stripe payment failed',
+          previewText: 'A pro subscription invoice payment failed.',
+          text: [
+            'Stripe reported a failed invoice payment.',
+            `Invoice: ${invoice.id}`,
+            `Customer: ${typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? 'Unknown'}`,
+            `Subscription: ${subscriptionId || 'Unknown'}`,
+            `Amount due: ${invoice.amount_due ?? 0} ${invoice.currency?.toUpperCase() ?? ''}`,
+            invoice.hosted_invoice_url ? `Invoice URL: ${invoice.hosted_invoice_url}` : '',
+          ].filter(Boolean).join('\n\n'),
+          actionPath: '/admin/pros',
+          metadata: {
+            stripeInvoiceId: invoice.id,
+            stripeCustomerId: typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? null,
+            stripeSubscriptionId: subscriptionId || null,
+            amountDue: invoice.amount_due ?? null,
+            currency: invoice.currency ?? null,
+          },
+        })
         break
       }
       default:

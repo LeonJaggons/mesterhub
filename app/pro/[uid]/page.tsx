@@ -27,6 +27,7 @@ import { authenticatedFetch } from '@/firebase/apiClient'
 import { createServiceRequest, type JobLocation } from '@/firebase/serviceRequests'
 import { uploadServiceRequestAttachment } from '@/firebase/storage'
 import { timestampMillis } from '@/app/requests/shared'
+import ReportUserButton from '@/app/components/reports/ReportUserButton'
 import districtsData from '@/public/districts.json'
 import {
   CATEGORY_QUESTIONS,
@@ -1424,17 +1425,30 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                 {pro.categoryName && <span>{pro.categoryName}</span>}
                 {pro.yearsExp && <span>{pro.yearsExp} years in business</span>}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const url = window.location.href
-                  if (navigator.share) navigator.share({ title: pro.fullName, url })
-                  else navigator.clipboard?.writeText(url)
-                }}
-                className="mt-4 inline-flex items-center gap-2 rounded-sm border border-gray-300 bg-white px-6 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
-              >
-                <MdShare size={16} /> Share
-              </button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = window.location.href
+                    if (navigator.share) navigator.share({ title: pro.fullName, url })
+                    else navigator.clipboard?.writeText(url)
+                  }}
+                  className="inline-flex items-center gap-2 rounded-sm border border-gray-300 bg-white px-6 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
+                >
+                  <MdShare size={16} /> Share
+                </button>
+                {!isOwnProfile && (
+                  <ReportUserButton
+                    targetUid={pro.uid}
+                    targetRole="pro"
+                    targetName={pro.fullName}
+                    reporterRole="customer"
+                    contextType="pro_profile"
+                    buttonLabel="Report profile"
+                    className="inline-flex items-center rounded-sm border border-red-100 bg-white px-6 py-2 text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer"
+                  />
+                )}
+              </div>
             </div>
           </div>
 

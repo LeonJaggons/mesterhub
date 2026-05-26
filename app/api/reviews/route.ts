@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { sendAdminNotification } from '@/firebase/adminNotifications'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 
 type ServiceRequestDoc = {
@@ -258,6 +259,30 @@ export async function POST(request: NextRequest) {
         reviewCount: review.reviewCount,
       },
     })
+
+    if (review.rating <= 2) {
+      await sendAdminNotification({
+        event: 'admin.review.low_rating_posted',
+        subject: `Low review: ${review.rating}/5 for ${review.categoryName || 'job'}`,
+        previewText: `${review.customerName} left a ${review.rating}/5 review.`,
+        text: [
+          'A customer posted a low review that may need follow-up.',
+          `Rating: ${review.rating}/5`,
+          `Customer: ${review.customerName} (${user.email ?? user.uid})`,
+          `Pro UID: ${review.proUid}`,
+          `Category: ${review.categoryName || 'Not provided'}`,
+          `Comment:\n${review.comment}`,
+        ].join('\n\n'),
+        actionPath: `/requests/${requestId}`,
+        requestId,
+        metadata: {
+          proUid: review.proUid,
+          customerUid: user.uid,
+          rating: review.rating,
+          reviewCount: review.reviewCount,
+        },
+      })
+    }
 
     return Response.json({ ok: true, review })
   } catch (err) {

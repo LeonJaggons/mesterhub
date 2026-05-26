@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { sendAdminNotification } from '@/firebase/adminNotifications'
 import type { SignupData } from '@/app/pro/signup/store'
 
 type ProStatus = 'pending_verification' | 'active' | 'suspended' | 'rejected'
@@ -112,6 +113,31 @@ export async function POST(request: NextRequest) {
     })
 
     await batch.commit()
+
+    await sendAdminNotification({
+      event: 'admin.pro.signup_submitted',
+      subject: `New pro signup: ${fullName}`,
+      previewText: `${fullName} submitted a ${cleanString(data.categoryName)} pro profile for verification.`,
+      text: [
+        'A new pro profile was submitted and is pending verification.',
+        `Name: ${fullName}`,
+        `Email: ${email}`,
+        `Phone: ${cleanString(data.phone) || 'Not provided'}`,
+        `Category: ${cleanString(data.categoryName)}`,
+        `Services: ${cleanStringArray(data.services).join(', ') || 'None listed'}`,
+        `Districts: ${cleanNumberArray(data.districts).join(', ') || 'None listed'}`,
+        data.backgroundCheck ? 'Background check requested: yes' : 'Background check requested: no',
+        data.licenceNumber ? `Licence number: ${cleanString(data.licenceNumber)}` : '',
+        data.certificateUrl ? 'Certificate uploaded: yes' : '',
+        data.insuranceUrl ? 'Insurance uploaded: yes' : '',
+      ].filter(Boolean).join('\n\n'),
+      actionPath: '/admin/pros',
+      metadata: {
+        proUid: user.uid,
+        categoryName: cleanString(data.categoryName),
+        status,
+      },
+    })
 
     return Response.json({ ok: true })
   } catch (err) {

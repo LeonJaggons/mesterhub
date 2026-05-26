@@ -12,7 +12,9 @@ type Overview = {
   requestsByStatus: Record<string, number>
   projectsByStatus: Record<string, number>
   feedbackByStatus: Record<string, number>
+  reportsByStatus: Record<string, number>
   latest: {
+    reports: Array<Record<string, unknown>>
     feedback: Array<Record<string, unknown>>
     serviceRequests: Array<Record<string, unknown>>
     pros: Array<Record<string, unknown>>
@@ -54,10 +56,10 @@ function RecentList({ title, items, empty }: { title: string; items: Array<Recor
         ) : items.map(item => (
           <div key={String(item.id)} className="py-3">
             <p className="text-sm font-bold text-gray-900">
-              {String(item.fullName || item.customerName || item.type || item.categoryName || item.id)}
+              {String(item.fullName || item.customerName || item.targetName || item.type || item.categoryName || item.id)}
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              {String(item.categoryName || item.email || item.customerEmail || item.path || '')}
+              {String(item.categoryName || item.reason || item.email || item.customerEmail || item.path || '')}
             </p>
           </div>
         ))}
@@ -177,19 +179,20 @@ export default function AdminOverviewPage() {
         <StatCard label="Pros" value={overview.totals.pros ?? 0} href="/admin/pros" />
         <StatCard label="Service requests" value={overview.totals.serviceRequests ?? 0} href="/admin/requests" />
         <StatCard label="Projects" value={overview.totals.projects ?? 0} href="/admin/projects" />
-        <StatCard label="Feedback" value={overview.totals.feedback ?? 0} href="/admin/feedback" />
+        <StatCard label="Reports" value={overview.totals.reports ?? 0} href="/admin/reports" />
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <Breakdown title="Pros" items={overview.prosByStatus} />
         <Breakdown title="Requests" items={overview.requestsByStatus} />
         <Breakdown title="Projects" items={overview.projectsByStatus} />
-        <Breakdown title="Feedback" items={overview.feedbackByStatus} />
+        <Breakdown title="Reports" items={overview.reportsByStatus} />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <RecentList title="Latest pros" items={overview.latest.pros} empty="No pros yet." />
         <RecentList title="Latest requests" items={overview.latest.serviceRequests} empty="No requests yet." />
+        <RecentList title="Latest reports" items={overview.latest.reports} empty="No reports yet." />
         <RecentList title="Latest feedback" items={overview.latest.feedback} empty="No feedback yet." />
       </section>
 
