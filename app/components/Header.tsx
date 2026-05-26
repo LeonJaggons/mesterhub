@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@base-ui/react/button'
 import { onAuthChange, signOut } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { useNotifications, type ClientNotification } from './notifications/useNotifications'
 import type { User } from 'firebase/auth'
 import styles from './Header.module.css'
 
@@ -14,6 +15,7 @@ import styles from './Header.module.css'
 type Category = { name: string; total_services: number; featured: string[] }
 type CategoryDetail = Category & { services: string[] }
 type ProBasic = { uid: string; fullName: string; categoryName: string }
+type NotificationsState = ReturnType<typeof useNotifications>
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -249,13 +251,88 @@ function ProNavLink({ href, label, badge = 0 }: { href: string; label: string; b
   )
 }
 
-function BellButton() {
+function notificationTime(value: string | null): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date)
+}
+
+function BellButton({
+  notifications,
+  unreadCount,
+  loading,
+  markRead,
+  markAllRead,
+}: {
+  notifications: ClientNotification[]
+  unreadCount: number
+  loading: boolean
+  markRead: NotificationsState['markRead']
+  markAllRead: NotificationsState['markAllRead']
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useClickOutside(ref, () => setOpen(false), open)
+
   return (
-    <button className="relative p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer border-none bg-transparent">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
-      </svg>
-    </button>
+    <div ref={ref} className={styles.notificationAnchor}>
+      <button
+        type="button"
+        className={styles.notificationButton}
+        onClick={() => setOpen(value => !value)}
+        aria-label="Notifications"
+        aria-expanded={open}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+        </svg>
+        <NavBadge count={unreadCount} />
+      </button>
+      <div className={styles.notificationPopup} data-open={open ? '' : undefined} aria-hidden={!open}>
+        <div className={styles.notificationHeader}>
+          <div>
+            <p className={styles.notificationKicker}>Notifications</p>
+            <h2 className={styles.notificationTitle}>{unreadCount ? `${unreadCount} unread` : 'All caught up'}</h2>
+          </div>
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              className={styles.notificationReadAll}
+              onClick={() => { void markAllRead() }}
+            >
+              Mark all read
+            </button>
+          )}
+        </div>
+        <div className={styles.notificationList}>
+          {notifications.length > 0 ? notifications.map(notification => (
+            <Link
+              key={notification.id}
+              href={notification.href}
+              className={`${styles.notificationItem} ${notification.readAt ? '' : styles.notificationItemUnread}`}
+              onClick={() => {
+                setOpen(false)
+                if (!notification.readAt) void markRead(notification.id)
+              }}
+            >
+              <span className={styles.notificationItemTitle}>{notification.title}</span>
+              <span className={styles.notificationItemBody}>{notification.body}</span>
+              <span className={styles.notificationItemTime}>{notificationTime(notification.createdAt)}</span>
+            </Link>
+          )) : (
+            <div className={styles.notificationEmpty}>
+              {loading ? 'Loading notifications...' : 'No notifications yet.'}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -347,11 +424,13 @@ function ProNav({
   pro,
   pendingJobs,
   confirmedAppointments,
+  notifications,
 }: {
   user: User
   pro: ProBasic
   pendingJobs: number
   confirmedAppointments: number
+  notifications: NotificationsState
 }) {
   return (
     <nav className="flex items-center gap-2">
@@ -361,7 +440,7 @@ function ProNav({
       <ProNavLink href="/pro/earnings" label="Earnings" />
       <ProNavLink href={`/pro/${pro.uid}`} label="Profile" />
       <ProHeaderUpgradeButton />
-      <BellButton />
+      <BellButton {...notifications} />
       <div className="ml-1">
         <ProAccountMenu user={user} pro={pro} />
       </div>
@@ -387,12 +466,14 @@ function MobileMenu({
   pendingJobs,
   confirmedAppointments,
   activeAppointments,
+  unreadNotifications,
 }: {
   user: User | null
   pro: ProBasic | null
   pendingJobs: number
   confirmedAppointments: number
   activeAppointments: number
+  unreadNotifications: number
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -424,6 +505,7 @@ function MobileMenu({
               <MobileNavLink href="/pro/jobs" label="Jobs" badge={pendingJobs} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/work" label="My Work" badge={confirmedAppointments} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/messages" label="Messages" onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/jobs" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/earnings" label="Earnings" onClick={() => setOpen(false)} />
               <MobileNavLink href={`/pro/${pro.uid}`} label="Profile" onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/settings" label="Settings" onClick={() => setOpen(false)} />
@@ -438,6 +520,7 @@ function MobileMenu({
                   <MobileNavLink href="/projects" label="Projects" onClick={() => setOpen(false)} />
                   <MobileNavLink href="/appointments" label="Appointments" badge={activeAppointments} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/messages" label="Messages" onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/requests" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/settings" label="Account settings" onClick={() => setOpen(false)} />
                 </>
               )}
@@ -480,6 +563,7 @@ export default function Header() {
   const [pendingJobs, setPendingJobs] = useState(0)
   const [confirmedProAppointments, setConfirmedProAppointments] = useState(0)
   const [activeAppointments, setActiveAppointments] = useState(0)
+  const notifications = useNotifications(!isSignupPath && Boolean(user))
 
   // Detect auth + pro status through the shared API so every client sees the same account resolution.
   useEffect(() => {
@@ -609,6 +693,7 @@ export default function Header() {
             pro={pro}
             pendingJobs={pendingJobs}
             confirmedAppointments={confirmedProAppointments}
+            notifications={notifications}
           />
         </div>
       ) : (
@@ -619,9 +704,12 @@ export default function Header() {
             Join as a pro
           </Link>
           {user ? (
-            <div className="ml-1">
-              <CustomerProfileMenu user={user} />
-            </div>
+            <>
+              <BellButton {...notifications} />
+              <div className="ml-1">
+                <CustomerProfileMenu user={user} />
+              </div>
+            </>
           ) : (
             <>
               <Link href="/register">
@@ -643,6 +731,7 @@ export default function Header() {
           pendingJobs={pendingJobs}
           confirmedAppointments={confirmedProAppointments}
           activeAppointments={activeAppointments}
+          unreadNotifications={notifications.unreadCount}
         />
       )}
     </header>

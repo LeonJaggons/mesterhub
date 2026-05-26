@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
+import { createInAppNotification } from '@/firebase/inAppNotifications'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { AppointmentRequestInput } from '@/firebase/conversations'
 import type { QuoteInput } from '@/firebase/serviceRequests'
@@ -785,6 +786,18 @@ export async function PATCH(
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid },
       })
+      await createInAppNotification({
+        recipientUid: req.customerUid,
+        recipientRole: 'customer',
+        actorUid: user.uid,
+        actorRole: 'pro',
+        type: 'quote.sent',
+        title: 'New quote received',
+        body: `${req.proName} sent a quote for your ${req.categoryName} request.`,
+        href: `/requests/${requestId}`,
+        requestId,
+        metadata: { proUid: req.proUid, categoryName: req.categoryName },
+      })
       return Response.json({ ok: true })
     }
 
@@ -886,6 +899,18 @@ export async function PATCH(
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid },
       })
+      await createInAppNotification({
+        recipientUid: req.proUid,
+        recipientRole: 'pro',
+        actorUid: user.uid,
+        actorRole: 'customer',
+        type: 'quote.accepted',
+        title: 'Quote accepted',
+        body: `${req.customerName} accepted your ${req.categoryName} quote.`,
+        href: `/pro/jobs/${requestId}`,
+        requestId,
+        metadata: { customerUid: req.customerUid, categoryName: req.categoryName },
+      })
       return Response.json({ ok: true })
     }
 
@@ -922,6 +947,18 @@ export async function PATCH(
         }),
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid },
+      })
+      await createInAppNotification({
+        recipientUid: req.proUid,
+        recipientRole: 'pro',
+        actorUid: user.uid,
+        actorRole: 'customer',
+        type: 'quote.declined',
+        title: 'Quote declined',
+        body: `${req.customerName} declined your ${req.categoryName} quote.`,
+        href: `/pro/jobs/${requestId}`,
+        requestId,
+        metadata: { customerUid: req.customerUid, categoryName: req.categoryName, reason },
       })
       return Response.json({ ok: true })
     }
@@ -1000,6 +1037,18 @@ export async function PATCH(
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid },
       })
+      await createInAppNotification({
+        recipientUid: req.customerUid,
+        recipientRole: 'customer',
+        actorUid: user.uid,
+        actorRole: 'pro',
+        type: 'appointment.proposed',
+        title: isChangeRequest ? 'Appointment change proposed' : 'Appointment proposed',
+        body: `${req.proName} proposed an appointment for your ${req.categoryName} request.`,
+        href: `/requests/${requestId}`,
+        requestId,
+        metadata: { proUid: req.proUid, categoryName: req.categoryName, appointmentKind },
+      })
       return Response.json({ ok: true })
     }
 
@@ -1049,6 +1098,18 @@ export async function PATCH(
         }),
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid },
+      })
+      await createInAppNotification({
+        recipientUid: req.proUid,
+        recipientRole: 'pro',
+        actorUid: user.uid,
+        actorRole: 'customer',
+        type: 'appointment.confirmed',
+        title: 'Appointment confirmed',
+        body: `${req.customerName} confirmed the appointment for ${req.categoryName}.`,
+        href: `/pro/jobs/${requestId}`,
+        requestId,
+        metadata: { customerUid: req.customerUid, categoryName: req.categoryName },
       })
       return Response.json({ ok: true })
     }
@@ -1108,6 +1169,18 @@ export async function PATCH(
         updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true })
       await batch.commit()
+      await createInAppNotification({
+        recipientUid,
+        recipientRole,
+        actorUid: user.uid,
+        actorRole: senderRole,
+        type: 'message.received',
+        title: `New message from ${senderName}`,
+        body: text.length > 140 ? `${text.slice(0, 137)}...` : text,
+        href: recipientRole === 'pro' ? `/pro/messages/${requestId}` : `/messages/${requestId}`,
+        requestId,
+        metadata: { proUid: req.proUid, customerUid: req.customerUid, categoryName: req.categoryName },
+      })
       return Response.json({ ok: true })
     }
 
@@ -1142,6 +1215,18 @@ export async function PATCH(
         }),
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid },
+      })
+      await createInAppNotification({
+        recipientUid: req.customerUid,
+        recipientRole: 'customer',
+        actorUid: user.uid,
+        actorRole: 'pro',
+        type: 'completion.requested',
+        title: 'Confirm job completion',
+        body: `${req.proName} marked your ${req.categoryName} job complete.`,
+        href: `/requests/${requestId}`,
+        requestId,
+        metadata: { proUid: req.proUid, categoryName: req.categoryName },
       })
       return Response.json({ ok: true })
     }
@@ -1196,6 +1281,18 @@ export async function PATCH(
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid, categoryName: req.categoryName },
       })
+      await createInAppNotification({
+        recipientUid: req.proUid,
+        recipientRole: 'pro',
+        actorUid: user.uid,
+        actorRole: 'customer',
+        type: 'request.completed',
+        title: 'Job completed',
+        body: `${req.customerName} confirmed the ${req.categoryName} job is complete.`,
+        href: `/pro/jobs/${requestId}`,
+        requestId,
+        metadata: { customerUid: req.customerUid, categoryName: req.categoryName },
+      })
       return Response.json({ ok: true })
     }
 
@@ -1233,6 +1330,18 @@ export async function PATCH(
         }),
         hideSubjectHeading: true,
         metadata: { proUid: req.proUid, customerUid: req.customerUid, cancelledBy: actorRole },
+      })
+      await createInAppNotification({
+        recipientUid: actorRole === 'pro' ? req.customerUid : req.proUid,
+        recipientRole: actorRole === 'pro' ? 'customer' : 'pro',
+        actorUid: user.uid,
+        actorRole,
+        type: 'request.cancelled',
+        title: 'Request cancelled',
+        body: `The ${req.categoryName} request was cancelled by the ${actorRole}.`,
+        href: actorRole === 'pro' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`,
+        requestId,
+        metadata: { proUid: req.proUid, customerUid: req.customerUid, cancelledBy: actorRole, reason },
       })
       return Response.json({ ok: true })
     }

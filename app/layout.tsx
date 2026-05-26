@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "./components/Header";
 import FeedbackFab from "./components/FeedbackFab";
-import Footer from "./components/Footer";
+import ConditionalFooter from "./components/ConditionalFooter";
 
 const googleSansFlex = localFont({
   src: "../public/GoogleSansFlex.ttf",
@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col root">
           <Header />
           {children}
-          <Footer />
+          <ConditionalFooter />
           <FeedbackFab />
         </body>
     </html>

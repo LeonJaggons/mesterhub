@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
+import { createInAppNotification } from '@/firebase/inAppNotifications'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { JobLocation, NewServiceRequest } from '@/firebase/serviceRequests'
 import { hasPaidProFeatures } from '@/lib/billing'
@@ -342,6 +343,18 @@ export async function POST(request: NextRequest) {
       bodyHtml: estimateRequestEmailHtml({ customerName: emailCustomerName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel }),
       hideSubjectHeading: true,
       metadata: { proUid, customerUid: user.uid, categoryName, projectId, notificationType: 'estimate_request_sent_to_pro' },
+    })
+    await createInAppNotification({
+      recipientUid: proUid,
+      recipientRole: 'pro',
+      actorUid: user.uid,
+      actorRole: 'customer',
+      type: 'request.created',
+      title: 'New estimate request',
+      body: `${customerDisplayName} requested a ${categoryName} estimate.`,
+      href: `/pro/jobs/${requestRef.id}`,
+      requestId: requestRef.id,
+      metadata: { categoryName, projectId },
     })
 
     return Response.json({ id: requestRef.id, projectId })
