@@ -21,6 +21,11 @@ type RequestDoc = {
   jobLocation?: unknown
 }
 
+type ProjectDoc = {
+  customerUid?: string
+  status?: 'active' | 'closed' | 'cancelled'
+}
+
 type ConversationDoc = {
   proUid: string
   customerUid: string
@@ -1236,13 +1241,30 @@ export async function PATCH(
       if (req.status !== 'accepted' || req.completion?.status !== 'pro_marked_complete') {
         return Response.json({ error: 'This request is not ready to complete.' }, { status: 409 })
       }
-      await reqRef.update({
+      const batch = adminDb.batch()
+      batch.update(reqRef, {
         status: 'completed',
         'completion.status': 'confirmed_complete',
         'completion.confirmedAt': FieldValue.serverTimestamp(),
         completedAt: FieldValue.serverTimestamp(),
         statusHistory: FieldValue.arrayUnion(historyEntry('completed', user.uid, 'customer')),
       })
+
+      if (req.projectId) {
+        const projectRef = adminDb.collection('projects').doc(req.projectId)
+        const projectSnap = await projectRef.get()
+        const project = projectSnap.exists ? projectSnap.data() as ProjectDoc : null
+        if (project?.customerUid === req.customerUid && project.status !== 'cancelled') {
+          batch.update(projectRef, {
+            status: 'closed',
+            completedRequestId: requestId,
+            completedAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          })
+        }
+      }
+
+      await batch.commit()
       await sendLifecycleEmail({
         to: await proEmail(req.proUid),
         event: 'request.completed',

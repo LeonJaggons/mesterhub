@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { listMarketplaceQuotesForProjects } from '@/lib/marketplaceQuotes'
 
 function cleanString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value.trim() : fallback
@@ -93,6 +94,10 @@ export async function GET(request: NextRequest) {
         } as Record<string, unknown>
       }),
     )
+    const quotesByProject = await listMarketplaceQuotesForProjects(user.uid, projects.map(project => String(project.id)))
+    for (const project of projects) {
+      project.marketplaceQuotes = quotesByProject.get(String(project.id)) ?? []
+    }
 
     projects.sort((a, b) => {
       const aTime = timestampMillis(a.updatedAt) || timestampMillis(a.createdAt)

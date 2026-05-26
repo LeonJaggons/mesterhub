@@ -435,6 +435,7 @@ function ProNav({
   return (
     <nav className="flex items-center gap-2">
       <ProNavLink href="/pro/jobs" label="Jobs" badge={pendingJobs} />
+      <ProNavLink href="/pro/marketplace" label="Marketplace" />
       <ProNavLink href="/pro/work" label="My Work" badge={confirmedAppointments} />
       <ProNavLink href="/pro/messages" label="Messages" />
       <ProNavLink href="/pro/earnings" label="Earnings" />
@@ -503,6 +504,7 @@ function MobileMenu({
           {pro && user ? (
             <>
               <MobileNavLink href="/pro/jobs" label="Jobs" badge={pendingJobs} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/marketplace" label="Marketplace" onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/work" label="My Work" badge={confirmedAppointments} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/messages" label="Messages" onClick={() => setOpen(false)} />
               <MobileNavLink href="/notifications" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />

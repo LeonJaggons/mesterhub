@@ -7,6 +7,8 @@ import type { User } from 'firebase/auth'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { uploadServiceRequestAttachment } from '@/firebase/storage'
+import { AcceptQuoteModal, DeclineQuoteModal } from '@/app/requests/QuoteDecisionModals'
+import type { AcceptQuoteInput } from '@/firebase/conversations'
 import districtsData from '@/public/districts.json'
 import servicesData from '@/public/services.json'
 import styles from '../account/account.module.css'
@@ -27,9 +29,23 @@ type ProjectDoc = {
   attachmentUrls?: string[]
   invitedProUids?: string[]
   hasAppointment?: boolean
+  marketplaceQuotes?: MarketplaceQuote[]
   status?: string
   createdAt: TimestampLike | null
   updatedAt?: TimestampLike | null
+}
+
+type MarketplaceQuote = {
+  id: string
+  projectId: string
+  proUid: string
+  proName: string
+  proCategoryName?: string
+  quote: { price: string; timeline: string; notes: string }
+  status: 'submitted' | 'accepted' | 'declined' | 'withdrawn'
+  requestId?: string
+  quotedAt?: TimestampLike | null
+  createdAt?: TimestampLike | null
 }
 
 type CreateProjectForm = {
@@ -341,14 +357,21 @@ function CreateProjectModal({
 function ProjectCard({
   project,
   onDelete,
+  onAcceptMarketplaceQuote,
+  onDeclineMarketplaceQuote,
   isDeleting,
+  busyQuoteId,
 }: {
   project: ProjectDoc
   onDelete: (project: ProjectDoc) => void
+  onAcceptMarketplaceQuote: (project: ProjectDoc, quote: MarketplaceQuote) => void
+  onDeclineMarketplaceQuote: (project: ProjectDoc, quote: MarketplaceQuote) => void
   isDeleting: boolean
+  busyQuoteId: string | null
 }) {
   const details = formatAnswers(project.answers).filter(item => item.key !== 'Project Details').slice(0, 4)
   const proCount = project.invitedProUids?.length ?? 0
+  const marketplaceQuotes = project.marketplaceQuotes?.filter(quote => quote.status === 'submitted' || quote.status === 'accepted') ?? []
 
   return (
     <article className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -396,6 +419,70 @@ function ProjectCard({
             ))}
           </div>
         )}
+
+        {marketplaceQuotes.length > 0 && (
+          <section className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="mb-3">
+              <p className="text-xs font-black uppercase tracking-widest text-slate-500">Marketplace quotes</p>
+              <p className="mt-1 text-sm text-slate-600">
+                These pros found your open project. They stay separate from the pros you chose directly.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {marketplaceQuotes.map(quote => (
+                <div key={quote.id} className="rounded-xl border border-white bg-white p-3 shadow-sm">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{quote.proName || 'Mestermind Pro'}</p>
+                      <p className="text-xs text-gray-500">
+                        {quote.proCategoryName || project.categoryName}
+                        {quote.quotedAt || quote.createdAt ? ` · ${timeAgo(quote.quotedAt ?? quote.createdAt ?? null)}` : ''}
+                      </p>
+                    </div>
+                    <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-bold ${
+                      quote.status === 'accepted'
+                        ? 'border-green-200 bg-green-50 text-green-700'
+                        : 'border-orange-200 bg-orange-50 text-orange-700'
+                    }`}>
+                      {quote.status === 'accepted' ? 'Accepted' : 'Marketplace quote'}
+                    </span>
+                  </div>
+                  <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                    <p className="text-sm font-bold text-gray-900">
+                      {quote.quote.price}
+                      {quote.quote.timeline && <span className="font-normal text-gray-600"> · {quote.quote.timeline}</span>}
+                    </p>
+                    {quote.quote.notes && <p className="mt-1 text-sm leading-5 text-gray-600">{quote.quote.notes}</p>}
+                  </div>
+                  {quote.status === 'accepted' && quote.requestId ? (
+                    <Link href={`/requests/${quote.requestId}`} className="mt-3 inline-block text-sm font-bold text-orange-600 hover:underline">
+                      View accepted request →
+                    </Link>
+                  ) : (
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => onAcceptMarketplaceQuote(project, quote)}
+                        disabled={busyQuoteId === quote.id}
+                        className="rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {busyQuoteId === quote.id ? 'Working...' : 'Accept quote'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDeclineMarketplaceQuote(project, quote)}
+                        disabled={busyQuoteId === quote.id}
+                        className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3 sm:flex-row">
@@ -433,6 +520,9 @@ export default function ProjectsPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null)
+  const [acceptingQuote, setAcceptingQuote] = useState<{ project: ProjectDoc; quote: MarketplaceQuote } | null>(null)
+  const [decliningQuote, setDecliningQuote] = useState<{ project: ProjectDoc; quote: MarketplaceQuote } | null>(null)
+  const [busyQuoteId, setBusyQuoteId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -485,6 +575,60 @@ export default function ProjectsPage() {
     }
   }
 
+  async function handleAcceptMarketplaceQuote(input: AcceptQuoteInput) {
+    if (!acceptingQuote) return
+    const { project, quote } = acceptingQuote
+    setBusyQuoteId(quote.id)
+    setDeleteError(null)
+    try {
+      const res = await authenticatedFetch(`/api/projects/${project.id}/marketplace-quotes/${quote.id}/accept`, {
+        method: 'POST',
+        body: JSON.stringify({ input }),
+      })
+      const data = await res.json() as { requestId?: string }
+      setProjects(prev => prev.map(item => item.id === project.id
+        ? {
+            ...item,
+            marketplaceQuotes: item.marketplaceQuotes?.map(existing => existing.id === quote.id
+              ? { ...existing, status: 'accepted', requestId: data.requestId }
+              : existing),
+            invitedProUids: [...new Set([...(item.invitedProUids ?? []), quote.proUid])],
+            updatedAt: nowTimestamp(),
+          }
+        : item))
+      setAcceptingQuote(null)
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not accept marketplace quote.')
+    } finally {
+      setBusyQuoteId(null)
+    }
+  }
+
+  async function handleDeclineMarketplaceQuote(reason: string) {
+    if (!decliningQuote) return
+    const { project, quote } = decliningQuote
+    setBusyQuoteId(quote.id)
+    setDeleteError(null)
+    try {
+      await authenticatedFetch(`/api/projects/${project.id}/marketplace-quotes/${quote.id}/decline`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+      setProjects(prev => prev.map(item => item.id === project.id
+        ? {
+            ...item,
+            marketplaceQuotes: item.marketplaceQuotes?.filter(existing => existing.id !== quote.id),
+            updatedAt: nowTimestamp(),
+          }
+        : item))
+      setDecliningQuote(null)
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not decline marketplace quote.')
+    } finally {
+      setBusyQuoteId(null)
+    }
+  }
+
   return (
     <main className="bg-gray-50 min-h-screen flex-1">
       <div className="max-w-3xl mx-auto px-4 py-10">
@@ -528,7 +672,10 @@ export default function ProjectsPage() {
                 key={project.id}
                 project={project}
                 onDelete={handleDeleteProject}
+                onAcceptMarketplaceQuote={(project, quote) => setAcceptingQuote({ project, quote })}
+                onDeclineMarketplaceQuote={(project, quote) => setDecliningQuote({ project, quote })}
                 isDeleting={deletingProjectId === project.id}
+                busyQuoteId={busyQuoteId}
               />
             ))}
           </div>
@@ -539,6 +686,20 @@ export default function ProjectsPage() {
           user={user}
           onClose={() => setCreateOpen(false)}
           onCreated={handleProjectCreated}
+        />
+      )}
+      {acceptingQuote && (
+        <AcceptQuoteModal
+          proName={acceptingQuote.quote.proName || 'this pro'}
+          onClose={() => setAcceptingQuote(null)}
+          onSubmit={handleAcceptMarketplaceQuote}
+        />
+      )}
+      {decliningQuote && (
+        <DeclineQuoteModal
+          proName={decliningQuote.quote.proName || 'this pro'}
+          onClose={() => setDecliningQuote(null)}
+          onConfirm={handleDeclineMarketplaceQuote}
         />
       )}
     </main>

@@ -14,6 +14,9 @@ export type NotificationType =
   | 'completion.requested'
   | 'request.completed'
   | 'request.cancelled'
+  | 'marketplace.quote_submitted'
+  | 'marketplace.quote_accepted'
+  | 'marketplace.quote_declined'
 
 export type InAppNotification = {
   id: string
