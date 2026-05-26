@@ -84,7 +84,7 @@ export default function NotificationsPage() {
                     borderRadius: '0.75rem',
                     padding: '1rem',
                     textDecoration: 'none',
-                    background: notification.readAt ? '#fff' : '#fff7ed',
+                    background: notification.readAt ? '#fff' : '#f8fafc',
                     color: 'inherit',
                   }}
                 >

@@ -448,7 +448,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
         </Link>
 
         <div className="mb-6">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">
             {isConfirmed ? 'Confirmed appointment' : 'Appointment request'}
           </p>
           <h1
@@ -466,7 +466,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
           <section className="lg:col-span-3 flex flex-col gap-5">
             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
               <div className="rounded-2xl bg-slate-50 border border-slate-100 p-5 mb-6">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">
                   {appointment.kind === 'quote' ? 'Quote visit' : 'Service appointment'}
                 </p>
                 <p className="text-3xl font-black text-gray-900 leading-none" style={dg}>
@@ -508,7 +508,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Progress</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Progress</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Appointment stage</h2>
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                 {stages.map((stage, index) => {
@@ -536,7 +536,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
             </section>
 
             <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Customer location</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Customer location</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
                 {mapLabel}
               </h2>
@@ -569,7 +569,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
 
           <aside className="lg:col-span-2 flex flex-col gap-4">
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Appointment actions</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Appointment actions</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>Manage this job</h2>
               <p className={`mb-4 rounded-xl border px-3 py-2 text-sm ${
                 isCompleted
@@ -633,7 +633,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Day-of checklist</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Day-of checklist</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Complete smoothly</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
                 <li>Confirm parking, entry codes, pets, and elevator access.</li>
@@ -645,7 +645,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
 
             {details.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Project brief</p>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Project brief</p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Customer answers</h2>
                 <div className="divide-y divide-gray-100">
                   {details.slice(0, 5).map(detail => (

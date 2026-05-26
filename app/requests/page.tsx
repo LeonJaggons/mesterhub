@@ -115,7 +115,7 @@ function RequestCard({
   const canDelete = req.status !== 'completed' && !hasAppointment
 
   return (
-    <article className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-orange-200">
+    <article className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-slate-300">
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           {req.pro ? (
@@ -134,7 +134,7 @@ function RequestCard({
         </div>
 
         <div className="flex flex-wrap gap-2 mb-3">
-          <span className="bg-orange-50 text-orange-700 border border-orange-100 text-xs font-semibold rounded-full px-2.5 py-1">
+          <span className="bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold rounded-full px-2.5 py-1">
             {req.categoryName}
           </span>
           {district && (
@@ -188,7 +188,7 @@ function RequestCard({
       </div>
 
       <div className="flex flex-col gap-2 px-5 py-2.5 bg-gray-50 border-t border-gray-100 text-xs font-semibold transition-colors sm:flex-row sm:items-center sm:justify-between">
-        <Link href={`/requests/${req.id}`} className="text-orange-600 hover:underline">
+        <Link href={`/requests/${req.id}`} className="text-slate-700 hover:underline">
           View request details →
         </Link>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -330,10 +330,10 @@ function RequestsPageContent() {
             )}
 
             {projectId && (
-              <div className="mb-5 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+              <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <span className="font-semibold">Showing requests for one project.</span>
-                  <Link href="/requests" className="font-bold text-orange-700 hover:underline">
+                  <Link href="/requests" className="font-bold text-slate-800 hover:underline">
                     Clear project filter
                   </Link>
                 </div>
@@ -351,12 +351,12 @@ function RequestsPageContent() {
                     onClick={() => setStatusFilter(filter.id)}
                     className={`rounded-full border px-3 py-1.5 text-sm font-semibold cursor-pointer transition-colors ${
                       active
-                        ? 'bg-orange-500 border-orange-500 text-white'
+                        ? 'bg-slate-800 border-slate-800 text-white'
                         : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                     }`}
                     aria-pressed={active}
                   >
-                    {filter.label} <span className={active ? 'text-orange-100' : 'text-gray-400'}>{count}</span>
+                    {filter.label} <span className={active ? 'text-slate-200' : 'text-gray-400'}>{count}</span>
                   </button>
                 )
               })}

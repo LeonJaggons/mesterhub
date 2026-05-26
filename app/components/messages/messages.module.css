@@ -5,7 +5,7 @@
   min-height: calc(100dvh - 5.25rem);
   width: 100%;
   background:
-    radial-gradient(circle at top left, rgba(249, 115, 22, 0.06), transparent 28rem),
+    radial-gradient(circle at top left, rgba(15, 23, 42, 0.05), transparent 28rem),
     #f8fafc;
   color: #111827;
 }
@@ -67,7 +67,7 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f97316;
+  color: #1e293b;
 }
 
 .listTitle {
@@ -97,7 +97,7 @@
 }
 
 .searchWrap:focus-within {
-  border-color: rgba(249, 115, 22, 0.45);
+  border-color: rgba(15, 23, 42, 0.28);
   background: #fff;
 }
 
@@ -201,8 +201,8 @@
   max-width: 100%;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: #fff7ed;
-  color: #ea580c;
+  background: #f1f5f9;
+  color: #334155;
   font-size: 0.72rem;
   font-weight: 700;
   overflow: hidden;
@@ -279,8 +279,8 @@
   flex-shrink: 0;
   padding: 0.55rem 0.75rem;
   border-radius: 999px;
-  background: #fff7ed;
-  color: #f97316;
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 .headerReportAction {
@@ -294,13 +294,13 @@
 }
 
 .textLink {
-  color: #f97316;
+  color: #1e293b;
 }
 
 .headerAction:hover,
 .headerReportAction:hover,
 .textLink:hover {
-  color: #ea580c;
+  color: #0f172a;
 }
 
 .headerReportAction:hover {
@@ -318,7 +318,7 @@
   gap: 0.35rem;
   background:
     linear-gradient(rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.76)),
-    radial-gradient(circle at 20% 10%, rgba(249, 115, 22, 0.08), transparent 20rem),
+    radial-gradient(circle at 20% 10%, rgba(15, 23, 42, 0.06), transparent 20rem),
     #f8fafc;
 }
 
@@ -359,7 +359,7 @@
 }
 
 .bubbleMine {
-  background: #f97316;
+  background: #1e293b;
   color: #fff;
   border-radius: 18px 18px 4px 18px;
 }
@@ -408,7 +408,7 @@
 }
 
 .composerField:focus {
-  border-color: rgba(249, 115, 22, 0.55);
+  border-color: rgba(15, 23, 42, 0.32);
   background: #fff;
 }
 
@@ -417,7 +417,7 @@
   height: 2.75rem;
   border-radius: 50%;
   border: none;
-  background: #f97316;
+  background: #1e293b;
   color: #fff;
   display: flex;
   align-items: center;
@@ -428,7 +428,7 @@
 }
 
 .sendBtn:hover:not(:disabled) {
-  background: #ea580c;
+  background: #0f172a;
   transform: translateY(-1px);
 }
 
@@ -512,7 +512,7 @@
 }
 
 .appointmentSummary span {
-  color: #f97316;
+  color: #1e293b;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -613,7 +613,7 @@
   width: 0.38rem;
   height: 0.38rem;
   border-radius: 50%;
-  background: #f97316;
+  background: #1e293b;
 }
 
 .detailGrid,
@@ -744,8 +744,8 @@
 .modalForm input:focus,
 .modalForm select:focus,
 .modalForm textarea:focus {
-  border-color: rgba(249, 115, 22, 0.55);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+  border-color: rgba(15, 23, 42, 0.32);
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
 }
 
 .appointmentChoices {
@@ -774,8 +774,8 @@
 }
 
 .choiceSelected {
-  border-color: rgba(249, 115, 22, 0.45);
-  background: #fff7ed;
+  border-color: rgba(15, 23, 42, 0.25);
+  background: #f8fafc;
 }
 
 .choice input,

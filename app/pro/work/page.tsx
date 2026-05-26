@@ -109,7 +109,7 @@ export default function WorkPage() {
     <main className="bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="mb-8">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Pro dashboard</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Pro dashboard</p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.02em' }}
@@ -131,7 +131,7 @@ export default function WorkPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <section className="lg:col-span-2 flex flex-col gap-4">
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">
                   Confirmed appointments
                 </p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
@@ -178,7 +178,7 @@ export default function WorkPage() {
 
             <aside className="lg:sticky lg:top-6 flex flex-col gap-4">
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Work summary</p>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Work summary</p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Today&apos;s view</h2>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">

@@ -168,7 +168,7 @@ function CustomerNavLink({ href, label, badge = 0 }: { href: string; label: stri
     <Link
       href={href}
       className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded-lg transition-colors ${
-        active ? 'text-orange-600 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+        active ? 'text-slate-800 bg-slate-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
       {label}
@@ -242,7 +242,7 @@ function ProNavLink({ href, label, badge = 0 }: { href: string; label: string; b
     <Link
       href={href}
       className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded-lg transition-colors ${
-        active ? 'text-orange-600 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+        active ? 'text-slate-800 bg-slate-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
       {label}

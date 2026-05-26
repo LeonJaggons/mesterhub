@@ -205,7 +205,7 @@ function NeedHelpCard({ requestId, status, proName }: { requestId: string; statu
 
   return (
     <section className="bg-white rounded-2xl border border-orange-100 p-5 shadow-sm">
-      <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Need help?</p>
+      <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Need help?</p>
       <h2 className="font-black text-gray-900 text-xl leading-none mb-2" style={dg}>
         We can help with this request
       </h2>
@@ -266,7 +266,7 @@ function ReviewCard({
   if (existingReview) {
     return (
       <section id="review" className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm scroll-mt-24">
-        <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Your review</p>
+        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Your review</p>
         <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>
           Thanks for reviewing {proName}
         </h2>
@@ -285,7 +285,7 @@ function ReviewCard({
 
   return (
     <section id="review" className="bg-white rounded-2xl border-2 border-orange-200 p-5 shadow-sm scroll-mt-24">
-      <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Review your pro</p>
+      <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Review your pro</p>
       <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>
         How did {proName} do?
       </h2>
@@ -536,7 +536,7 @@ export default function RequestDetailPage() {
         </Link>
 
         <div className="mb-6">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Your project</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Your project</p>
           <h1 className="text-4xl font-black text-gray-900 leading-tight" style={{ ...dg, letterSpacing: '-0.02em' }}>
             {req.categoryName}
           </h1>

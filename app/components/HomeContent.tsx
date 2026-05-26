@@ -81,7 +81,7 @@ const dg = { fontFamily: 'var(--font-darker-grotesque)' }
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-bold tracking-widest uppercase text-orange-600 mb-3">
+    <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">
       {children}
     </p>
   )
@@ -143,8 +143,8 @@ export default function HomeContent() {
         <div className="max-w-4xl mx-auto divide-y divide-gray-100">
           {FEATURES.map((f) => (
             <div key={f.headline} className="py-16 flex flex-col sm:flex-row items-start gap-10">
-              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center">
-                <f.icon size={30} className="text-orange-600" />
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+                <f.icon size={30} className="text-slate-800" />
               </div>
               <div>
                 <h3
@@ -230,7 +230,7 @@ export default function HomeContent() {
             {STEPS.map((step) => (
               <div key={step.number} className="flex flex-col gap-4">
                 <div
-                  className="w-12 h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-black text-xl flex-shrink-0"
+                  className="w-12 h-12 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-xl flex-shrink-0"
                   style={dg}
                 >
                   {step.number}

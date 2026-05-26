@@ -62,12 +62,12 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
   return (
     <Link href={`/requests/${req.id}`} className="block group">
       <article className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all group-hover:shadow-md ${
-        isCancelled ? 'border-gray-300 opacity-80' : 'border-gray-200 group-hover:border-orange-200'
+        isCancelled ? 'border-gray-300 opacity-80' : 'border-gray-200 group-hover:border-slate-300'
       }`}>
         <div className="p-5">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
             <div>
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">
                 {appointment.kind === 'quote' ? 'Quote visit' : 'Service appointment'}
               </p>
               <h2 className="font-black text-gray-900 text-2xl leading-none" style={dg}>
@@ -109,13 +109,13 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
           )}
 
           {appointment.notes && (
-            <p className="text-sm text-gray-600 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2 mt-3 whitespace-pre-wrap">
+            <p className="text-sm text-gray-600 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 mt-3 whitespace-pre-wrap">
               {appointment.notes}
             </p>
           )}
         </div>
 
-        <div className="px-5 py-2.5 bg-gray-50 border-t border-gray-100 text-xs font-semibold text-orange-600 group-hover:bg-orange-50 transition-colors">
+        <div className="px-5 py-2.5 bg-gray-50 border-t border-gray-100 text-xs font-semibold text-slate-700 group-hover:bg-slate-50 transition-colors">
           View request details →
         </div>
       </article>
@@ -208,12 +208,12 @@ export default function AppointmentsPage() {
                     onClick={() => setStatusFilter(filter.id)}
                     className={`rounded-full border px-3 py-1.5 text-sm font-semibold cursor-pointer transition-colors ${
                       active
-                        ? 'bg-orange-500 border-orange-500 text-white'
+                        ? 'bg-slate-800 border-slate-800 text-white'
                         : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                     }`}
                     aria-pressed={active}
                   >
-                    {filter.label} <span className={active ? 'text-orange-100' : 'text-gray-400'}>{count}</span>
+                    {filter.label} <span className={active ? 'text-slate-200' : 'text-gray-400'}>{count}</span>
                   </button>
                 )
               })}

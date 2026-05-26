@@ -119,7 +119,7 @@ export default function JoinAsProPage() {
       {/* ── Benefits ── */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Why Mestermind</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Why Mestermind</p>
           <h2
             className="text-4xl font-black text-gray-900 mb-2"
             style={{ ...dg, letterSpacing: '-0.02em' }}
@@ -150,7 +150,7 @@ export default function JoinAsProPage() {
       {/* ── How it works ── */}
       <section id="how-it-works" className="py-20 px-4 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Getting started</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Getting started</p>
           <h2
             className="text-4xl font-black text-gray-900 mb-2"
             style={{ ...dg, letterSpacing: '-0.02em' }}
@@ -179,7 +179,7 @@ export default function JoinAsProPage() {
       {/* ── FAQ ── */}
       <section className="py-20 px-4 border-t border-gray-100">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">FAQ</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">FAQ</p>
           <h2
             className="text-4xl font-black text-gray-900 mb-12"
             style={{ ...dg, letterSpacing: '-0.02em' }}

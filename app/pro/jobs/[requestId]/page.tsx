@@ -239,7 +239,7 @@ function AppointmentModal({
       >
         <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">Appointment request</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">Appointment request</p>
             <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
               Schedule with {req.customerName || 'the customer'}
             </h2>
@@ -418,7 +418,7 @@ function CancelRequestModal({
       >
         <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">Cancel request</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">Cancel request</p>
             <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
               Cancel with {customerName}?
             </h2>
@@ -630,7 +630,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             ← Back to Jobs
           </button>
           <section className="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Inquiry hidden</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Inquiry hidden</p>
             <h1 className="text-4xl font-black text-gray-900 leading-none mb-3" style={dg}>
               Upgrade to view this request
             </h1>
@@ -713,7 +713,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
         </button>
 
         <div className="mb-6">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Job request</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Job request</p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.02em' }}
@@ -753,7 +753,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             {/* Job brief */}
             <section className="bg-white rounded-2xl border border-gray-200 p-5">
               <div className="mb-5">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Job brief</p>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Job brief</p>
                 <h2 className="font-black text-gray-900 text-3xl leading-none mb-2" style={dg}>
                   {primaryDetail ? formatVal(primaryDetail[1]) : req.categoryName}
                 </h2>
@@ -776,7 +776,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                   {urgencyDetail && (
                     <div className="rounded-xl bg-orange-50 border border-orange-100 p-4">
-                      <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">Urgency</p>
+                      <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">Urgency</p>
                       <p className="text-base font-black text-gray-900" style={dg}>{formatVal(urgencyDetail[1])}</p>
                     </div>
                   )}
@@ -1028,7 +1028,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Customer context</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Customer context</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
                 {customerName}
               </h2>

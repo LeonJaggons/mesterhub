@@ -47,11 +47,11 @@ function ProjectCard({
   const details = formatAnswers(project.answers).filter(item => item.key !== 'Project Details').slice(0, 4)
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:border-orange-200 hover:shadow-md">
+    <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:border-slate-300 hover:shadow-md">
       <div className="p-5">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">Marketplace project</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">Marketplace project</p>
             <h2 className="text-2xl font-black leading-none text-gray-900" style={dg}>{project.categoryName}</h2>
             <p className="mt-2 text-sm leading-6 text-gray-600">{shortText(projectTitle(project))}</p>
           </div>
@@ -88,7 +88,7 @@ function ProjectCard({
           type="button"
           onClick={() => onQuote(project)}
           disabled={submitting}
-          className="w-full rounded-lg bg-orange-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          className="w-full rounded-lg bg-slate-800 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {submitting ? 'Sending quote...' : 'Send marketplace quote'}
         </button>
@@ -151,7 +151,7 @@ export default function ProMarketplacePage() {
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-orange-500">Open marketplace</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-700">Open marketplace</p>
             <h1 className="text-5xl font-black leading-[1.05] text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
               Projects looking for quotes
             </h1>
@@ -179,7 +179,7 @@ export default function ProMarketplacePage() {
                 ))}
               </div>
             ) : access && !access.eligible ? (
-              <div className="rounded-2xl border border-orange-100 bg-white p-8 text-center shadow-sm">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
                 <p className="text-2xl font-black text-gray-900" style={dg}>Marketplace unavailable</p>
                 <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
                   {access.reason ?? 'Your account is not eligible for marketplace quoting yet.'}
@@ -212,7 +212,7 @@ export default function ProMarketplacePage() {
           <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
             <ProUpgradeCta />
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-orange-500">Marketplace quotes</p>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-700">Marketplace quotes</p>
               <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>How it works</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
                 <li>Customers see these in a separate marketplace section on their project.</li>

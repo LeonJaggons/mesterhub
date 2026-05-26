@@ -574,7 +574,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
   return (
     <div className="flex flex-col gap-4">
       <section className="bg-white rounded-2xl border border-gray-200 p-5">
-        <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">At a glance</p>
+        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">At a glance</p>
         <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Pro details</h2>
         <div className="divide-y divide-gray-100">
           {[
@@ -595,7 +595,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
       </section>
 
       <section className="bg-white rounded-2xl border border-gray-200 p-5">
-        <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Trust</p>
+        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Trust</p>
         <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Verification</h2>
         <div className="flex flex-col gap-2">
           {checks.map(check => (
@@ -609,7 +609,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
 
       {topDistricts.length > 0 && (
         <section className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Coverage</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Coverage</p>
           <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Service areas</h2>
           <div className="flex flex-wrap gap-2">
             {topDistricts.map(id => (

@@ -9,7 +9,7 @@ import { QuoteModal, DeclineModal, type QuoteFormData } from './JobModals'
 import { approximateLocationLabel } from '@/app/requests/shared'
 import type { JobLocation } from '@/firebase/serviceRequests'
 import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
-import { FREE_CLEAR_INQUIRY_LIMIT, inquiryCreatedAtMillis, inquiryMonthKey, type InquiryTimestamp } from '@/lib/inquiryAccess'
+import { inquiryCreatedAtMillis, inquiryMonthKey, type InquiryTimestamp } from '@/lib/inquiryAccess'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
@@ -341,7 +341,7 @@ export default function JobsPage() {
       <div className="max-w-6xl mx-auto px-4 py-12">
 
         <div className="mb-8">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-3">Pro dashboard</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Pro dashboard</p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.02em' }}
@@ -369,13 +369,13 @@ export default function JobsPage() {
                   key={t.id}
                   onClick={() => setTab(t.id)}
                   className={`relative px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer border-none ${
-                    tab === t.id ? 'bg-orange-500 text-white shadow-sm' : 'bg-transparent text-gray-600 hover:text-gray-900'
+                    tab === t.id ? 'bg-slate-800 text-white shadow-sm' : 'bg-transparent text-gray-600 hover:text-gray-900'
                   }`}
                   style={dg}
                 >
                   {t.label}
                   {t.count != null && t.count > 0 && (
-                    <span className={`ml-1.5 text-xs font-bold ${tab === t.id ? 'text-orange-100' : 'text-orange-500'}`}>
+                    <span className={`ml-1.5 text-xs font-bold ${tab === t.id ? 'text-slate-200' : 'text-slate-500'}`}>
                       {t.count}
                     </span>
                   )}
@@ -427,12 +427,12 @@ export default function JobsPage() {
             <ProUpgradeCta />
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Mester brief</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Mester brief</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Helpful to know</h2>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-orange-50 border border-orange-100 p-3">
-                  <p className="text-2xl font-black text-orange-700" style={dg}>{pendingCount}</p>
-                  <p className="text-xs text-orange-700">Need quotes</p>
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                  <p className="text-2xl font-black text-slate-800" style={dg}>{pendingCount}</p>
+                  <p className="text-xs text-slate-500">Need quotes</p>
                 </div>
                 <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
                   <p className="text-2xl font-black text-slate-800" style={dg}>{acceptedCount}</p>
@@ -455,7 +455,7 @@ export default function JobsPage() {
 
             {nextRequest && (
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Next best action</p>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Next best action</p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>{nextRequest.categoryName}</h2>
                 <p className="text-sm text-gray-500 mb-3">
                   {districtCopy(nextRequest)} · {timeAgo(nextRequest.createdAt) || 'just now'}
@@ -474,7 +474,7 @@ export default function JobsPage() {
             )}
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Before sending quotes</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Before sending quotes</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Ask yourself</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
                 {[
@@ -484,7 +484,7 @@ export default function JobsPage() {
                   'What should the customer prepare before I arrive?',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="text-orange-400 flex-shrink-0 mt-0.5">○</span>
+                    <span className="text-slate-400 flex-shrink-0 mt-0.5">○</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -492,7 +492,7 @@ export default function JobsPage() {
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Work mix</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Work mix</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Common requests</h2>
               {categories.length > 0 ? (
                 <div className="flex flex-col gap-2">

@@ -178,7 +178,7 @@ function CreateProjectModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">New project</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">New project</p>
             <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>Describe your project</h2>
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
               Use the same estimate request fields now, then send this project to one or more pros later.
@@ -314,7 +314,7 @@ function CreateProjectModal({
                 onChange={handleAttachmentChange}
                 className="hidden"
               />
-              <label htmlFor="project-attachments" className="block cursor-pointer rounded-sm bg-white px-4 py-3 text-center text-sm font-bold text-orange-600 border border-gray-200 hover:bg-orange-50">
+              <label htmlFor="project-attachments" className="block cursor-pointer rounded-sm bg-white px-4 py-3 text-center text-sm font-bold text-slate-700 border border-gray-200 hover:bg-slate-50">
                 Add photos or PDFs
               </label>
               <p className="mt-2 text-xs text-gray-500">Upload up to {MAX_PROJECT_ATTACHMENTS} files.</p>
@@ -378,7 +378,7 @@ function ProjectCard({
       <div className="p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">
               Active project
             </p>
             <h2 className="font-black text-gray-900 text-2xl leading-none" style={dg}>
@@ -388,7 +388,7 @@ function ProjectCard({
               {shortText(projectTitle(project))}
             </p>
           </div>
-          <span className="w-fit rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+          <span className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
             {proCount} pro{proCount === 1 ? '' : 's'} sent
           </span>
         </div>
@@ -442,7 +442,7 @@ function ProjectCard({
                     <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-bold ${
                       quote.status === 'accepted'
                         ? 'border-green-200 bg-green-50 text-green-700'
-                        : 'border-orange-200 bg-orange-50 text-orange-700'
+                        : 'border-slate-200 bg-slate-50 text-slate-700'
                     }`}>
                       {quote.status === 'accepted' ? 'Accepted' : 'Marketplace quote'}
                     </span>
@@ -455,7 +455,7 @@ function ProjectCard({
                     {quote.quote.notes && <p className="mt-1 text-sm leading-5 text-gray-600">{quote.quote.notes}</p>}
                   </div>
                   {quote.status === 'accepted' && quote.requestId ? (
-                    <Link href={`/requests/${quote.requestId}`} className="mt-3 inline-block text-sm font-bold text-orange-600 hover:underline">
+                    <Link href={`/requests/${quote.requestId}`} className="mt-3 inline-block text-sm font-bold text-slate-700 hover:underline">
                       View accepted request →
                     </Link>
                   ) : (
