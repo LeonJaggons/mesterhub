@@ -32,6 +32,8 @@ const REPORT_REASONS = [
   { value: 'Other safety concern', labelKey: 'other' },
 ] as const
 
+type ReportReason = (typeof REPORT_REASONS)[number]['value']
+
 export default function ReportUserButton({
   targetUid,
   targetRole,
@@ -48,7 +50,7 @@ export default function ReportUserButton({
   const detailsId = useId()
   const [currentUid, setCurrentUid] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [reason, setReason] = useState(REPORT_REASONS[0].value)
+  const [reason, setReason] = useState<ReportReason>(REPORT_REASONS[0].value)
   const [details, setDetails] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -152,7 +154,7 @@ export default function ReportUserButton({
                 {t('reports.reason')}
                 <select
                   value={reason}
-                  onChange={event => setReason(event.target.value)}
+                  onChange={event => setReason(event.target.value as ReportReason)}
                   className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 >
                   {REPORT_REASONS.map(option => (
