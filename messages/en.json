@@ -1,0 +1,255 @@
+{
+  "metadata": {
+    "title": "Mestermind",
+    "description": "Find trusted local professionals in Budapest."
+  },
+  "common": {
+    "brand": "Mestermind"
+  },
+  "header": {
+    "aria": {
+      "home": "Home",
+      "loadingAccountNavigation": "Loading account navigation",
+      "accountMenu": "Account menu",
+      "openNavigationMenu": "Open navigation menu",
+      "notifications": "Notifications",
+      "changeLanguage": "Change language"
+    },
+    "services": {
+      "explore": "Explore Services",
+      "kicker": "Explore services",
+      "title": "Find the right pro",
+      "fallbackTitle": "Services",
+      "hint": "Choose a service to see matching pros.",
+      "serviceCount": "{count} services"
+    },
+    "customerNav": {
+      "requests": "My requests",
+      "projects": "Projects",
+      "appointments": "Appointments",
+      "messages": "Messages",
+      "joinPro": "Join as a pro",
+      "settings": "Account settings"
+    },
+    "proNav": {
+      "jobs": "Jobs",
+      "marketplace": "Marketplace",
+      "work": "My Work",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "earnings": "Earnings",
+      "profile": "Profile",
+      "settings": "Settings",
+      "verification": "ID & verification",
+      "help": "Help",
+      "previewProfile": "Preview my profile"
+    },
+    "auth": {
+      "account": "Account",
+      "help": "Help",
+      "signOut": "Sign out",
+      "signUp": "Sign up",
+      "login": "Log in"
+    },
+    "upgrade": {
+      "opening": "Opening...",
+      "label": "Upgrade"
+    },
+    "notifications": {
+      "kicker": "Notifications",
+      "unread": "{count} unread",
+      "allCaughtUp": "All caught up",
+      "markAllRead": "Mark all read",
+      "loading": "Loading notifications...",
+      "empty": "No notifications yet."
+    }
+  },
+  "proLanding": {
+    "hero": {
+      "eyebrow": "For professionals",
+      "headlineLine1": "Grow your business.",
+      "headlineLine2": "On your terms.",
+      "body": "Join 1,200+ professionals already using Mestermind to find clients, build their reputation, and grow their income across Budapest.",
+      "primaryCta": "Create your free profile",
+      "secondaryCta": "See how it works"
+    },
+    "stats": {
+      "jobRequests": "Job requests per month",
+      "districts": "Budapest districts covered",
+      "rating": "Average pro rating",
+      "freeValue": "Free",
+      "free": "To join and browse jobs"
+    },
+    "benefits": {
+      "eyebrow": "Why Mestermind",
+      "headline": "Everything you need to win more jobs.",
+      "body": "Built for independent professionals who want to spend more time working and less time finding work.",
+      "found": {
+        "title": "Get found by thousands",
+        "body": "Mestermind connects you with customers actively searching for your services across all 23 Budapest districts."
+      },
+      "schedule": {
+        "title": "You control your schedule",
+        "body": "Accept only the jobs you want, when you want them. No pressure, no commitments you didn't agree to."
+      },
+      "paid": {
+        "title": "Get paid fairly",
+        "body": "Set your own rates. Customers see your starting price upfront, so the people who contact you are already interested."
+      },
+      "reputation": {
+        "title": "Build your reputation",
+        "body": "Every completed job is an opportunity for a verified review. Great work compounds — your profile gets stronger over time."
+      }
+    },
+    "steps": {
+      "eyebrow": "Getting started",
+      "headline": "Up and running in three steps.",
+      "body": "No complicated setup. No waiting for approval. Start receiving enquiries the same day.",
+      "profile": {
+        "title": "Create your profile",
+        "body": "Tell us about your services, experience, and pricing. Takes less than 10 minutes."
+      },
+      "matched": {
+        "title": "Get matched with jobs",
+        "body": "We surface your profile to customers looking for exactly what you offer, in your district."
+      },
+      "paid": {
+        "title": "Win the job. Get paid.",
+        "body": "Quote, confirm, and complete. Reviews build automatically after each job."
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "headline": "Common questions.",
+      "free": {
+        "question": "Is it free to join?",
+        "answer": "Yes. Creating a profile and browsing job requests is completely free. We only charge a small fee when you win a job through the platform."
+      },
+      "types": {
+        "question": "What types of professionals can join?",
+        "answer": "Anyone offering a home or personal service — cleaners, handymen, electricians, plumbers, photographers, tutors, personal trainers, and more."
+      },
+      "reviews": {
+        "question": "How do I get reviews?",
+        "answer": "After every completed job, the customer receives an automatic prompt to leave a review. You don't need to ask — we handle it."
+      },
+      "prices": {
+        "question": "Can I set my own prices?",
+        "answer": "Absolutely. You set a starting price that customers see on your profile, and you quote each job individually based on the details."
+      }
+    },
+    "finalCta": {
+      "headline": "Ready to get started?",
+      "body": "Create your free profile today and start receiving job requests from customers across Budapest.",
+      "cta": "Create your free profile"
+    }
+  },
+  "home": {
+    "hero": {
+      "carousel": {
+        "cleaning": "Cleaning,",
+        "repairs": "Repairs,",
+        "painting": "Painting,",
+        "moving": "Moving,"
+      },
+      "madeEasy": "made easy.",
+      "searchPlaceholder": "Describe your project or problem — be as detailed as you'd like!",
+      "districtPlaceholder": "District",
+      "searching": "Searching…",
+      "noServicesFound": "No services found",
+      "searchButton": "Search",
+      "popularSearchesLabel": "Popular searches",
+      "popularNow": "Popular now",
+      "popularSearches": {
+        "houseCleaning": "House cleaning",
+        "handyman": "Handyman",
+        "plumbing": "Plumbing",
+        "moving": "Moving"
+      },
+      "trustPrefix": "Trusted by 4.5M+ people",
+      "trustSuffix": "with over 300k reviews on the App Store",
+      "heroImageAlt": "Professional contractor consulting with homeowners"
+    },
+    "content": {
+      "stats": {
+        "verifiedPros": "Verified professionals",
+        "servicesAvailable": "Services available",
+        "budapestDistricts": "Budapest districts",
+        "averageRating": "Average rating"
+      },
+      "why": {
+        "eyebrow": "Why Mestermind",
+        "headlineLine1": "Stop guessing.",
+        "headlineLine2": "Start hiring.",
+        "body": "Finding a reliable cleaner, handyman, or contractor in Budapest used to mean hours of calls and crossed fingers. Mestermind puts 1,200+ vetted professionals one search away.",
+        "cta": "Find a professional"
+      },
+      "features": {
+        "fast": {
+          "headline": "From search to booked in minutes.",
+          "body": "No more scrolling through Facebook groups, chasing unresponsive numbers, or hoping for the best. Describe your project, pick your district, and get matched with available professionals immediately."
+        },
+        "verified": {
+          "headline": "Every pro reviewed by real Budapest residents.",
+          "body": "Ratings come from verified customers — not bots, not the pros themselves. Read what your neighbours actually experienced before you commit to anyone."
+        },
+        "prices": {
+          "headline": "See prices before you pick up the phone.",
+          "body": "Transparent starting prices on every listing. Request quotes from multiple pros, compare what you get, and choose the best fit. No surprises, no awkward conversations."
+        }
+      },
+      "testimonials": {
+        "eyebrow": "Customer reviews",
+        "headline": "What Budapest residents say",
+        "body": "Real reviews from verified customers.",
+        "eszter": {
+          "quote": "Found an excellent house cleaner within minutes. The booking process was seamless and the job was done better than any agency I've used before.",
+          "detail": "Budapest, V. kerület · House Cleaning"
+        },
+        "bence": {
+          "quote": "Plumbing emergency on a Sunday. Mestermind connected me with someone who arrived within two hours. Saved my entire weekend.",
+          "detail": "Budapest, XI. kerület · Plumbing"
+        },
+        "reka": {
+          "quote": "We hired a photography team for our company event. Professional, punctual, and the results were exactly what we needed. Will use again.",
+          "detail": "Budapest, XIII. kerület · Event Photography"
+        }
+      },
+      "categories": {
+        "eyebrow": "Browse by category",
+        "headline": "550+ services, one platform.",
+        "body": "From a leaking tap to a corporate event — we have a professional for it.",
+        "homeImprovement": "Home Improvement",
+        "events": "Events",
+        "wellness": "Wellness",
+        "lessons": "Lessons",
+        "auto": "Auto",
+        "photography": "Photography",
+        "pets": "Pets",
+        "business": "Business"
+      },
+      "steps": {
+        "eyebrow": "Getting started",
+        "headline": "Up and running in three steps.",
+        "body": "No account required to browse. No commitment until you book.",
+        "describe": {
+          "title": "Describe your project",
+          "body": "Tell us what you need — be as specific as you like. The more detail you give, the better your matches."
+        },
+        "match": {
+          "title": "Get matched instantly",
+          "body": "We surface vetted, reviewed professionals available in your Budapest district right now."
+        },
+        "book": {
+          "title": "Book with confidence",
+          "body": "Compare prices and reviews side by side, then hire directly through the platform."
+        }
+      },
+      "finalCta": {
+        "headline": "Budapest's home services, sorted.",
+        "body": "Join thousands of residents who find trusted professionals on Mestermind every day.",
+        "cta": "Get started for free"
+      }
+    }
+  }
+}

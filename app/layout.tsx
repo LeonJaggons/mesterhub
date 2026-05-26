@@ -4,6 +4,9 @@ import "./globals.css";
 import Header from "./components/Header";
 import FeedbackFab from "./components/FeedbackFab";
 import ConditionalFooter from "./components/ConditionalFooter";
+import { I18nProvider } from "@/lib/i18n/client";
+import { getMessages } from "@/lib/i18n/messages";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 const googleSansFlex = localFont({
   src: "../public/GoogleSansFlex.ttf",
@@ -19,22 +22,26 @@ export const metadata: Metadata = {
   description: "Find trusted local professionals in Budapest.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getRequestLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${googleSansFlex.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col root">
+        <I18nProvider locale={locale} messages={getMessages(locale)}>
           <Header />
           {children}
           <ConditionalFooter />
           <FeedbackFab />
-        </body>
+        </I18nProvider>
+      </body>
     </html>
   );
 }

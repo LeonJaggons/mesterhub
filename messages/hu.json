@@ -1,0 +1,255 @@
+{
+  "metadata": {
+    "title": "Mestermind",
+    "description": "Találj megbízható helyi szakembereket Budapesten."
+  },
+  "common": {
+    "brand": "Mestermind"
+  },
+  "header": {
+    "aria": {
+      "home": "Kezdőlap",
+      "loadingAccountNavigation": "Fióknavigáció betöltése",
+      "accountMenu": "Fiókmenü",
+      "openNavigationMenu": "Navigációs menü megnyitása",
+      "notifications": "Értesítések",
+      "changeLanguage": "Nyelv váltása"
+    },
+    "services": {
+      "explore": "Szolgáltatások",
+      "kicker": "Szolgáltatások böngészése",
+      "title": "Találd meg a megfelelő szakembert",
+      "fallbackTitle": "Szolgáltatások",
+      "hint": "Válassz szolgáltatást, és nézd meg a megfelelő szakembereket.",
+      "serviceCount": "{count} szolgáltatás"
+    },
+    "customerNav": {
+      "requests": "Kéréseim",
+      "projects": "Projektek",
+      "appointments": "Időpontok",
+      "messages": "Üzenetek",
+      "joinPro": "Csatlakozás szakemberként",
+      "settings": "Fiókbeállítások"
+    },
+    "proNav": {
+      "jobs": "Munkák",
+      "marketplace": "Piactér",
+      "work": "Munkáim",
+      "messages": "Üzenetek",
+      "notifications": "Értesítések",
+      "earnings": "Bevételek",
+      "profile": "Profil",
+      "settings": "Beállítások",
+      "verification": "Személyazonosság és ellenőrzés",
+      "help": "Segítség",
+      "previewProfile": "Profilom előnézete"
+    },
+    "auth": {
+      "account": "Fiók",
+      "help": "Segítség",
+      "signOut": "Kijelentkezés",
+      "signUp": "Regisztráció",
+      "login": "Bejelentkezés"
+    },
+    "upgrade": {
+      "opening": "Megnyitás...",
+      "label": "Frissítés"
+    },
+    "notifications": {
+      "kicker": "Értesítések",
+      "unread": "{count} olvasatlan",
+      "allCaughtUp": "Minden naprakész",
+      "markAllRead": "Összes olvasottnak jelölése",
+      "loading": "Értesítések betöltése...",
+      "empty": "Még nincsenek értesítések."
+    }
+  },
+  "proLanding": {
+    "hero": {
+      "eyebrow": "Szakembereknek",
+      "headlineLine1": "Növeld a vállalkozásod.",
+      "headlineLine2": "A saját feltételeiddel.",
+      "body": "Csatlakozz 1 200+ szakemberhez, akik már a Mestermind segítségével találnak ügyfeleket, építik a hírnevüket és növelik a bevételüket Budapesten.",
+      "primaryCta": "Ingyenes profil létrehozása",
+      "secondaryCta": "Így működik"
+    },
+    "stats": {
+      "jobRequests": "Munkakérés havonta",
+      "districts": "Lefedett budapesti kerület",
+      "rating": "Átlagos szakemberértékelés",
+      "freeValue": "Ingyenes",
+      "free": "Csatlakozás és munkák böngészése"
+    },
+    "benefits": {
+      "eyebrow": "Miért a Mestermind?",
+      "headline": "Minden, amire szükséged van több munka megszerzéséhez.",
+      "body": "Független szakembereknek készült, akik több időt szeretnének munkával tölteni, és kevesebbet ügyfélszerzéssel.",
+      "found": {
+        "title": "Több ezer ügyfél találhat rád",
+        "body": "A Mestermind olyan ügyfelekkel köt össze, akik aktívan keresik a szolgáltatásaidat Budapest mind a 23 kerületében."
+      },
+      "schedule": {
+        "title": "Te irányítod az időbeosztásod",
+        "body": "Csak azokat a munkákat vállald el, amelyeket szeretnél, akkor, amikor neked megfelel. Nincs nyomás, nincs olyan kötelezettség, amibe nem egyeztél bele."
+      },
+      "paid": {
+        "title": "Korrekt díjazást kapsz",
+        "body": "Te határozod meg az áraidat. Az ügyfelek előre látják az induló árat, így akik megkeresnek, már valóban érdeklődnek."
+      },
+      "reputation": {
+        "title": "Építsd a hírneved",
+        "body": "Minden elvégzett munka lehetőség egy ellenőrzött értékelésre. A jó munka összeadódik — a profilod idővel egyre erősebb lesz."
+      }
+    },
+    "steps": {
+      "eyebrow": "Első lépések",
+      "headline": "Három lépés, és indulhatsz.",
+      "body": "Nincs bonyolult beállítás. Nincs hosszú jóváhagyási várakozás. Akár még aznap elkezdhetsz megkereséseket kapni.",
+      "profile": {
+        "title": "Hozd létre a profilod",
+        "body": "Mutasd be a szolgáltatásaidat, tapasztalatodat és áraidat. Kevesebb mint 10 percet vesz igénybe."
+      },
+      "matched": {
+        "title": "Kapj hozzád illő munkákat",
+        "body": "Megmutatjuk a profilodat azoknak az ügyfeleknek, akik pontosan azt keresik, amit kínálsz, a kerületedben."
+      },
+      "paid": {
+        "title": "Nyerd el a munkát. Kapj fizetést.",
+        "body": "Adj ajánlatot, erősítsd meg, végezd el. Az értékelések minden munka után automatikusan építik a profilodat."
+      }
+    },
+    "faq": {
+      "eyebrow": "GYIK",
+      "headline": "Gyakori kérdések.",
+      "free": {
+        "question": "Ingyenes a csatlakozás?",
+        "answer": "Igen. A profil létrehozása és a munkakérések böngészése teljesen ingyenes. Csak akkor számítunk fel kisebb díjat, amikor a platformon keresztül elnyersz egy munkát."
+      },
+      "types": {
+        "question": "Milyen szakemberek csatlakozhatnak?",
+        "answer": "Bárki, aki otthoni vagy személyes szolgáltatást nyújt — takarítók, ezermesterek, villanyszerelők, vízszerelők, fotósok, oktatók, személyi edzők és még sokan mások."
+      },
+      "reviews": {
+        "question": "Hogyan kapok értékeléseket?",
+        "answer": "Minden befejezett munka után az ügyfél automatikus felkérést kap értékelés írására. Nem kell külön kérned — mi intézzük."
+      },
+      "prices": {
+        "question": "Beállíthatom a saját áraimat?",
+        "answer": "Természetesen. Te adod meg a profilodon látható induló árat, az egyes munkákra pedig a részletek alapján adhatsz külön ajánlatot."
+      }
+    },
+    "finalCta": {
+      "headline": "Készen állsz az indulásra?",
+      "body": "Hozd létre ingyenes profilodat még ma, és kezdj munkakéréseket kapni budapesti ügyfelektől.",
+      "cta": "Ingyenes profil létrehozása"
+    }
+  },
+  "home": {
+    "hero": {
+      "carousel": {
+        "cleaning": "Takarítás,",
+        "repairs": "Javítás,",
+        "painting": "Festés,",
+        "moving": "Költöztetés,"
+      },
+      "madeEasy": "egyszerűen.",
+      "searchPlaceholder": "Írd le a projektedet vagy a problémát — minél részletesebben, annál jobb!",
+      "districtPlaceholder": "Kerület",
+      "searching": "Keresés…",
+      "noServicesFound": "Nem találtunk szolgáltatást",
+      "searchButton": "Keresés",
+      "popularSearchesLabel": "Népszerű keresések",
+      "popularNow": "Most népszerű",
+      "popularSearches": {
+        "houseCleaning": "Takarítás",
+        "handyman": "Ezermester",
+        "plumbing": "Vízszerelés",
+        "moving": "Költöztetés"
+      },
+      "trustPrefix": "4,5M+ ember bízik bennünk",
+      "trustSuffix": "több mint 300 ezer App Store-értékeléssel",
+      "heroImageAlt": "Szakember egyeztet lakástulajdonosokkal"
+    },
+    "content": {
+      "stats": {
+        "verifiedPros": "Ellenőrzött szakember",
+        "servicesAvailable": "Elérhető szolgáltatás",
+        "budapestDistricts": "Budapesti kerület",
+        "averageRating": "Átlagos értékelés"
+      },
+      "why": {
+        "eyebrow": "Miért a Mestermind?",
+        "headlineLine1": "Ne találgass.",
+        "headlineLine2": "Találj szakembert.",
+        "body": "Budapesten megbízható takarítót, ezermestert vagy kivitelezőt találni korábban órákig tartó telefonálást és sok bizonytalanságot jelentett. A Mestermind 1 200+ ellenőrzött szakembert hoz egyetlen keresésnyire.",
+        "cta": "Szakember keresése"
+      },
+      "features": {
+        "fast": {
+          "headline": "A kereséstől a foglalásig percek alatt.",
+          "body": "Nincs több görgetés Facebook-csoportokban, vissza nem hívó telefonszámok után futás vagy reménykedés. Írd le, mire van szükséged, válaszd ki a kerületet, és azonnal összekötünk elérhető szakemberekkel."
+        },
+        "verified": {
+          "headline": "Minden szakembert valódi budapesti ügyfelek értékelnek.",
+          "body": "Az értékelések ellenőrzött ügyfelektől származnak — nem botoktól és nem maguktól a szakemberektől. Nézd meg, mit tapasztaltak a szomszédaid, mielőtt döntesz."
+        },
+        "prices": {
+          "headline": "Lásd az árakat, mielőtt telefonálnál.",
+          "body": "Átlátható induló árak minden adatlapon. Kérj ajánlatot több szakembertől, hasonlítsd össze, mit kapsz, és válaszd a legjobb megoldást. Nincsenek meglepetések, nincs kínos alkudozás."
+        }
+      },
+      "testimonials": {
+        "eyebrow": "Ügyfélvélemények",
+        "headline": "Mit mondanak a budapestiek",
+        "body": "Valódi értékelések ellenőrzött ügyfelektől.",
+        "eszter": {
+          "quote": "Pár perc alatt találtam egy kiváló takarítót. A foglalás gördülékeny volt, a munka pedig jobb lett, mint bármelyik ügynökségnél, amit korábban próbáltam.",
+          "detail": "Budapest, V. kerület · Takarítás"
+        },
+        "bence": {
+          "quote": "Vasárnapi vízvezeték-vészhelyzet volt. A Mestermind olyan szakemberrel kötött össze, aki két órán belül megérkezett. Megmentette az egész hétvégémet.",
+          "detail": "Budapest, XI. kerület · Vízszerelés"
+        },
+        "reka": {
+          "quote": "Céges eseményre béreltünk fotós csapatot. Profik voltak, pontosak, és pontosan azt kaptuk, amire szükségünk volt. Újra őket választanám.",
+          "detail": "Budapest, XIII. kerület · Rendezvényfotózás"
+        }
+      },
+      "categories": {
+        "eyebrow": "Böngészés kategória szerint",
+        "headline": "550+ szolgáltatás, egy platformon.",
+        "body": "A csöpögő csaptól a céges eseményig — nálunk találsz hozzá szakembert.",
+        "homeImprovement": "Otthonfelújítás",
+        "events": "Rendezvények",
+        "wellness": "Wellness",
+        "lessons": "Oktatás",
+        "auto": "Autó",
+        "photography": "Fotózás",
+        "pets": "Kisállatok",
+        "business": "Üzleti szolgáltatások"
+      },
+      "steps": {
+        "eyebrow": "Első lépések",
+        "headline": "Három lépés, és indulhatsz.",
+        "body": "Böngészéshez nincs szükség fiókra. Csak akkor köteleződsz el, amikor foglalsz.",
+        "describe": {
+          "title": "Írd le a projektedet",
+          "body": "Mondd el, mire van szükséged — lehetőleg minél pontosabban. Minél több részletet adsz meg, annál jobb találatokat kapsz."
+        },
+        "match": {
+          "title": "Kapj azonnali ajánlásokat",
+          "body": "Megmutatjuk a leellenőrzött, értékelt szakembereket, akik épp elérhetők a budapesti kerületedben."
+        },
+        "book": {
+          "title": "Foglalj magabiztosan",
+          "body": "Hasonlítsd össze az árakat és értékeléseket egymás mellett, majd foglalj közvetlenül a platformon."
+        }
+      },
+      "finalCta": {
+        "headline": "Budapesti otthoni szolgáltatások, átláthatóan.",
+        "body": "Csatlakozz több ezer budapestihez, akik nap mint nap a Mestermind segítségével találnak megbízható szakembereket.",
+        "cta": "Kezdd el ingyen"
+      }
+    }
+  }
+}

@@ -5,10 +5,11 @@ import { useState, useEffect, useRef, type CSSProperties, type MouseEvent as Rea
 import { useRouter } from 'next/navigation'
 import { Autocomplete } from '@base-ui/react/autocomplete'
 import { Button } from '@base-ui/react/button'
+import { useTranslations } from '@/lib/i18n/client'
 import styles from './Hero.module.css'
 
-const CAROUSEL_ITEMS = ['Cleaning,', 'Repairs,', 'Painting,', 'Moving,']
-const POPULAR_SEARCHES = ['House cleaning', 'Handyman', 'Plumbing', 'Moving']
+const CAROUSEL_KEYS = ['cleaning', 'repairs', 'painting', 'moving'] as const
+const POPULAR_SEARCH_KEYS = ['houseCleaning', 'handyman', 'plumbing', 'moving'] as const
 type TiltStyle = CSSProperties & { '--tilt-x'?: string; '--tilt-y'?: string }
 
 type District = { id: number; roman: string; name: string }
@@ -41,10 +42,12 @@ function DistrictSelect({
   value,
   onChange,
   districts,
+  placeholder,
 }: {
   value: District | null
   onChange: (d: District) => void
   districts: District[]
+  placeholder: string
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -69,7 +72,7 @@ function DistrictSelect({
       >
         <span className={styles.districtPin}><MapPinIcon /></span>
         <span className={value ? styles.districtValue : styles.districtPlaceholder}>
-          {value ? `${value.roman}. ${value.name}` : 'District'}
+          {value ? `${value.roman}. ${value.name}` : placeholder}
         </span>
         <span className={`${styles.districtChevron} ${open ? styles.districtChevronOpen : ''}`}>
           <ChevronDownIcon />
@@ -99,6 +102,7 @@ function DistrictSelect({
 }
 
 function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
+  const t = useTranslations()
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [district, setDistrict] = useState<District | null>(null)
@@ -176,13 +180,13 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
           <Autocomplete.Root items={items} filteredItems={items} onValueChange={handleSearch}>
             <Autocomplete.Input
               className={styles.queryInput}
-              placeholder="Describe your project or problem — be as detailed as you'd like!"
+              placeholder={t('home.hero.searchPlaceholder')}
             />
             <Autocomplete.Portal>
               <Autocomplete.Positioner className={styles.autocompletePositioner} sideOffset={4}>
                 <Autocomplete.Popup className={styles.autocompletePopup}>
                   <Autocomplete.Status className={styles.autocompleteStatus}>
-                    {loading && <span>Searching…</span>}
+                    {loading && <span>{t('home.hero.searching')}</span>}
                   </Autocomplete.Status>
                   <Autocomplete.List className={styles.autocompleteList}>
                     {(item: string) => (
@@ -192,7 +196,7 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
                     )}
                   </Autocomplete.List>
                   <Autocomplete.Empty className={styles.autocompleteEmpty}>
-                    No services found
+                    {t('home.hero.noServicesFound')}
                   </Autocomplete.Empty>
                 </Autocomplete.Popup>
               </Autocomplete.Positioner>
@@ -200,20 +204,23 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
           </Autocomplete.Root>
         </div>
         <div className={styles.districtField}>
-          <DistrictSelect value={district} onChange={setDistrict} districts={districts} />
+          <DistrictSelect value={district} onChange={setDistrict} districts={districts} placeholder={t('home.hero.districtPlaceholder')} />
         </div>
       </div>
       <Button type="submit" className={styles.searchBtn}>
-        Search
+        {t('home.hero.searchButton')}
       </Button>
     </form>
   )
 }
 
 export default function Hero() {
+  const t = useTranslations()
   const searchRef = useRef<HTMLDivElement>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
   const [tiltStyle, setTiltStyle] = useState<TiltStyle>({ '--tilt-x': '0deg', '--tilt-y': '0deg' })
+  const carouselItems = CAROUSEL_KEYS.map(key => t(`home.hero.carousel.${key}`))
+  const popularSearches = POPULAR_SEARCH_KEYS.map(key => t(`home.hero.popularSearches.${key}`))
 
   useEffect(() => {
     const el = searchRef.current
@@ -249,21 +256,21 @@ export default function Hero() {
             <h1 className={styles.heading}>
               <div className={styles.carouselWrapper}>
                 <ul className={styles.carouselList}>
-                  {CAROUSEL_ITEMS.map((item, i) => (
+                  {carouselItems.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
-                  <li aria-hidden="true">{CAROUSEL_ITEMS[0]}</li>
+                  <li aria-hidden="true">{carouselItems[0]}</li>
                 </ul>
               </div>
-              made easy.
+              {t('home.hero.madeEasy')}
             </h1>
             <div ref={searchRef} className={styles.searchBarContainer}>
               <SearchBar />
             </div>
-            <div className={styles.popularRow} aria-label="Popular searches">
-              <span className={styles.popularLabel}>Popular now</span>
+            <div className={styles.popularRow} aria-label={t('home.hero.popularSearchesLabel')}>
+              <span className={styles.popularLabel}>{t('home.hero.popularNow')}</span>
               <div className={styles.popularLinks}>
-                {POPULAR_SEARCHES.map(service => (
+                {popularSearches.map(service => (
                   <Link key={service} href={`/instant-results?q=${encodeURIComponent(service)}`}>
                     {service}
                   </Link>
@@ -271,9 +278,9 @@ export default function Hero() {
               </div>
             </div>
             <p className={styles.trustText}>
-              Trusted by 4.5M+ people &middot; 4.9/5{' '}
+              {t('home.hero.trustPrefix')} &middot; 4.9/5{' '}
               <span className={styles.starGreen}><StarIcon /></span>{' '}
-              with over 300k reviews on the App Store
+              {t('home.hero.trustSuffix')}
             </p>
           </div>
           <div
@@ -284,7 +291,7 @@ export default function Hero() {
           >
             <img
               src="/hero.avif"
-              alt="Professional contractor consulting with homeowners"
+              alt={t('home.hero.heroImageAlt')}
               className={styles.heroImageImg}
             />
           </div>

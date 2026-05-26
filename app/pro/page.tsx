@@ -1,71 +1,38 @@
 import Link from 'next/link'
+import { getTranslations } from '@/lib/i18n/server'
 
 const BENEFITS = [
-  {
-    title: 'Get found by thousands',
-    body: 'Mestermind connects you with customers actively searching for your services across all 23 Budapest districts.',
-  },
-  {
-    title: 'You control your schedule',
-    body: 'Accept only the jobs you want, when you want them. No pressure, no commitments you didn\'t agree to.',
-  },
-  {
-    title: 'Get paid fairly',
-    body: 'Set your own rates. Customers see your starting price upfront, so the people who contact you are already interested.',
-  },
-  {
-    title: 'Build your reputation',
-    body: 'Every completed job is an opportunity for a verified review. Great work compounds — your profile gets stronger over time.',
-  },
-]
+  'found',
+  'schedule',
+  'paid',
+  'reputation',
+] as const
 
 const STEPS = [
-  {
-    number: '1',
-    title: 'Create your profile',
-    body: 'Tell us about your services, experience, and pricing. Takes less than 10 minutes.',
-  },
-  {
-    number: '2',
-    title: 'Get matched with jobs',
-    body: 'We surface your profile to customers looking for exactly what you offer, in your district.',
-  },
-  {
-    number: '3',
-    title: 'Win the job. Get paid.',
-    body: 'Quote, confirm, and complete. Reviews build automatically after each job.',
-  },
-]
+  { number: '1', key: 'profile' },
+  { number: '2', key: 'matched' },
+  { number: '3', key: 'paid' },
+] as const
 
 const STATS = [
-  { value: '12,000+', label: 'Job requests per month' },
-  { value: '23', label: 'Budapest districts covered' },
-  { value: '4.9★', label: 'Average pro rating' },
-  { value: 'Free', label: 'To join and browse jobs' },
-]
+  { value: '12,000+', key: 'jobRequests' },
+  { value: '23', key: 'districts' },
+  { value: '4.9★', key: 'rating' },
+  { valueKey: 'freeValue', key: 'free' },
+] as const
 
 const FAQ = [
-  {
-    q: 'Is it free to join?',
-    a: 'Yes. Creating a profile and browsing job requests is completely free. We only charge a small fee when you win a job through the platform.',
-  },
-  {
-    q: 'What types of professionals can join?',
-    a: 'Anyone offering a home or personal service — cleaners, handymen, electricians, plumbers, photographers, tutors, personal trainers, and more.',
-  },
-  {
-    q: 'How do I get reviews?',
-    a: 'After every completed job, the customer receives an automatic prompt to leave a review. You don\'t need to ask — we handle it.',
-  },
-  {
-    q: 'Can I set my own prices?',
-    a: 'Absolutely. You set a starting price that customers see on your profile, and you quote each job individually based on the details.',
-  },
-]
+  'free',
+  'types',
+  'reviews',
+  'prices',
+] as const
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
-export default function JoinAsProPage() {
+export default async function JoinAsProPage() {
+  const t = await getTranslations()
+
   return (
     <main>
       {/* ── Hero ── */}
@@ -76,29 +43,29 @@ export default function JoinAsProPage() {
         <div className="absolute inset-0 bg-gray-950/45" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-950/50 via-gray-950/18 to-gray-950/40" aria-hidden="true" />
         <div className="relative mx-auto max-w-3xl text-center">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-400 mb-4">For professionals</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-orange-400 mb-4">{t('proLanding.hero.eyebrow')}</p>
           <h1
             className="text-5xl md:text-6xl font-black leading-[1.05] mb-6"
             style={{ ...dg, letterSpacing: '-0.03em' }}
           >
-            Grow your business.<br />
-            <span className="text-orange-400">On your terms.</span>
+            {t('proLanding.hero.headlineLine1')}<br />
+            <span className="text-orange-400">{t('proLanding.hero.headlineLine2')}</span>
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
-            Join 1,200+ professionals already using Mestermind to find clients, build their reputation, and grow their income across Budapest.
+            {t('proLanding.hero.body')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/pro/signup"
               className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg px-8 py-3.5 text-base transition-colors"
             >
-              Create your free profile
+              {t('proLanding.hero.primaryCta')}
             </Link>
             <Link
               href="#how-it-works"
               className="inline-block rounded-lg bg-white px-8 py-3.5 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-100"
             >
-              See how it works
+              {t('proLanding.hero.secondaryCta')}
             </Link>
           </div>
         </div>
@@ -108,9 +75,9 @@ export default function JoinAsProPage() {
       <section className="border-b border-gray-100 bg-gray-50 py-5">
         <dl className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200">
           {STATS.map((s) => (
-            <div key={s.label} className="flex flex-col items-center py-4 md:py-0 text-center px-6">
-              <dt className="text-4xl font-black text-gray-900" style={dg}>{s.value}</dt>
-              <dd className="text-xs text-gray-400 mt-1">{s.label}</dd>
+            <div key={s.key} className="flex flex-col items-center py-4 md:py-0 text-center px-6">
+              <dt className="text-4xl font-black text-gray-900" style={dg}>{'valueKey' in s ? t(`proLanding.stats.${s.valueKey}`) : s.value}</dt>
+              <dd className="text-xs text-gray-400 mt-1">{t(`proLanding.stats.${s.key}`)}</dd>
             </div>
           ))}
         </dl>
@@ -119,27 +86,27 @@ export default function JoinAsProPage() {
       {/* ── Benefits ── */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Why Mestermind</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proLanding.benefits.eyebrow')}</p>
           <h2
             className="text-4xl font-black text-gray-900 mb-2"
             style={{ ...dg, letterSpacing: '-0.02em' }}
           >
-            Everything you need to win more jobs.
+            {t('proLanding.benefits.headline')}
           </h2>
-          <p className="text-gray-500 text-base mb-12">Built for independent professionals who want to spend more time working and less time finding work.</p>
+          <p className="text-gray-500 text-base mb-12">{t('proLanding.benefits.body')}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {BENEFITS.map((b) => (
-              <div key={b.title} className="flex gap-4">
+            {BENEFITS.map((benefit) => (
+              <div key={benefit} className="flex gap-4">
                 <div className="flex-shrink-0 w-2 h-2 rounded-full bg-orange-500 mt-2.5" />
                 <div>
                   <h3
                     className="text-xl font-black text-gray-900 mb-2"
                     style={dg}
                   >
-                    {b.title}
+                    {t(`proLanding.benefits.${benefit}.title`)}
                   </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{b.body}</p>
+                  <p className="text-gray-500 text-sm leading-relaxed">{t(`proLanding.benefits.${benefit}.body`)}</p>
                 </div>
               </div>
             ))}
@@ -150,14 +117,14 @@ export default function JoinAsProPage() {
       {/* ── How it works ── */}
       <section id="how-it-works" className="py-20 px-4 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Getting started</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proLanding.steps.eyebrow')}</p>
           <h2
             className="text-4xl font-black text-gray-900 mb-2"
             style={{ ...dg, letterSpacing: '-0.02em' }}
           >
-            Up and running in three steps.
+            {t('proLanding.steps.headline')}
           </h2>
-          <p className="text-gray-500 text-base mb-12">No complicated setup. No waiting for approval. Start receiving enquiries the same day.</p>
+          <p className="text-gray-500 text-base mb-12">{t('proLanding.steps.body')}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {STEPS.map((step) => (
@@ -168,8 +135,8 @@ export default function JoinAsProPage() {
                 >
                   {step.number}
                 </div>
-                <h3 className="font-black text-xl text-gray-900" style={dg}>{step.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
+                <h3 className="font-black text-xl text-gray-900" style={dg}>{t(`proLanding.steps.${step.key}.title`)}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{t(`proLanding.steps.${step.key}.body`)}</p>
               </div>
             ))}
           </div>
@@ -179,23 +146,23 @@ export default function JoinAsProPage() {
       {/* ── FAQ ── */}
       <section className="py-20 px-4 border-t border-gray-100">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">FAQ</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proLanding.faq.eyebrow')}</p>
           <h2
             className="text-4xl font-black text-gray-900 mb-12"
             style={{ ...dg, letterSpacing: '-0.02em' }}
           >
-            Common questions.
+            {t('proLanding.faq.headline')}
           </h2>
           <div className="divide-y divide-gray-100">
             {FAQ.map((item) => (
-              <div key={item.q} className="py-6">
+              <div key={item} className="py-6">
                 <h3
                   className="text-lg font-black text-gray-900 mb-2"
                   style={dg}
                 >
-                  {item.q}
+                  {t(`proLanding.faq.${item}.question`)}
                 </h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.a}</p>
+                <p className="text-gray-500 text-sm leading-relaxed">{t(`proLanding.faq.${item}.answer`)}</p>
               </div>
             ))}
           </div>
@@ -214,16 +181,16 @@ export default function JoinAsProPage() {
             className="text-5xl font-black mb-5 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.03em' }}
           >
-            Ready to get started?
+            {t('proLanding.finalCta.headline')}
           </h2>
           <p className="text-white/85 text-base mb-10 leading-relaxed">
-            Create your free profile today and start receiving job requests from customers across Budapest.
+            {t('proLanding.finalCta.body')}
           </p>
           <Link
             href="/pro/signup"
             className="inline-block bg-orange-500 text-white hover:bg-orange-600 font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
           >
-            Create your free profile
+            {t('proLanding.finalCta.cta')}
           </Link>
         </div>
       </section>

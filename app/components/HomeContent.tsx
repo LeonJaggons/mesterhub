@@ -7,73 +7,68 @@ import {
   MdPriceCheck,
   MdFlashOn,
 } from 'react-icons/md'
+import { useTranslations } from '@/lib/i18n/client'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const STATS = [
-  { value: '1,200+', label: 'Verified professionals' },
-  { value: '550+', label: 'Services available' },
-  { value: '23', label: 'Budapest districts' },
-  { value: '4.9★', label: 'Average rating' },
-]
+  { value: '1,200+', labelKey: 'verifiedPros' },
+  { value: '550+', labelKey: 'servicesAvailable' },
+  { value: '23', labelKey: 'budapestDistricts' },
+  { value: '4.9★', labelKey: 'averageRating' },
+] as const
 
-type Category = { name: string; image: string }
+type Category = { nameKey: string; image: string }
 
 const CATEGORIES: Category[] = [
-  { name: 'Home Improvement', image: '/img/categories/home-improvement.jpeg' },
-  { name: 'Events', image: '/img/categories/events.webp' },
-  { name: 'Wellness', image: '/img/categories/wellness.webp' },
-  { name: 'Lessons', image: '/img/categories/home-improvement.jpeg' },
-  { name: 'Auto', image: '/img/categories/auto.webp' },
-  { name: 'Photography', image: '/img/categories/photo.webp' },
-  { name: 'Pets', image: '/img/categories/pets.webp' },
-  { name: 'Business', image: '/img/categories/business.webp' },
+  { nameKey: 'homeImprovement', image: '/img/categories/home-improvement.jpeg' },
+  { nameKey: 'events', image: '/img/categories/events.webp' },
+  { nameKey: 'wellness', image: '/img/categories/wellness.webp' },
+  { nameKey: 'lessons', image: '/img/categories/home-improvement.jpeg' },
+  { nameKey: 'auto', image: '/img/categories/auto.webp' },
+  { nameKey: 'photography', image: '/img/categories/photo.webp' },
+  { nameKey: 'pets', image: '/img/categories/pets.webp' },
+  { nameKey: 'business', image: '/img/categories/business.webp' },
 ]
 
 const FEATURES = [
   {
     icon: MdFlashOn,
-    headline: 'From search to booked in minutes.',
-    body: 'No more scrolling through Facebook groups, chasing unresponsive numbers, or hoping for the best. Describe your project, pick your district, and get matched with available professionals immediately.',
+    key: 'fast',
   },
   {
     icon: MdVerified,
-    headline: 'Every pro reviewed by real Budapest residents.',
-    body: 'Ratings come from verified customers — not bots, not the pros themselves. Read what your neighbours actually experienced before you commit to anyone.',
+    key: 'verified',
   },
   {
     icon: MdPriceCheck,
-    headline: 'See prices before you pick up the phone.',
-    body: 'Transparent starting prices on every listing. Request quotes from multiple pros, compare what you get, and choose the best fit. No surprises, no awkward conversations.',
+    key: 'prices',
   },
-]
+] as const
 
 const TESTIMONIALS = [
   {
     rating: 5,
-    quote: "Found an excellent house cleaner within minutes. The booking process was seamless and the job was done better than any agency I've used before.",
+    key: 'eszter',
     name: 'Eszter K.',
-    detail: 'Budapest, V. kerület · House Cleaning',
   },
   {
     rating: 5,
-    quote: 'Plumbing emergency on a Sunday. Mestermind connected me with someone who arrived within two hours. Saved my entire weekend.',
+    key: 'bence',
     name: 'Bence M.',
-    detail: 'Budapest, XI. kerület · Plumbing',
   },
   {
     rating: 5,
-    quote: 'We hired a photography team for our company event. Professional, punctual, and the results were exactly what we needed. Will use again.',
+    key: 'reka',
     name: 'Réka V.',
-    detail: 'Budapest, XIII. kerület · Event Photography',
   },
 ]
 
 const STEPS = [
-  { number: '1', title: 'Describe your project', body: 'Tell us what you need — be as specific as you like. The more detail you give, the better your matches.' },
-  { number: '2', title: 'Get matched instantly', body: 'We surface vetted, reviewed professionals available in your Budapest district right now.' },
-  { number: '3', title: 'Book with confidence', body: 'Compare prices and reviews side by side, then hire directly through the platform.' },
-]
+  { number: '1', key: 'describe' },
+  { number: '2', key: 'match' },
+  { number: '3', key: 'book' },
+] as const
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -102,15 +97,17 @@ function Stars({ rating }: { rating: number }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HomeContent() {
+  const t = useTranslations()
+
   return (
     <>
       {/* ── Stats bar ── */}
       <section className="border-y border-gray-100 bg-gray-50 py-5">
         <dl className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200">
           {STATS.map((s) => (
-            <div key={s.label} className="flex flex-col items-center py-4 md:py-0 text-center px-6">
+            <div key={s.labelKey} className="flex flex-col items-center py-4 md:py-0 text-center px-6">
               <dt className="text-4xl font-black text-gray-900" style={dg}>{s.value}</dt>
-              <dd className="text-xs text-gray-400 mt-1">{s.label}</dd>
+              <dd className="text-xs text-gray-400 mt-1">{t(`home.content.stats.${s.labelKey}`)}</dd>
             </div>
           ))}
         </dl>
@@ -119,21 +116,21 @@ export default function HomeContent() {
       {/* ── Big statement ── */}
       <section className="py-24 px-4 text-center">
         <div className="max-w-2xl mx-auto">
-          <Eyebrow>Why Mestermind</Eyebrow>
+          <Eyebrow>{t('home.content.why.eyebrow')}</Eyebrow>
           <h2
             className="text-5xl md:text-6xl font-black text-gray-900 leading-[1.05] mb-6"
             style={{ ...dg, letterSpacing: '-0.03em' }}
           >
-            Stop guessing.<br />Start hiring.
+            {t('home.content.why.headlineLine1')}<br />{t('home.content.why.headlineLine2')}
           </h2>
           <p className="text-gray-500 text-lg leading-relaxed mb-10 max-w-lg mx-auto">
-            Finding a reliable cleaner, handyman, or contractor in Budapest used to mean hours of calls and crossed fingers. Mestermind puts 1,200+ vetted professionals one search away.
+            {t('home.content.why.body')}
           </p>
           <Link
             href="/instant-results"
             className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg px-8 py-3.5 text-base transition-colors"
           >
-            Find a professional
+            {t('home.content.why.cta')}
           </Link>
         </div>
       </section>
@@ -142,7 +139,7 @@ export default function HomeContent() {
       <section className="border-t border-gray-100 px-4 py-4">
         <div className="max-w-4xl mx-auto divide-y divide-gray-100">
           {FEATURES.map((f) => (
-            <div key={f.headline} className="py-16 flex flex-col sm:flex-row items-start gap-10">
+            <div key={f.key} className="py-16 flex flex-col sm:flex-row items-start gap-10">
               <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center">
                 <f.icon size={30} className="text-slate-800" />
               </div>
@@ -151,9 +148,9 @@ export default function HomeContent() {
                   className="text-3xl font-black text-gray-900 mb-4 leading-tight"
                   style={{ ...dg, letterSpacing: '-0.02em' }}
                 >
-                  {f.headline}
+                  {t(`home.content.features.${f.key}.headline`)}
                 </h3>
-                <p className="text-gray-500 text-base leading-relaxed max-w-lg">{f.body}</p>
+                <p className="text-gray-500 text-base leading-relaxed max-w-lg">{t(`home.content.features.${f.key}.body`)}</p>
               </div>
             </div>
           ))}
@@ -163,19 +160,19 @@ export default function HomeContent() {
       {/* ── Testimonials ── */}
       <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
-          <Eyebrow>Customer reviews</Eyebrow>
+          <Eyebrow>{t('home.content.testimonials.eyebrow')}</Eyebrow>
           <h2 className="text-4xl font-black text-gray-900 mb-2" style={{ ...dg, letterSpacing: '-0.02em' }}>
-            What Budapest residents say
+            {t('home.content.testimonials.headline')}
           </h2>
-          <p className="text-gray-500 text-base mb-10">Real reviews from verified customers.</p>
+          <p className="text-gray-500 text-base mb-10">{t('home.content.testimonials.body')}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4 shadow-sm">
-                <Stars rating={t.rating} />
-                <p className="text-gray-700 text-base leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+            {TESTIMONIALS.map((testimonial) => (
+              <div key={testimonial.name} className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4 shadow-sm">
+                <Stars rating={testimonial.rating} />
+                <p className="text-gray-700 text-base leading-relaxed flex-1">&ldquo;{t(`home.content.testimonials.${testimonial.key}.quote`)}&rdquo;</p>
                 <div className="pt-4 border-t border-gray-100">
-                  <p className="font-bold text-sm text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{t.detail}</p>
+                  <p className="font-bold text-sm text-gray-900">{testimonial.name}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{t(`home.content.testimonials.${testimonial.key}.detail`)}</p>
                 </div>
               </div>
             ))}
@@ -186,16 +183,18 @@ export default function HomeContent() {
       {/* ── Popular services ── */}
       <section className="py-20 px-4 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
-          <Eyebrow>Browse by category</Eyebrow>
+          <Eyebrow>{t('home.content.categories.eyebrow')}</Eyebrow>
           <h2 className="text-4xl font-black text-gray-900 mb-2" style={{ ...dg, letterSpacing: '-0.02em' }}>
-            550+ services, one platform.
+            {t('home.content.categories.headline')}
           </h2>
-          <p className="text-gray-500 text-base mb-10">From a leaking tap to a corporate event — we have a professional for it.</p>
+          <p className="text-gray-500 text-base mb-10">{t('home.content.categories.body')}</p>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map((cat) => {
+              const categoryName = t(`home.content.categories.${cat.nameKey}`)
+              return (
               <Link
-                key={cat.name}
-                href={`/instant-results?q=${encodeURIComponent(cat.name)}`}
+                key={cat.nameKey}
+                href={`/instant-results?q=${encodeURIComponent(categoryName)}`}
                 className="group relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-gray-200 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg"
               >
                 <Image
@@ -210,10 +209,11 @@ export default function HomeContent() {
                   className="absolute inset-x-0 bottom-0 px-4 pb-4 text-left text-lg font-black leading-tight text-white drop-shadow-sm"
                   style={dg}
                 >
-                  {cat.name}
+                  {categoryName}
                 </span>
               </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -221,11 +221,11 @@ export default function HomeContent() {
       {/* ── How it works ── */}
       <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
-          <Eyebrow>Getting started</Eyebrow>
+          <Eyebrow>{t('home.content.steps.eyebrow')}</Eyebrow>
           <h2 className="text-4xl font-black text-gray-900 mb-2" style={{ ...dg, letterSpacing: '-0.02em' }}>
-            Up and running in three steps.
+            {t('home.content.steps.headline')}
           </h2>
-          <p className="text-gray-500 text-base mb-12">No account required to browse. No commitment until you book.</p>
+          <p className="text-gray-500 text-base mb-12">{t('home.content.steps.body')}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {STEPS.map((step) => (
               <div key={step.number} className="flex flex-col gap-4">
@@ -235,8 +235,8 @@ export default function HomeContent() {
                 >
                   {step.number}
                 </div>
-                <h3 className="font-black text-xl text-gray-900" style={dg}>{step.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
+                <h3 className="font-black text-xl text-gray-900" style={dg}>{t(`home.content.steps.${step.key}.title`)}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{t(`home.content.steps.${step.key}.body`)}</p>
               </div>
             ))}
           </div>
@@ -255,16 +255,16 @@ export default function HomeContent() {
             className="text-5xl md:text-6xl font-black mb-5 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.03em' }}
           >
-            Budapest&apos;s home services, sorted.
+            {t('home.content.finalCta.headline')}
           </h2>
           <p className="text-gray-400 text-base mb-10 leading-relaxed">
-            Join thousands of residents who find trusted professionals on Mestermind every day.
+            {t('home.content.finalCta.body')}
           </p>
           <Link
             href="/instant-results"
             className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
           >
-            Get started for free
+            {t('home.content.finalCta.cta')}
           </Link>
         </div>
       </section>

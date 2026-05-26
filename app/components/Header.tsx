@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Button } from '@base-ui/react/button'
 import { onAuthChange, signOut } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { defaultLocale, getPathLocale, getPathnameWithoutLocale, locales, localizeHref, type Locale } from '@/lib/i18n/config'
+import { useTranslations } from '@/lib/i18n/client'
 import { useNotifications, type ClientNotification } from './notifications/useNotifications'
 import type { User } from 'firebase/auth'
 import styles from './Header.module.css'
@@ -16,6 +18,11 @@ type Category = { name: string; total_services: number; featured: string[] }
 type CategoryDetail = Category & { services: string[] }
 type ProBasic = { uid: string; fullName: string; categoryName: string }
 type NotificationsState = ReturnType<typeof useNotifications>
+
+const LANGUAGE_LABELS: Record<Locale, { short: string; name: string }> = {
+  en: { short: 'EN', name: 'English' },
+  hu: { short: 'HU', name: 'Magyar' },
+}
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -60,13 +67,25 @@ function MenuIcon() {
   )
 }
 
+function GlobeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20" />
+      <path d="M12 2a15.3 15.3 0 010 20" />
+      <path d="M12 2a15.3 15.3 0 000 20" />
+    </svg>
+  )
+}
+
 function getInitials(user: User): string {
   if (user.displayName) return user.displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   return user.email?.[0].toUpperCase() ?? '?'
 }
 
 function AvatarImg({ user }: { user: User }) {
-  if (user.photoURL) return <img src={user.photoURL} alt={user.displayName ?? 'Profile'} className={styles.avatarImg} />
+  const t = useTranslations()
+  if (user.photoURL) return <img src={user.photoURL} alt={user.displayName ?? t('header.proNav.profile')} className={styles.avatarImg} />
   return <span>{getInitials(user)}</span>
 }
 
@@ -81,9 +100,56 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, onClose: () =
   }, [ref, onClose, enabled])
 }
 
+function LanguageChooser({ compact = false }: { compact?: boolean }) {
+  const t = useTranslations()
+  const rawPathname = usePathname()
+  const locale = getPathLocale(rawPathname) ?? defaultLocale
+  const pathname = getPathnameWithoutLocale(rawPathname)
+  const searchParams = useSearchParams()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useClickOutside(ref, () => setOpen(false), open)
+
+  const queryString = searchParams.toString()
+  const href = queryString ? `${pathname}?${queryString}` : pathname
+
+  return (
+    <div ref={ref} className={compact ? styles.languageAnchorMobile : styles.languageAnchor}>
+      <button
+        type="button"
+        className={styles.languageButton}
+        onClick={() => setOpen(value => !value)}
+        aria-label={t('header.aria.changeLanguage')}
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <GlobeIcon />
+        <span className={styles.languageButtonLabel}>{LANGUAGE_LABELS[locale].short}</span>
+      </button>
+      <div className={styles.languagePopover} data-open={open ? '' : undefined} role="menu">
+        {locales.map(nextLocale => (
+          <a
+            key={nextLocale}
+            href={localizeHref(href, nextLocale)}
+            hrefLang={nextLocale}
+            role="menuitem"
+            aria-current={locale === nextLocale ? 'true' : undefined}
+            className={`${styles.languageOption} ${locale === nextLocale ? styles.languageOptionActive : ''}`}
+            onClick={() => setOpen(false)}
+          >
+            <span className={styles.languageOptionName}>{LANGUAGE_LABELS[nextLocale].name}</span>
+            <span className={styles.languageOptionCode}>{LANGUAGE_LABELS[nextLocale].short}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Customer nav ─────────────────────────────────────────────────────────────
 
 function ServicesDropdown({ categories }: { categories: Category[] }) {
+  const t = useTranslations()
   const [active, setActive] = useState<string | null>(null)
   const [detail, setDetail] = useState<CategoryDetail | null>(null)
   const activeCategory = active ?? categories[0]?.name ?? null
@@ -97,8 +163,8 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
     <div className={styles.DropdownLayout}>
       <div className={styles.CategoryPanel}>
         <div className={styles.DropdownHeader}>
-          <p className={styles.DropdownKicker}>Explore services</p>
-          <p className={styles.DropdownTitle}>Find the right pro</p>
+          <p className={styles.DropdownKicker}>{t('header.services.kicker')}</p>
+          <p className={styles.DropdownTitle}>{t('header.services.title')}</p>
         </div>
         {categories.map((cat, i) => (
           <div key={cat.name}>
@@ -110,7 +176,7 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
             >
               <span className={styles.CategoryItemText}>
                 <span>{cat.name}</span>
-                <small>{cat.total_services} services</small>
+                <small>{t('header.services.serviceCount', { count: cat.total_services })}</small>
               </span>
               <span className={styles.CategoryItemChevron}><ChevronRight /></span>
             </button>
@@ -119,8 +185,8 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
       </div>
       <div className={styles.ServicesPanel}>
         <div className={styles.ServicesHeader}>
-          <p className={styles.DropdownKicker}>{activeCategory ?? 'Services'}</p>
-          <p className={styles.ServicesHint}>Choose a service to see matching pros.</p>
+          <p className={styles.DropdownKicker}>{activeCategory ?? t('header.services.fallbackTitle')}</p>
+          <p className={styles.ServicesHint}>{t('header.services.hint')}</p>
         </div>
         <div className={styles.ServicesGrid}>
           {detail?.services.map(service => (
@@ -135,6 +201,7 @@ function ServicesDropdown({ categories }: { categories: Category[] }) {
 }
 
 function ServicesMenu({ categories }: { categories: Category[] }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -151,7 +218,7 @@ function ServicesMenu({ categories }: { categories: Category[] }) {
         className={`${styles.headerMenuText} ${styles.headerNavItem} flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors`}
         aria-expanded={open}
       >
-        Explore Services
+        {t('header.services.explore')}
         <ChevronDown />
       </button>
       <div className={styles.servicesPopup} data-open={open ? '' : undefined} aria-hidden={!open}>
@@ -162,7 +229,7 @@ function ServicesMenu({ categories }: { categories: Category[] }) {
 }
 
 function CustomerNavLink({ href, label, badge = 0 }: { href: string; label: string; badge?: number }) {
-  const pathname = usePathname()
+  const pathname = getPathnameWithoutLocale(usePathname())
   const active = pathname === href || pathname.startsWith(href + '/')
   return (
     <Link
@@ -178,17 +245,20 @@ function CustomerNavLink({ href, label, badge = 0 }: { href: string; label: stri
 }
 
 function CustomerNav({ activeAppointments }: { activeAppointments: number }) {
+  const t = useTranslations()
+
   return (
     <>
-      <CustomerNavLink href="/requests" label="My requests" />
-      <CustomerNavLink href="/projects" label="Projects" />
-      <CustomerNavLink href="/appointments" label="Appointments" badge={activeAppointments} />
-      <CustomerNavLink href="/messages" label="Messages" />
+      <CustomerNavLink href="/requests" label={t('header.customerNav.requests')} />
+      <CustomerNavLink href="/projects" label={t('header.customerNav.projects')} />
+      <CustomerNavLink href="/appointments" label={t('header.customerNav.appointments')} badge={activeAppointments} />
+      <CustomerNavLink href="/messages" label={t('header.customerNav.messages')} />
     </>
   )
 }
 
 function CustomerProfileMenu({ user }: { user: User }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -202,24 +272,24 @@ function CustomerProfileMenu({ user }: { user: User }) {
 
   return (
     <div ref={ref} className={styles.profileAnchor}>
-      <button className={styles.avatar} onClick={() => setOpen(v => !v)} aria-label="Account menu">
+      <button className={styles.avatar} onClick={() => setOpen(v => !v)} aria-label={t('header.aria.accountMenu')}>
         <AvatarImg user={user} />
       </button>
       <div className={styles.profilePopup} data-open={open ? '' : undefined} aria-hidden={!open}>
         <div className={styles.menuUserInfo}>
-          <div className={styles.menuUserName}>{user.displayName ?? 'Account'}</div>
+          <div className={styles.menuUserName}>{user.displayName ?? t('header.auth.account')}</div>
           <div className={styles.menuUserEmail}>{user.email}</div>
         </div>
         <hr className={styles.menuSeparator} />
         <Link href="/settings" className={styles.menuItem} onClick={() => setOpen(false)}>
-          Account settings
+          {t('header.customerNav.settings')}
         </Link>
         <Link href="/help" className={styles.menuItem} onClick={() => setOpen(false)}>
-          Help
+          {t('header.auth.help')}
         </Link>
         <hr className={styles.menuSeparator} />
         <button className={`${styles.menuItem} ${styles.menuItemDanger}`} onClick={handleSignOut}>
-          Sign out
+          {t('header.auth.signOut')}
         </button>
       </div>
     </div>
@@ -236,7 +306,7 @@ function NavBadge({ count }: { count: number }) {
 }
 
 function ProNavLink({ href, label, badge = 0 }: { href: string; label: string; badge?: number }) {
-  const pathname = usePathname()
+  const pathname = getPathnameWithoutLocale(usePathname())
   const active = pathname === href || pathname.startsWith(href + '/')
   return (
     <Link
@@ -276,6 +346,7 @@ function BellButton({
   markRead: NotificationsState['markRead']
   markAllRead: NotificationsState['markAllRead']
 }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useClickOutside(ref, () => setOpen(false), open)
@@ -286,7 +357,7 @@ function BellButton({
         type="button"
         className={styles.notificationButton}
         onClick={() => setOpen(value => !value)}
-        aria-label="Notifications"
+        aria-label={t('header.aria.notifications')}
         aria-expanded={open}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -297,8 +368,10 @@ function BellButton({
       <div className={styles.notificationPopup} data-open={open ? '' : undefined} aria-hidden={!open}>
         <div className={styles.notificationHeader}>
           <div>
-            <p className={styles.notificationKicker}>Notifications</p>
-            <h2 className={styles.notificationTitle}>{unreadCount ? `${unreadCount} unread` : 'All caught up'}</h2>
+            <p className={styles.notificationKicker}>{t('header.notifications.kicker')}</p>
+            <h2 className={styles.notificationTitle}>
+              {unreadCount ? t('header.notifications.unread', { count: unreadCount }) : t('header.notifications.allCaughtUp')}
+            </h2>
           </div>
           {unreadCount > 0 && (
             <button
@@ -306,7 +379,7 @@ function BellButton({
               className={styles.notificationReadAll}
               onClick={() => { void markAllRead() }}
             >
-              Mark all read
+              {t('header.notifications.markAllRead')}
             </button>
           )}
         </div>
@@ -327,7 +400,7 @@ function BellButton({
             </Link>
           )) : (
             <div className={styles.notificationEmpty}>
-              {loading ? 'Loading notifications...' : 'No notifications yet.'}
+              {loading ? t('header.notifications.loading') : t('header.notifications.empty')}
             </div>
           )}
         </div>
@@ -337,6 +410,7 @@ function BellButton({
 }
 
 function ProAccountMenu({ user, pro }: { user: User; pro: ProBasic }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -350,7 +424,7 @@ function ProAccountMenu({ user, pro }: { user: User; pro: ProBasic }) {
 
   return (
     <div ref={ref} className={styles.profileAnchor}>
-      <button className={styles.avatar} onClick={() => setOpen(v => !v)}>
+      <button className={styles.avatar} onClick={() => setOpen(v => !v)} aria-label={t('header.aria.accountMenu')}>
         <AvatarImg user={user} />
       </button>
       <div className={styles.profilePopup} data-open={open ? '' : undefined} aria-hidden={!open}>
@@ -360,20 +434,21 @@ function ProAccountMenu({ user, pro }: { user: User; pro: ProBasic }) {
         </div>
         <hr className={styles.menuSeparator} />
         <Link href={`/pro/${pro.uid}`} className={styles.menuItem} onClick={() => setOpen(false)}>
-          Preview my profile
+          {t('header.proNav.previewProfile')}
         </Link>
         <hr className={styles.menuSeparator} />
-        <Link href="/pro/settings" className={styles.menuItem} onClick={() => setOpen(false)}>Settings</Link>
-        <Link href="/pro/verification" className={styles.menuItem} onClick={() => setOpen(false)}>ID &amp; verification</Link>
-        <Link href="/pro/help" className={styles.menuItem} onClick={() => setOpen(false)}>Help</Link>
+        <Link href="/pro/settings" className={styles.menuItem} onClick={() => setOpen(false)}>{t('header.proNav.settings')}</Link>
+        <Link href="/pro/verification" className={styles.menuItem} onClick={() => setOpen(false)}>{t('header.proNav.verification')}</Link>
+        <Link href="/pro/help" className={styles.menuItem} onClick={() => setOpen(false)}>{t('header.proNav.help')}</Link>
         <hr className={styles.menuSeparator} />
-        <button className={`${styles.menuItem} ${styles.menuItemDanger}`} onClick={handleSignOut}>Sign out</button>
+        <button className={`${styles.menuItem} ${styles.menuItemDanger}`} onClick={handleSignOut}>{t('header.auth.signOut')}</button>
       </div>
     </div>
   )
 }
 
 function ProHeaderUpgradeButton() {
+  const t = useTranslations()
   const [visible, setVisible] = useState(false)
   const [billingLoading, setBillingLoading] = useState(false)
 
@@ -414,7 +489,7 @@ function ProHeaderUpgradeButton() {
         <path d="M8 1.5l1.35 3.8 3.65 1.28-3.65 1.28L8 11.66 6.65 7.86 3 6.58 6.65 5.3 8 1.5z" />
         <path d="M12.6 10.3l.55 1.55 1.45.5-1.45.5-.55 1.55-.55-1.55-1.45-.5 1.45-.5.55-1.55z" />
       </svg>
-      {billingLoading ? 'Opening...' : 'Upgrade'}
+      {billingLoading ? t('header.upgrade.opening') : t('header.upgrade.label')}
     </button>
   )
 }
@@ -432,15 +507,18 @@ function ProNav({
   confirmedAppointments: number
   notifications: NotificationsState
 }) {
+  const t = useTranslations()
+
   return (
     <nav className="flex items-center gap-2">
-      <ProNavLink href="/pro/jobs" label="Jobs" badge={pendingJobs} />
-      <ProNavLink href="/pro/marketplace" label="Marketplace" />
-      <ProNavLink href="/pro/work" label="My Work" badge={confirmedAppointments} />
-      <ProNavLink href="/pro/messages" label="Messages" />
-      <ProNavLink href="/pro/earnings" label="Earnings" />
-      <ProNavLink href={`/pro/${pro.uid}`} label="Profile" />
+      <ProNavLink href="/pro/jobs" label={t('header.proNav.jobs')} badge={pendingJobs} />
+      <ProNavLink href="/pro/marketplace" label={t('header.proNav.marketplace')} />
+      <ProNavLink href="/pro/work" label={t('header.proNav.work')} badge={confirmedAppointments} />
+      <ProNavLink href="/pro/messages" label={t('header.proNav.messages')} />
+      <ProNavLink href="/pro/earnings" label={t('header.proNav.earnings')} />
+      <ProNavLink href={`/pro/${pro.uid}`} label={t('header.proNav.profile')} />
       <ProHeaderUpgradeButton />
+      <LanguageChooser />
       <BellButton {...notifications} />
       <div className="ml-1">
         <ProAccountMenu user={user} pro={pro} />
@@ -450,7 +528,7 @@ function ProNav({
 }
 
 function MobileNavLink({ href, label, badge = 0, onClick }: { href: string; label: string; badge?: number; onClick: () => void }) {
-  const pathname = usePathname()
+  const pathname = getPathnameWithoutLocale(usePathname())
   const active = pathname === href || pathname.startsWith(href + '/')
 
   return (
@@ -476,6 +554,7 @@ function MobileMenu({
   activeAppointments: number
   unreadNotifications: number
 }) {
+  const t = useTranslations()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -493,7 +572,7 @@ function MobileMenu({
         type="button"
         className={styles.mobileMenuButton}
         onClick={() => setOpen(value => !value)}
-        aria-label="Open navigation menu"
+        aria-label={t('header.aria.openNavigationMenu')}
         aria-expanded={open}
       >
         <MenuIcon />
@@ -503,34 +582,34 @@ function MobileMenu({
         <div className={styles.mobileMenuSection}>
           {pro && user ? (
             <>
-              <MobileNavLink href="/pro/jobs" label="Jobs" badge={pendingJobs} onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/marketplace" label="Marketplace" onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/work" label="My Work" badge={confirmedAppointments} onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/messages" label="Messages" onClick={() => setOpen(false)} />
-              <MobileNavLink href="/notifications" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/earnings" label="Earnings" onClick={() => setOpen(false)} />
-              <MobileNavLink href={`/pro/${pro.uid}`} label="Profile" onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/settings" label="Settings" onClick={() => setOpen(false)} />
-              <MobileNavLink href="/pro/help" label="Help" onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/jobs" label={t('header.proNav.jobs')} badge={pendingJobs} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/marketplace" label={t('header.proNav.marketplace')} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/work" label={t('header.proNav.work')} badge={confirmedAppointments} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/messages" label={t('header.proNav.messages')} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/notifications" label={t('header.proNav.notifications')} badge={unreadNotifications} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/earnings" label={t('header.proNav.earnings')} onClick={() => setOpen(false)} />
+              <MobileNavLink href={`/pro/${pro.uid}`} label={t('header.proNav.profile')} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/settings" label={t('header.proNav.settings')} onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro/help" label={t('header.proNav.help')} onClick={() => setOpen(false)} />
             </>
           ) : (
             <>
-              <MobileNavLink href="/instant-results" label="Explore services" onClick={() => setOpen(false)} />
+              <MobileNavLink href="/instant-results" label={t('header.services.explore')} onClick={() => setOpen(false)} />
               {user && (
                 <>
-                  <MobileNavLink href="/requests" label="My requests" onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/projects" label="Projects" onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/appointments" label="Appointments" badge={activeAppointments} onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/messages" label="Messages" onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/notifications" label="Notifications" badge={unreadNotifications} onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/settings" label="Account settings" onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/requests" label={t('header.customerNav.requests')} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/projects" label={t('header.customerNav.projects')} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/appointments" label={t('header.customerNav.appointments')} badge={activeAppointments} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/messages" label={t('header.customerNav.messages')} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/notifications" label={t('header.proNav.notifications')} badge={unreadNotifications} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/settings" label={t('header.customerNav.settings')} onClick={() => setOpen(false)} />
                 </>
               )}
-              <MobileNavLink href="/pro" label="Join as a pro" onClick={() => setOpen(false)} />
+              <MobileNavLink href="/pro" label={t('header.customerNav.joinPro')} onClick={() => setOpen(false)} />
               {!user && (
                 <>
-                  <MobileNavLink href="/register" label="Sign up" onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/login" label="Log in" onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/register" label={t('header.auth.signUp')} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/login" label={t('header.auth.login')} onClick={() => setOpen(false)} />
                 </>
               )}
             </>
@@ -540,14 +619,15 @@ function MobileMenu({
         {user && (
           <div className={styles.mobileMenuFooter}>
             <div className={styles.mobileUserInfo}>
-              <span>{user.displayName ?? 'Account'}</span>
+              <span>{user.displayName ?? t('header.auth.account')}</span>
               <small>{user.email}</small>
             </div>
             <button type="button" className={styles.mobileSignOutButton} onClick={handleSignOut}>
-              Sign out
+              {t('header.auth.signOut')}
             </button>
           </div>
         )}
+        <LanguageChooser compact />
       </div>
     </div>
   )
@@ -556,7 +636,8 @@ function MobileMenu({
 // ─── Root header ──────────────────────────────────────────────────────────────
 
 export default function Header() {
-  const pathname = usePathname()
+  const t = useTranslations()
+  const pathname = getPathnameWithoutLocale(usePathname())
   const isSignupPath = pathname.startsWith('/pro/signup')
   const [user, setUser] = useState<User | null>(null)
   const [pro, setPro] = useState<ProBasic | null>(null)
@@ -679,13 +760,13 @@ export default function Header() {
   return (
     <header className={styles.headerRoot}>
       <div className={styles.headerLogoSlot}>
-        <Link href={pro ? '/pro/jobs' : '/'} aria-label="Home" className={styles.logoLink}>
+        <Link href={pro ? '/pro/jobs' : '/'} aria-label={t('header.aria.home')} className={styles.logoLink}>
           <LogoMark />
         </Link>
       </div>
 
       {resolvingAccount ? (
-        <nav className={styles.desktopNav} aria-busy="true" aria-label="Loading account navigation">
+        <nav className={styles.desktopNav} aria-busy="true" aria-label={t('header.aria.loadingAccountNavigation')}>
           <div className={styles.loadingNav} />
         </nav>
       ) : pro && user ? (
@@ -703,8 +784,9 @@ export default function Header() {
           <ServicesMenu categories={categories} />
           {user && <CustomerNav activeAppointments={activeAppointments} />}
           <Link href="/pro" className={`${styles.headerMenuText} ${styles.headerNavItem} px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 transition-colors`}>
-            Join as a pro
+            {t('header.customerNav.joinPro')}
           </Link>
+          <LanguageChooser />
           {user ? (
             <>
               <BellButton {...notifications} />
@@ -716,11 +798,11 @@ export default function Header() {
             <>
               <Link href="/register">
                 <Button className={`${styles.headerMenuText} rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 px-5 py-2 font-semibold text-white cursor-pointer shadow-sm transition-all`}>
-                  Sign up
+                  {t('header.auth.signUp')}
                 </Button>
               </Link>
               <Link href="/login" className={`${styles.headerMenuText} ${styles.headerNavItem} px-3 py-1.5 font-normal text-gray-700 hover:bg-gray-100 rounded-lg transition-colors`}>
-                Log in
+                {t('header.auth.login')}
               </Link>
             </>
           )}
