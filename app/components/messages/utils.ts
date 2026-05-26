@@ -1,11 +1,13 @@
 import type { Conversation } from '@/firebase/conversations'
 import type { Message } from '@/firebase/conversations'
 import { PRO_AVATAR_COLORS, timestampMillis, type TimestampLike } from '@/app/requests/shared'
+import type { createTranslator } from '@/lib/i18n/translator'
 
 export type MessageRole = 'customer' | 'pro'
+type Translator = ReturnType<typeof createTranslator>
 
-export function partnerDisplayName(conv: Conversation, role: MessageRole): string {
-  return role === 'customer' ? conv.proName : (conv.customerName || 'Customer')
+export function partnerDisplayName(conv: Conversation, role: MessageRole, customerFallback = 'Customer'): string {
+  return role === 'customer' ? conv.proName : (conv.customerName || customerFallback)
 }
 
 export function partnerInitials(name: string): string {
@@ -32,7 +34,7 @@ function timestampDate(ts: TimestampLike | null | undefined): Date | null {
   return millis ? new Date(millis) : null
 }
 
-export function formatListTime(ts: TimestampLike | null): string {
+export function formatListTime(ts: TimestampLike | null, locale: string, t: Translator): string {
   const d = timestampDate(ts)
   if (!d) return ''
   const now = new Date()
@@ -41,16 +43,16 @@ export function formatListTime(ts: TimestampLike | null): string {
   const diffDays = Math.round((startOfToday.getTime() - startOfMsg.getTime()) / 86400000)
 
   if (diffDays === 0) {
-    return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    return d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })
   }
-  if (diffDays === 1) return 'Yesterday'
+  if (diffDays === 1) return t('messages.time.yesterday')
   if (diffDays < 7) {
-    return d.toLocaleDateString(undefined, { weekday: 'short' })
+    return d.toLocaleDateString(locale, { weekday: 'short' })
   }
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
-export function daySeparatorLabel(ts: TimestampLike | null): string {
+export function daySeparatorLabel(ts: TimestampLike | null, locale: string, t: Translator): string {
   const d = timestampDate(ts)
   if (!d) return ''
   const now = new Date()
@@ -58,14 +60,14 @@ export function daySeparatorLabel(ts: TimestampLike | null): string {
   const startOfMsg = new Date(d.getFullYear(), d.getMonth(), d.getDate())
   const diffDays = Math.round((startOfToday.getTime() - startOfMsg.getTime()) / 86400000)
 
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
-  return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+  if (diffDays === 0) return t('messages.time.today')
+  if (diffDays === 1) return t('messages.time.yesterday')
+  return d.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
 export type MessageGroup = { dayKey: string; label: string; messages: Message[] }
 
-export function groupMessagesByDay(messages: Message[]): MessageGroup[] {
+export function groupMessagesByDay(messages: Message[], locale: string, t: Translator): MessageGroup[] {
   const groups: MessageGroup[] = []
   let currentKey = ''
 
@@ -78,7 +80,7 @@ export function groupMessagesByDay(messages: Message[]): MessageGroup[] {
       currentKey = key
       groups.push({
         dayKey: key,
-        label: daySeparatorLabel(msg.createdAt),
+        label: daySeparatorLabel(msg.createdAt, locale, t),
         messages: [msg],
       })
     } else {

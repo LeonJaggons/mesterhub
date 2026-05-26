@@ -2,15 +2,16 @@
 
 import { useState } from 'react'
 import type { AcceptQuoteInput } from '@/firebase/conversations'
+import { useTranslations } from '@/lib/i18n/client'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 const START_OPTIONS = [
-  'As soon as possible',
-  'Within 24 hours',
-  'This week',
-  'Next week',
-  'Flexible — will coordinate in messages',
+  { value: 'As soon as possible', labelKey: 'asap' },
+  { value: 'Within 24 hours', labelKey: 'within24' },
+  { value: 'This week', labelKey: 'thisWeek' },
+  { value: 'Next week', labelKey: 'nextWeek' },
+  { value: 'Flexible — will coordinate in messages', labelKey: 'flexible' },
 ]
 
 const PHONE_PATTERN = /^\+[1-9]\d{7,14}$/
@@ -26,6 +27,7 @@ function ModalShell({
   onClose: () => void
   children: React.ReactNode
 }) {
+  const t = useTranslations()
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -48,7 +50,7 @@ function ModalShell({
             type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer shrink-0 p-1"
-            aria-label="Close"
+            aria-label={t('customerRequests.detail.common.close')}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -70,10 +72,11 @@ export function AcceptQuoteModal({
   onClose: () => void
   onSubmit: (data: AcceptQuoteInput) => Promise<void>
 }) {
+  const t = useTranslations()
   const [message, setMessage] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
-  const [preferredStart, setPreferredStart] = useState(START_OPTIONS[0])
+  const [preferredStart, setPreferredStart] = useState(START_OPTIONS[0].value)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const canSubmit = Boolean(message.trim() && phone.trim() && address.trim())
@@ -82,19 +85,19 @@ export function AcceptQuoteModal({
     e.preventDefault()
     const cleanedPhone = phone.replace(/\s+/g, '')
     if (!message.trim()) {
-      setError('Please write a message so the pro knows how to reach you.')
+      setError(t('customerRequests.detail.acceptModal.errors.message'))
       return
     }
     if (!phone.trim()) {
-      setError('Please add a phone number so the pro can reach you.')
+      setError(t('customerRequests.detail.acceptModal.errors.phone'))
       return
     }
     if (!PHONE_PATTERN.test(cleanedPhone)) {
-      setError('Enter your phone number with country code and digits only, e.g. +36301234567.')
+      setError(t('customerRequests.detail.acceptModal.errors.phoneFormat'))
       return
     }
     if (!address.trim()) {
-      setError('Please add the service address for the appointment.')
+      setError(t('customerRequests.detail.acceptModal.errors.address'))
       return
     }
     setError('')
@@ -107,39 +110,39 @@ export function AcceptQuoteModal({
         preferredStart,
       })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(err instanceof Error ? err.message : t('customerRequests.detail.acceptModal.errors.generic'))
       setSubmitting(false)
     }
   }
 
   return (
     <ModalShell
-      subtitle="Accept quote"
-      title={`Hire ${proName}`}
+      subtitle={t('customerRequests.detail.acceptModal.kicker')}
+      title={t('customerRequests.detail.acceptModal.title', { name: proName })}
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
         <p className="text-sm text-gray-500 -mt-1">
-          Your message and contact details are shared with {proName} so you can coordinate the job.
+          {t('customerRequests.detail.acceptModal.body', { name: proName })}
         </p>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-message" className="text-sm font-bold text-gray-700">
-            First message <span className="text-orange-500">*</span>
+            {t('customerRequests.detail.acceptModal.messageLabel')} <span className="text-orange-500">*</span>
           </label>
           <textarea
             id="accept-message"
             value={message}
             onChange={e => setMessage(e.target.value)}
             rows={4}
-            placeholder="Hi! I'd like to move forward. I'm available…"
+            placeholder={t('customerRequests.detail.acceptModal.messagePlaceholder')}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-phone" className="text-sm font-bold text-gray-700">
-            Phone number <span className="text-orange-500">*</span>
+            {t('customerRequests.detail.acceptModal.phoneLabel')} <span className="text-orange-500">*</span>
           </label>
           <input
             id="accept-phone"
@@ -148,7 +151,7 @@ export function AcceptQuoteModal({
             onChange={e => setPhone(e.target.value)}
             placeholder="+36301234567"
             pattern="\+[1-9][0-9]{7,14}"
-            title="Use country code and digits only, for example +36301234567."
+            title={t('customerRequests.detail.acceptModal.phoneTitle')}
             required
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
           />
@@ -156,14 +159,14 @@ export function AcceptQuoteModal({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-address" className="text-sm font-bold text-gray-700">
-            Full address <span className="text-orange-500">*</span>
+            {t('customerRequests.detail.acceptModal.addressLabel')} <span className="text-orange-500">*</span>
           </label>
           <input
             id="accept-address"
             type="text"
             value={address}
             onChange={e => setAddress(e.target.value)}
-            placeholder="Street, building, floor, door"
+            placeholder={t('customerRequests.detail.acceptModal.addressPlaceholder')}
             required
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
           />
@@ -171,7 +174,7 @@ export function AcceptQuoteModal({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-start" className="text-sm font-bold text-gray-700">
-            When would you like to start?
+            {t('customerRequests.detail.acceptModal.startLabel')}
           </label>
           <select
             id="accept-start"
@@ -180,7 +183,7 @@ export function AcceptQuoteModal({
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
           >
             {START_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt.value} value={opt.value}>{t(`customerRequests.detail.acceptModal.startOptions.${opt.labelKey}`)}</option>
             ))}
           </select>
         </div>
@@ -194,14 +197,14 @@ export function AcceptQuoteModal({
             className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black rounded-xl py-3 text-base transition-colors border-none cursor-pointer"
             style={dg}
           >
-            {submitting ? 'Accepting…' : 'Accept & send message'}
+            {submitting ? t('customerRequests.detail.acceptModal.accepting') : t('customerRequests.detail.acceptModal.submit')}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="px-5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl text-sm cursor-pointer bg-white"
           >
-            Cancel
+            {t('customerRequests.detail.common.cancel')}
           </button>
         </div>
       </form>
@@ -218,6 +221,7 @@ export function DeclineQuoteModal({
   onClose: () => void
   onConfirm: (reason: string) => Promise<void>
 }) {
+  const t = useTranslations()
   const [reason, setReason] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState('')
@@ -228,28 +232,28 @@ export function DeclineQuoteModal({
     try {
       await onConfirm(reason.trim())
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setError(err instanceof Error ? err.message : t('customerRequests.detail.declineModal.error'))
       setConfirming(false)
     }
   }
 
   return (
-    <ModalShell subtitle="Decline quote" title={`Decline ${proName}'s quote?`} onClose={onClose}>
+    <ModalShell subtitle={t('customerRequests.detail.declineModal.kicker')} title={t('customerRequests.detail.declineModal.title', { name: proName })} onClose={onClose}>
       <div className="p-6">
         <p className="text-sm text-gray-500 mb-4">
-          The pro will be notified. You can request quotes from other pros anytime.
+          {t('customerRequests.detail.declineModal.body')}
         </p>
 
         <div className="flex flex-col gap-1.5 mb-5">
           <label htmlFor="decline-reason" className="text-sm font-bold text-gray-700">
-            Reason <span className="text-gray-400 font-normal">(optional)</span>
+            {t('customerRequests.detail.declineModal.reasonLabel')} <span className="text-gray-400 font-normal">{t('customerRequests.detail.common.optional')}</span>
           </label>
           <textarea
             id="decline-reason"
             value={reason}
             onChange={e => setReason(e.target.value)}
             rows={3}
-            placeholder="e.g. Price is above my budget"
+            placeholder={t('customerRequests.detail.declineModal.reasonPlaceholder')}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
           />
         </div>
@@ -262,7 +266,7 @@ export function DeclineQuoteModal({
             onClick={onClose}
             className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl py-3 text-sm cursor-pointer bg-white"
           >
-            Keep quote
+            {t('customerRequests.detail.declineModal.keep')}
           </button>
           <button
             type="button"
@@ -271,7 +275,7 @@ export function DeclineQuoteModal({
             className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-xl py-3 text-sm cursor-pointer border-none"
             style={dg}
           >
-            {confirming ? 'Declining…' : 'Decline quote'}
+            {confirming ? t('customerRequests.detail.declineModal.declining') : t('customerRequests.detail.declineModal.confirm')}
           </button>
         </div>
       </div>

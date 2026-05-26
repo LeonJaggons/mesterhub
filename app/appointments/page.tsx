@@ -7,7 +7,7 @@ import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from '../account/account.module.css'
 import {
-  approximateLocationLabel,
+  approximateRadiusMeters,
   dg,
   districtLabel,
   fetchProSummary,
@@ -15,6 +15,10 @@ import {
   type ProSummary,
   type ServiceRequest,
 } from '../requests/shared'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
+
+type Translator = ReturnType<typeof useTranslations>
 
 type ConfirmedAppointmentRequest = ServiceRequest & {
   appointmentRequest: AppointmentRequest & { status: 'confirmed' }
@@ -23,11 +27,11 @@ type ConfirmedAppointmentRequest = ServiceRequest & {
 
 type ServiceStatusFilter = 'all' | 'accepted' | 'completed' | 'cancelled'
 
-const SERVICE_STATUS_FILTERS: Array<{ id: ServiceStatusFilter; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'accepted', label: 'Active' },
-  { id: 'completed', label: 'Completed' },
-  { id: 'cancelled', label: 'Cancelled' },
+const SERVICE_STATUS_FILTERS: Array<{ id: ServiceStatusFilter; labelKey: string }> = [
+  { id: 'all', labelKey: 'all' },
+  { id: 'accepted', labelKey: 'active' },
+  { id: 'completed', labelKey: 'completed' },
+  { id: 'cancelled', labelKey: 'cancelled' },
 ]
 
 function appointmentStart(appointment: AppointmentRequest): Date | null {
@@ -35,10 +39,10 @@ function appointmentStart(appointment: AppointmentRequest): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-function formatAppointmentDateTime(date: string, time: string): string {
+function formatAppointmentDateTime(date: string, time: string, locale: string, t: Translator): string {
   const parsed = new Date(`${date}T${time}`)
-  if (Number.isNaN(parsed.getTime())) return `${date} at ${time}`
-  return parsed.toLocaleString(undefined, {
+  if (Number.isNaN(parsed.getTime())) return `${date} ${t('appointments.common.at')} ${time}`
+  return parsed.toLocaleString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -47,14 +51,26 @@ function formatAppointmentDateTime(date: string, time: string): string {
   })
 }
 
-function locationLabel(req: ServiceRequest, appointment: AppointmentRequest): string {
+function approximateLocationLabel(t: Translator, location?: ServiceRequest['jobLocation'] | null): string | null {
+  if (!location) return null
+  if (!location.accuracy) return t('appointments.location.approximate')
+  const meters = approximateRadiusMeters(location)
+  if (meters >= 1000) return t('appointments.location.withinKm', { distance: (meters / 1000).toFixed(1) })
+  return t('appointments.location.withinMeters', { distance: meters })
+}
+
+function locationLabel(t: Translator, req: ServiceRequest, appointment: AppointmentRequest): string {
   if (appointment.location) return appointment.location
-  if (appointment.jobLocation) return approximateLocationLabel(appointment.jobLocation)
-  if (req.jobLocation) return approximateLocationLabel(req.jobLocation)
+  const appointmentLocation = approximateLocationLabel(t, appointment.jobLocation)
+  if (appointmentLocation) return appointmentLocation
+  const requestLocation = approximateLocationLabel(t, req.jobLocation)
+  if (requestLocation) return requestLocation
   return req.customerDistrict ? districtLabel(req.customerDistrict) : 'Budapest'
 }
 
 function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
+  const t = useTranslations()
+  const locale = useLocale()
   const appointment = req.appointmentRequest
   const proName = req.pro?.fullName ?? req.proName
   const isCancelled = req.status === 'cancelled'
@@ -68,43 +84,45 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
             <div>
               <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">
-                {appointment.kind === 'quote' ? 'Quote visit' : 'Service appointment'}
+                {appointment.kind === 'quote' ? t('appointments.card.quoteVisit') : t('appointments.card.serviceAppointment')}
               </p>
               <h2 className="font-black text-gray-900 text-2xl leading-none" style={dg}>
-                {req.categoryName}
+                {translateCategory(t, req.categoryName)}
               </h2>
-              <p className="text-sm text-gray-500 mt-1">with {proName}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('appointments.card.withPro', { name: proName })}</p>
             </div>
             <span className={`w-fit text-xs font-bold border rounded-full px-2.5 py-1 ${
               isCancelled
                 ? 'text-gray-600 bg-gray-100 border-gray-200'
                 : 'text-slate-700 bg-slate-50 border-slate-200'
             }`}>
-              {isCancelled ? 'Cancelled' : 'Confirmed'}
+              {isCancelled ? t('appointments.status.cancelled') : t('appointments.status.confirmed')}
             </span>
           </div>
 
           <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 mb-3">
             <p className="text-lg font-black text-gray-900" style={dg}>
-              {formatAppointmentDateTime(appointment.date, appointment.time)}
+              {formatAppointmentDateTime(appointment.date, appointment.time, locale, t)}
             </p>
             <p className="text-sm text-gray-500 mt-1">{appointment.duration}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div className="rounded-xl bg-gray-50 border border-gray-100 p-3">
-              <p className="text-xs text-gray-400 mb-1">Location</p>
-              <p className="font-semibold text-gray-900">{locationLabel(req, appointment)}</p>
+              <p className="text-xs text-gray-400 mb-1">{t('appointments.card.location')}</p>
+              <p className="font-semibold text-gray-900">{locationLabel(t, req, appointment)}</p>
             </div>
             <div className="rounded-xl bg-gray-50 border border-gray-100 p-3">
-              <p className="text-xs text-gray-400 mb-1">Price</p>
-              <p className="font-semibold text-gray-900">{req.quote?.price ?? 'Quote accepted'}</p>
+              <p className="text-xs text-gray-400 mb-1">{t('appointments.card.price')}</p>
+              <p className="font-semibold text-gray-900">{req.quote?.price ?? t('appointments.card.quoteAccepted')}</p>
             </div>
           </div>
 
           {isCancelled && (
             <p className="text-sm text-gray-600 bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 mt-3">
-              This request was cancelled{req.cancelReason ? `: ${req.cancelReason}` : '.'}
+              {req.cancelReason
+                ? t('appointments.card.cancelledWithReason', { reason: req.cancelReason })
+                : t('appointments.card.cancelled')}
             </p>
           )}
 
@@ -116,7 +134,7 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
         </div>
 
         <div className="px-5 py-2.5 bg-gray-50 border-t border-gray-100 text-xs font-semibold text-slate-700 group-hover:bg-slate-50 transition-colors">
-          View request details →
+          {t('appointments.card.viewDetails')}
         </div>
       </article>
     </Link>
@@ -124,6 +142,7 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
 }
 
 export default function AppointmentsPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [appointments, setAppointments] = useState<ConfirmedAppointmentRequest[]>([])
   const [statusFilter, setStatusFilter] = useState<ServiceStatusFilter>('all')
@@ -178,8 +197,8 @@ export default function AppointmentsPage() {
   return (
     <main className="bg-gray-50 min-h-screen flex-1">
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <h1 className={styles.title}>My appointments</h1>
-        <p className={styles.subtitle}>Confirmed appointments with pros you&apos;ve hired.</p>
+        <h1 className={styles.title}>{t('appointments.header.title')}</h1>
+        <p className={styles.subtitle}>{t('appointments.header.subtitle')}</p>
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
@@ -189,15 +208,15 @@ export default function AppointmentsPage() {
           </div>
         ) : appointments.length === 0 ? (
           <div className={`${styles.card} ${styles.empty}`}>
-            <p className={styles.emptyTitle}>No confirmed appointments</p>
-            <p>Appointments appear here after you confirm a pro&apos;s proposed time.</p>
+            <p className={styles.emptyTitle}>{t('appointments.empty.title')}</p>
+            <p>{t('appointments.empty.body')}</p>
             <Link href="/requests" className={styles.linkBtn}>
-              View my requests
+              {t('appointments.empty.cta')}
             </Link>
           </div>
         ) : (
           <>
-            <div className="flex flex-wrap gap-2 mb-5" aria-label="Filter appointments by service status">
+            <div className="flex flex-wrap gap-2 mb-5" aria-label={t('appointments.filters.aria')}>
               {SERVICE_STATUS_FILTERS.map(filter => {
                 const active = statusFilter === filter.id
                 const count = countForStatus(filter.id)
@@ -213,7 +232,7 @@ export default function AppointmentsPage() {
                     }`}
                     aria-pressed={active}
                   >
-                    {filter.label} <span className={active ? 'text-slate-200' : 'text-gray-400'}>{count}</span>
+                    {t(`appointments.filters.${filter.labelKey}`)} <span className={active ? 'text-slate-200' : 'text-gray-400'}>{count}</span>
                   </button>
                 )
               })}
@@ -221,8 +240,10 @@ export default function AppointmentsPage() {
 
             {filteredAppointments.length === 0 ? (
               <div className={`${styles.card} ${styles.empty}`}>
-                <p className={styles.emptyTitle}>No {SERVICE_STATUS_FILTERS.find(f => f.id === statusFilter)?.label.toLowerCase()} appointments</p>
-                <p>Choose another service status to see different appointments.</p>
+                <p className={styles.emptyTitle}>
+                  {t('appointments.emptyStatus.title', { status: t(`appointments.filters.${SERVICE_STATUS_FILTERS.find(f => f.id === statusFilter)?.labelKey ?? 'all'}`).toLowerCase() })}
+                </p>
+                <p>{t('appointments.emptyStatus.body')}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-4">

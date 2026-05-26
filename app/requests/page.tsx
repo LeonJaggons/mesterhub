@@ -12,89 +12,106 @@ import {
   districtLabel,
   fetchProSummary,
   STATUS_COLORS,
-  requestStatusLabel,
   timestampMillis,
-  timeAgo,
   type ProSummary,
   type ServiceRequest,
 } from './shared'
 import { ProListSnippet } from './components/ProCard'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 
 type EnrichedRequest = ServiceRequest & { pro: ProSummary | null }
 type RequestStatusFilter = 'all' | ServiceRequest['status']
+type Translator = ReturnType<typeof useTranslations>
 
-const REQUEST_STATUS_FILTERS: Array<{ id: RequestStatusFilter; label: string }> = [
-  { id: 'all', label: 'Active' },
-  { id: 'pending', label: 'Pending' },
-  { id: 'quoted', label: 'Quoted' },
-  { id: 'accepted', label: 'Accepted' },
-  { id: 'completed', label: 'Completed' },
-  { id: 'declined', label: 'Declined' },
-  { id: 'cancelled', label: 'Cancelled' },
+const REQUEST_STATUS_FILTERS: Array<{ id: RequestStatusFilter; labelKey: string }> = [
+  { id: 'all', labelKey: 'active' },
+  { id: 'pending', labelKey: 'pending' },
+  { id: 'quoted', labelKey: 'quoted' },
+  { id: 'accepted', labelKey: 'accepted' },
+  { id: 'completed', labelKey: 'completed' },
+  { id: 'declined', labelKey: 'declined' },
+  { id: 'cancelled', labelKey: 'cancelled' },
 ]
 
-function nextAction(req: EnrichedRequest): { label: string; body: string; needsAction: boolean } {
+function requestStatusLabel(t: Translator, status: ServiceRequest['status'], declinedBy?: 'pro' | 'customer'): string {
+  if (status === 'declined' && declinedBy === 'customer') return t('customerRequests.status.youDeclined')
+  if (status === 'declined' && declinedBy === 'pro') return t('customerRequests.status.declinedByPro')
+  return t(`customerRequests.status.${status}`)
+}
+
+function timeAgo(t: Translator, ts: ServiceRequest['createdAt']): string {
+  const millis = timestampMillis(ts)
+  if (!millis) return ''
+  const seconds = Math.floor((Date.now() - millis) / 1000)
+  if (seconds < 60) return t('customerRequests.time.justNow')
+  if (seconds < 3600) return t('customerRequests.time.minutesAgo', { count: Math.floor(seconds / 60) })
+  if (seconds < 86400) return t('customerRequests.time.hoursAgo', { count: Math.floor(seconds / 3600) })
+  return t('customerRequests.time.daysAgo', { count: Math.floor(seconds / 86400) })
+}
+
+function nextAction(t: Translator, req: EnrichedRequest): { label: string; body: string; needsAction: boolean } {
   if (req.status === 'quoted') {
     return {
-      label: 'Action needed',
-      body: 'Review the quote and accept or decline it.',
+      label: t('customerRequests.actions.actionNeeded'),
+      body: t('customerRequests.actions.reviewQuote'),
       needsAction: true,
     }
   }
   if (req.status === 'accepted' && req.appointmentChangeRequest) {
     return {
-      label: 'Action needed',
-      body: 'Review the proposed appointment change.',
+      label: t('customerRequests.actions.actionNeeded'),
+      body: t('customerRequests.actions.reviewAppointmentChange'),
       needsAction: true,
     }
   }
   if (req.status === 'accepted' && req.appointmentRequest?.status === 'proposed') {
     return {
-      label: 'Action needed',
-      body: 'Confirm the appointment time proposed by the pro.',
+      label: t('customerRequests.actions.actionNeeded'),
+      body: t('customerRequests.actions.confirmAppointment'),
       needsAction: true,
     }
   }
   if (req.status === 'accepted' && req.completion?.status === 'pro_marked_complete') {
     return {
-      label: 'Action needed',
-      body: 'Confirm the job is complete if the work is finished.',
+      label: t('customerRequests.actions.actionNeeded'),
+      body: t('customerRequests.actions.confirmCompletion'),
       needsAction: true,
     }
   }
   if (req.status === 'pending') {
     return {
-      label: 'Next step',
-      body: `Waiting for ${req.pro?.fullName ?? req.proName} to send a quote.`,
+      label: t('customerRequests.actions.nextStep'),
+      body: t('customerRequests.actions.waitingForQuote', { name: req.pro?.fullName ?? req.proName }),
       needsAction: false,
     }
   }
   if (req.status === 'accepted') {
     return {
-      label: 'Action needed',
+      label: t('customerRequests.actions.actionNeeded'),
       body: req.appointmentRequest?.status === 'confirmed'
-        ? 'Appointment confirmed. Message the pro if anything changes.'
-        : 'Coordinate details with the pro and wait for an appointment proposal.',
+        ? t('customerRequests.actions.appointmentConfirmed')
+        : t('customerRequests.actions.coordinateDetails'),
       needsAction: req.appointmentRequest?.status !== 'confirmed',
     }
   }
   if (req.status === 'completed') {
     return {
-      label: 'Closed',
-      body: 'This job is complete.',
+      label: t('customerRequests.actions.closed'),
+      body: t('customerRequests.actions.jobComplete'),
       needsAction: false,
     }
   }
   if (req.status === 'declined') {
     return {
-      label: 'Closed',
-      body: requestStatusLabel(req.status, req.declinedBy),
+      label: t('customerRequests.actions.closed'),
+      body: requestStatusLabel(t, req.status, req.declinedBy),
       needsAction: false,
     }
   }
   return {
-    label: 'Closed',
-    body: req.cancelReason ? `Cancelled: ${req.cancelReason}` : 'This request was cancelled.',
+    label: t('customerRequests.actions.closed'),
+    body: req.cancelReason ? t('customerRequests.actions.cancelledWithReason', { reason: req.cancelReason }) : t('customerRequests.actions.cancelled'),
     needsAction: false,
   }
 }
@@ -108,8 +125,9 @@ function RequestCard({
   onDelete: (req: EnrichedRequest) => void
   isDeleting: boolean
 }) {
+  const t = useTranslations()
   const district = req.customerDistrict ? districtLabel(req.customerDistrict) : null
-  const action = nextAction(req)
+  const action = nextAction(t, req)
   const shouldOpenConversation = req.status === 'accepted' && req.appointmentRequest?.status !== 'confirmed'
   const hasAppointment = Boolean(req.appointmentRequest || req.appointmentChangeRequest)
   const canDelete = req.status !== 'completed' && !hasAppointment
@@ -122,20 +140,20 @@ function RequestCard({
             <ProListSnippet pro={req.pro} />
           ) : (
             <div>
-              <p className="font-bold text-gray-900" style={dg}>{req.proName || 'Pro'}</p>
-              <p className="text-xs text-gray-500">{req.categoryName}</p>
+              <p className="font-bold text-gray-900" style={dg}>{req.proName || t('customerRequests.card.proFallback')}</p>
+              <p className="text-xs text-gray-500">{translateCategory(t, req.categoryName)}</p>
             </div>
           )}
           <span
             className={`text-xs font-semibold border rounded-full px-2.5 py-1 shrink-0 ${STATUS_COLORS[req.status]}`}
           >
-            {requestStatusLabel(req.status, req.declinedBy)}
+            {requestStatusLabel(t, req.status, req.declinedBy)}
           </span>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-3">
           <span className="bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold rounded-full px-2.5 py-1">
-            {req.categoryName}
+            {translateCategory(t, req.categoryName)}
           </span>
           {district && (
             <span className="inline-flex items-center gap-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full px-2.5 py-1">
@@ -143,12 +161,12 @@ function RequestCard({
               {district}
             </span>
           )}
-          <span className="text-xs text-gray-400 rounded-full px-2 py-1">{timeAgo(req.createdAt)}</span>
+          <span className="text-xs text-gray-400 rounded-full px-2 py-1">{timeAgo(t, req.createdAt)}</span>
         </div>
 
         {req.quote && (req.status === 'quoted' || req.status === 'accepted') && (
           <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-            <p className="text-xs text-slate-800 font-semibold uppercase tracking-wide mb-0.5">Quote</p>
+            <p className="text-xs text-slate-800 font-semibold uppercase tracking-wide mb-0.5">{t('customerRequests.card.quote')}</p>
             <p className="text-sm font-bold text-gray-900">
               {req.quote.price}
               {req.quote.timeline && (
@@ -160,7 +178,7 @@ function RequestCard({
 
         {req.status === 'pending' && (
           <p className="text-sm text-gray-500 mt-2">
-            Waiting for {req.pro?.fullName ?? req.proName} to respond…
+            {t('customerRequests.card.waitingForResponse', { name: req.pro?.fullName ?? req.proName })}
           </p>
         )}
 
@@ -180,7 +198,7 @@ function RequestCard({
             </div>
             {action.needsAction && (
               <span className="shrink-0 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
-                Now
+                {t('customerRequests.card.now')}
               </span>
             )}
           </div>
@@ -189,12 +207,12 @@ function RequestCard({
 
       <div className="flex flex-col gap-2 px-5 py-2.5 bg-gray-50 border-t border-gray-100 text-xs font-semibold transition-colors sm:flex-row sm:items-center sm:justify-between">
         <Link href={`/requests/${req.id}`} className="text-slate-700 hover:underline">
-          View request details →
+          {t('customerRequests.card.viewDetails')}
         </Link>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           {shouldOpenConversation && (
             <Link href={`/messages/${req.id}`} className="rounded-lg bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-900">
-              Open conversation
+              {t('customerRequests.card.openConversation')}
             </Link>
           )}
           {canDelete && (
@@ -204,7 +222,7 @@ function RequestCard({
               disabled={isDeleting}
               className="rounded-lg border border-red-200 bg-white px-3 py-2 text-center text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? t('customerRequests.card.deleting') : t('customerRequests.card.delete')}
             </button>
           )}
         </div>
@@ -214,6 +232,7 @@ function RequestCard({
 }
 
 function RequestsPageContent() {
+  const t = useTranslations()
   const router = useRouter()
   const searchParams = useSearchParams()
   const projectId = searchParams.get('projectId') ?? ''
@@ -260,12 +279,12 @@ function RequestsPageContent() {
     ? visibleByDefault
     : projectRequests.filter(req => req.status === statusFilter)
   const filteredRequests = [...statusFilteredRequests].sort((a, b) => {
-    const actionDelta = Number(nextAction(b).needsAction) - Number(nextAction(a).needsAction)
+    const actionDelta = Number(nextAction(t, b).needsAction) - Number(nextAction(t, a).needsAction)
     if (actionDelta !== 0) return actionDelta
     return (timestampMillis(b.createdAt) ?? 0) - (timestampMillis(a.createdAt) ?? 0)
   })
-  const actionRequests = filteredRequests.filter(req => nextAction(req).needsAction)
-  const otherRequests = filteredRequests.filter(req => !nextAction(req).needsAction)
+  const actionRequests = filteredRequests.filter(req => nextAction(t, req).needsAction)
+  const otherRequests = filteredRequests.filter(req => !nextAction(t, req).needsAction)
 
   function countForStatus(status: RequestStatusFilter): number {
     if (status === 'all') return visibleByDefault.length
@@ -274,18 +293,18 @@ function RequestsPageContent() {
 
   async function handleDeleteRequest(req: EnrichedRequest) {
     if (req.status === 'completed') {
-      setDeleteError('Completed jobs cannot be deleted.')
+      setDeleteError(t('customerRequests.delete.completed'))
       return
     }
     if (req.appointmentRequest || req.appointmentChangeRequest) {
-      setDeleteError('Requests with appointments cannot be deleted.')
+      setDeleteError(t('customerRequests.delete.hasAppointment'))
       return
     }
     const active = req.status === 'pending' || req.status === 'quoted' || req.status === 'accepted'
     const confirmed = window.confirm(
       active
-        ? 'Delete this request? It will be cancelled for the pro and hidden from your account.'
-        : 'Delete this request from your account?',
+        ? t('customerRequests.delete.confirmActive')
+        : t('customerRequests.delete.confirm'),
     )
     if (!confirmed) return
 
@@ -295,7 +314,7 @@ function RequestsPageContent() {
       await authenticatedFetch(`/api/service-requests/${req.id}`, { method: 'DELETE' })
       setRequests(prev => prev.filter(item => item.id !== req.id))
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Could not delete request.')
+      setDeleteError(err instanceof Error ? err.message : t('customerRequests.delete.error'))
     } finally {
       setDeletingRequestId(null)
     }
@@ -304,8 +323,8 @@ function RequestsPageContent() {
   return (
     <main className="bg-gray-50 min-h-screen flex-1">
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <h1 className={styles.title}>My requests</h1>
-        <p className={styles.subtitle}>Track quotes and projects with the pros you&apos;ve contacted.</p>
+        <h1 className={styles.title}>{t('customerRequests.header.title')}</h1>
+        <p className={styles.subtitle}>{t('customerRequests.header.subtitle')}</p>
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
@@ -315,10 +334,10 @@ function RequestsPageContent() {
           </div>
         ) : requests.length === 0 ? (
           <div className={`${styles.card} ${styles.empty}`}>
-            <p className={styles.emptyTitle}>No requests yet</p>
-            <p>Find a pro and submit a project to get started.</p>
+            <p className={styles.emptyTitle}>{t('customerRequests.empty.title')}</p>
+            <p>{t('customerRequests.empty.body')}</p>
             <Link href="/" className={styles.linkBtn}>
-              Explore services
+              {t('customerRequests.empty.cta')}
             </Link>
           </div>
         ) : (
@@ -332,15 +351,15 @@ function RequestsPageContent() {
             {projectId && (
               <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="font-semibold">Showing requests for one project.</span>
+                  <span className="font-semibold">{t('customerRequests.projectFilter.showing')}</span>
                   <Link href="/requests" className="font-bold text-slate-800 hover:underline">
-                    Clear project filter
+                    {t('customerRequests.projectFilter.clear')}
                   </Link>
                 </div>
               </div>
             )}
 
-            <div className="flex flex-wrap gap-2 mb-5" aria-label="Filter requests by status">
+            <div className="flex flex-wrap gap-2 mb-5" aria-label={t('customerRequests.filters.aria')}>
               {REQUEST_STATUS_FILTERS.map(filter => {
                 const active = statusFilter === filter.id
                 const count = countForStatus(filter.id)
@@ -356,7 +375,7 @@ function RequestsPageContent() {
                     }`}
                     aria-pressed={active}
                   >
-                    {filter.label} <span className={active ? 'text-slate-200' : 'text-gray-400'}>{count}</span>
+                    {t(`customerRequests.filters.${filter.labelKey}`)} <span className={active ? 'text-slate-200' : 'text-gray-400'}>{count}</span>
                   </button>
                 )
               })}
@@ -364,15 +383,17 @@ function RequestsPageContent() {
 
             {filteredRequests.length === 0 ? (
               <div className={`${styles.card} ${styles.empty}`}>
-                <p className={styles.emptyTitle}>No {REQUEST_STATUS_FILTERS.find(f => f.id === statusFilter)?.label.toLowerCase()} requests</p>
-                <p>{projectId ? 'This project has no requests in that status.' : 'Choose another status to see different requests.'}</p>
+                <p className={styles.emptyTitle}>
+                  {t('customerRequests.emptyStatus.title', { status: t(`customerRequests.filters.${REQUEST_STATUS_FILTERS.find(f => f.id === statusFilter)?.labelKey ?? 'active'}`).toLowerCase() })}
+                </p>
+                <p>{projectId ? t('customerRequests.emptyStatus.projectBody') : t('customerRequests.emptyStatus.body')}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
                 {actionRequests.length > 0 && (
                   <>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-black uppercase tracking-widest text-orange-500">Needs your action</span>
+                      <span className="text-xs font-black uppercase tracking-widest text-orange-500">{t('customerRequests.sections.needsAction')}</span>
                       <span className="h-px flex-1 bg-orange-100" />
                     </div>
                     {actionRequests.map(req => (
@@ -390,7 +411,7 @@ function RequestsPageContent() {
                   <>
                     {actionRequests.length > 0 && (
                       <div className="mt-2 flex items-center gap-3">
-                        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Other requests</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-gray-400">{t('customerRequests.sections.other')}</span>
                         <span className="h-px flex-1 bg-gray-200" />
                       </div>
                     )}
@@ -413,21 +434,26 @@ function RequestsPageContent() {
   )
 }
 
+function RequestsLoadingFallback() {
+  const t = useTranslations()
+  return (
+    <main className="bg-gray-50 min-h-screen flex-1">
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <h1 className={styles.title}>{t('customerRequests.header.title')}</h1>
+        <p className={styles.subtitle}>{t('customerRequests.header.subtitle')}</p>
+        <div className="space-y-3 animate-pulse">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-40 bg-white rounded-2xl border border-gray-200" />
+          ))}
+        </div>
+      </div>
+    </main>
+  )
+}
+
 export default function RequestsPage() {
   return (
-    <Suspense fallback={(
-      <main className="bg-gray-50 min-h-screen flex-1">
-        <div className="max-w-3xl mx-auto px-4 py-10">
-          <h1 className={styles.title}>My requests</h1>
-          <p className={styles.subtitle}>Track quotes and projects with the pros you&apos;ve contacted.</p>
-          <div className="space-y-3 animate-pulse">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-40 bg-white rounded-2xl border border-gray-200" />
-            ))}
-          </div>
-        </div>
-      </main>
-    )}>
+    <Suspense fallback={<RequestsLoadingFallback />}>
       <RequestsPageContent />
     </Suspense>
   )

@@ -12,7 +12,7 @@ import type { AcceptQuoteInput } from '@/firebase/conversations'
 import districtsData from '@/public/districts.json'
 import servicesData from '@/public/services.json'
 import styles from '../account/account.module.css'
-import { dg, districtLabel, formatAnswers, nowTimestamp, timeAgo, timestampMillis, type TimestampLike } from '../requests/shared'
+import { dg, districtLabel, formatAnswers, nowTimestamp, timestampMillis, type TimestampLike } from '../requests/shared'
 import {
   CATEGORY_QUESTIONS,
   MAX_ATTACHMENT_SIZE,
@@ -20,6 +20,10 @@ import {
   TIMING_OPTIONS,
   URGENCY_OPTIONS,
 } from './projectQuestions'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
+
+type Translator = ReturnType<typeof useTranslations>
 
 type ProjectDoc = {
   id: string
@@ -56,11 +60,11 @@ type CreateProjectForm = {
   projectDetails: string
 }
 
-function projectTitle(project: ProjectDoc): string {
+function projectTitle(t: Translator, project: ProjectDoc): string {
   return project.answers.project_details
     || project.answers.task
     || project.answers.issue
-    || `${project.categoryName} project`
+    || t('projects.card.titleFallback', { category: translateCategory(t, project.categoryName) })
 }
 
 function shortText(value: string, max = 140): string {
@@ -69,6 +73,41 @@ function shortText(value: string, max = 140): string {
 
 function validAttachment(file: File): boolean {
   return file.type.startsWith('image/') || file.type === 'application/pdf'
+}
+
+function timeAgo(t: Translator, ts: TimestampLike | null): string {
+  const millis = timestampMillis(ts)
+  if (!millis) return ''
+  const seconds = Math.floor((Date.now() - millis) / 1000)
+  if (seconds < 60) return t('customerRequests.time.justNow')
+  if (seconds < 3600) return t('customerRequests.time.minutesAgo', { count: Math.floor(seconds / 60) })
+  if (seconds < 86400) return t('customerRequests.time.hoursAgo', { count: Math.floor(seconds / 3600) })
+  return t('customerRequests.time.daysAgo', { count: Math.floor(seconds / 86400) })
+}
+
+function optionKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+}
+
+function translateQuestionLabel(t: Translator, id: string, fallback: string): string {
+  return t(`projects.questions.labels.${id}`, { defaultValue: fallback })
+}
+
+function translateQuestionOption(t: Translator, value: string, fallback: string): string {
+  return t(`projects.questions.options.${optionKey(value)}`, { defaultValue: fallback })
+}
+
+function translatedDetails(t: Translator, answers: Record<string, string>) {
+  return formatAnswers(answers)
+    .filter(item => item.key !== 'Project Details')
+    .map(item => ({
+      key: t(`projects.answers.keys.${optionKey(item.key)}`, { defaultValue: item.key }),
+      value: t(`projects.answers.values.${optionKey(item.value)}`, { defaultValue: item.value }),
+    }))
 }
 
 const emptyCreateProjectForm: CreateProjectForm = {
@@ -88,6 +127,7 @@ function CreateProjectModal({
   onClose: () => void
   onCreated: (project: ProjectDoc) => void
 }) {
+  const t = useTranslations()
   const [form, setForm] = useState<CreateProjectForm>(emptyCreateProjectForm)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [attachments, setAttachments] = useState<File[]>([])
@@ -106,11 +146,11 @@ function CreateProjectModal({
     e.target.value = ''
     setError(null)
     if (files.some(file => !validAttachment(file))) {
-      setError('Upload photos or PDF files only.')
+      setError(t('projects.create.errors.fileType'))
       return
     }
     if (files.some(file => file.size > MAX_ATTACHMENT_SIZE)) {
-      setError('Each attachment must be under 10 MB.')
+      setError(t('projects.create.errors.fileSize'))
       return
     }
     setAttachments(prev => [...prev, ...files].slice(0, MAX_PROJECT_ATTACHMENTS))
@@ -124,7 +164,7 @@ function CreateProjectModal({
     e.preventDefault()
     setError(null)
     if (!form.categoryName || !form.customerDistrict || !form.urgency || !form.projectDetails.trim()) {
-      setError('Category, district, urgency, and project details are required.')
+      setError(t('projects.create.errors.required'))
       return
     }
     setSubmitting(true)
@@ -164,7 +204,7 @@ function CreateProjectModal({
       })
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not create project.')
+      setError(err instanceof Error ? err.message : t('projects.create.errors.create'))
       setSubmitting(false)
     }
   }
@@ -178,17 +218,17 @@ function CreateProjectModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">New project</p>
-            <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>Describe your project</h2>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('projects.create.kicker')}</p>
+            <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>{t('projects.create.title')}</h2>
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              Use the same estimate request fields now, then send this project to one or more pros later.
+              {t('projects.create.subtitle')}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer"
-            aria-label="Close"
+            aria-label={t('projects.create.close')}
           >
             ×
           </button>
@@ -197,16 +237,16 @@ function CreateProjectModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-1.5">
-              Category <span className="text-orange-500">*</span>
+              {t('projects.create.category')} <span className="text-orange-500">*</span>
             </label>
             <select
               value={form.categoryName}
               onChange={e => updateForm('categoryName', e.target.value)}
               className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
             >
-              <option value="">Select category</option>
+              <option value="">{t('projects.create.selectCategory')}</option>
               {servicesData.categories.map(category => (
-                <option key={category.name} value={category.name}>{category.name}</option>
+                <option key={category.name} value={category.name}>{translateCategory(t, category.name)}</option>
               ))}
             </select>
           </div>
@@ -214,14 +254,14 @@ function CreateProjectModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                Your district <span className="text-orange-500">*</span>
+                {t('projects.create.district')} <span className="text-orange-500">*</span>
               </label>
               <select
                 value={form.customerDistrict}
                 onChange={e => updateForm('customerDistrict', e.target.value)}
                 className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
               >
-                <option value="">Select district</option>
+                <option value="">{t('projects.create.selectDistrict')}</option>
                 {districtsData.districts.map(district => (
                   <option key={district.id} value={district.roman}>{district.roman}. {district.name}</option>
                 ))}
@@ -229,16 +269,16 @@ function CreateProjectModal({
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                Urgency <span className="text-orange-500">*</span>
+                {t('projects.create.urgency')} <span className="text-orange-500">*</span>
               </label>
               <select
                 value={form.urgency}
                 onChange={e => updateForm('urgency', e.target.value)}
                 className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
               >
-                <option value="">Select urgency</option>
+                <option value="">{t('projects.create.selectUrgency')}</option>
                 {URGENCY_OPTIONS.map(option => (
-                  <option key={option} value={option}>{option}</option>
+                  <option key={option} value={option}>{translateQuestionOption(t, option, option)}</option>
                 ))}
               </select>
             </div>
@@ -248,16 +288,16 @@ function CreateProjectModal({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {questions.map(question => (
                 <div key={question.id}>
-                  <label className="block text-sm font-bold text-gray-800 mb-1.5">{question.label}</label>
+                  <label className="block text-sm font-bold text-gray-800 mb-1.5">{translateQuestionLabel(t, question.id, question.label)}</label>
                   {question.type === 'select' ? (
                     <select
                       value={answers[question.id] ?? ''}
                       onChange={e => setAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
                       className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
                     >
-                      <option value="">Select answer</option>
+                      <option value="">{t('projects.create.selectAnswer')}</option>
                       {question.options?.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
+                        <option key={option.value} value={option.value}>{translateQuestionOption(t, option.label, option.label)}</option>
                       ))}
                     </select>
                   ) : (
@@ -265,7 +305,7 @@ function CreateProjectModal({
                       type="text"
                       value={answers[question.id] ?? ''}
                       onChange={e => setAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
-                      placeholder={question.placeholder}
+                      placeholder={question.placeholder ? t(`projects.questions.placeholders.${question.id}`, { defaultValue: question.placeholder }) : undefined}
                       className="w-full border border-gray-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-orange-400 transition-colors"
                     />
                   )}
@@ -276,34 +316,34 @@ function CreateProjectModal({
 
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-1.5">
-              Describe the work <span className="text-orange-500">*</span>
+              {t('projects.create.describeWork')} <span className="text-orange-500">*</span>
             </label>
             <textarea
               value={form.projectDetails}
               onChange={e => updateForm('projectDetails', e.target.value)}
-              placeholder="Tell pros what needs doing, what problem you are seeing, measurements, photos you can share, and anything unusual about the job."
+              placeholder={t('projects.create.describePlaceholder')}
               className="w-full min-h-32 resize-y border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-orange-400 transition-colors"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-800 mb-1.5">Preferred timing</label>
+            <label className="block text-sm font-bold text-gray-800 mb-1.5">{t('projects.create.preferredTiming')}</label>
             <select
               value={form.preferredTiming}
               onChange={e => updateForm('preferredTiming', e.target.value)}
               className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
             >
-              <option value="">Select timing</option>
+              <option value="">{t('projects.create.selectTiming')}</option>
               {TIMING_OPTIONS.map(option => (
-                <option key={option} value={option}>{option}</option>
+                <option key={option} value={option}>{translateQuestionOption(t, option, option)}</option>
               ))}
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-1.5">
-              Photos or attachments <span className="text-gray-400 font-normal">(optional)</span>
+              {t('projects.create.attachments')} <span className="text-gray-400 font-normal">{t('projects.create.optional')}</span>
             </label>
             <div className="rounded-sm border border-dashed border-gray-300 bg-gray-50 p-4">
               <input
@@ -315,16 +355,16 @@ function CreateProjectModal({
                 className="hidden"
               />
               <label htmlFor="project-attachments" className="block cursor-pointer rounded-sm bg-white px-4 py-3 text-center text-sm font-bold text-slate-700 border border-gray-200 hover:bg-slate-50">
-                Add photos or PDFs
+                {t('projects.create.addAttachments')}
               </label>
-              <p className="mt-2 text-xs text-gray-500">Upload up to {MAX_PROJECT_ATTACHMENTS} files.</p>
+              <p className="mt-2 text-xs text-gray-500">{t('projects.create.uploadLimit', { count: MAX_PROJECT_ATTACHMENTS })}</p>
               {attachments.length > 0 && (
                 <ul className="mt-3 flex flex-col gap-2">
                   {attachments.map((file, index) => (
                     <li key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-sm border border-gray-200 bg-white px-3 py-2 text-sm">
                       <span className="truncate text-gray-700">{file.name}</span>
                       <button type="button" onClick={() => removeAttachment(index)} className="shrink-0 border-none bg-transparent text-xs font-bold text-gray-400 hover:text-red-500 cursor-pointer">
-                        Remove
+                        {t('projects.create.removeAttachment')}
                       </button>
                     </li>
                   ))}
@@ -337,7 +377,7 @@ function CreateProjectModal({
 
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer">
-              Cancel
+              {t('projects.create.cancel')}
             </button>
             <button
               type="submit"
@@ -345,7 +385,7 @@ function CreateProjectModal({
               className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-xl py-3 text-base transition-colors cursor-pointer disabled:cursor-not-allowed border-none"
               style={dg}
             >
-              {submitting ? 'Creating...' : 'Create project'}
+              {submitting ? t('projects.create.creating') : t('projects.create.submit')}
             </button>
           </div>
         </form>
@@ -369,7 +409,8 @@ function ProjectCard({
   isDeleting: boolean
   busyQuoteId: string | null
 }) {
-  const details = formatAnswers(project.answers).filter(item => item.key !== 'Project Details').slice(0, 4)
+  const t = useTranslations()
+  const details = translatedDetails(t, project.answers).slice(0, 4)
   const proCount = project.invitedProUids?.length ?? 0
   const marketplaceQuotes = project.marketplaceQuotes?.filter(quote => quote.status === 'submitted' || quote.status === 'accepted') ?? []
 
@@ -379,17 +420,17 @@ function ProjectCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">
-              Active project
+              {t('projects.card.kicker')}
             </p>
             <h2 className="font-black text-gray-900 text-2xl leading-none" style={dg}>
-              {project.categoryName}
+              {translateCategory(t, project.categoryName)}
             </h2>
             <p className="mt-2 text-sm leading-6 text-gray-600">
-              {shortText(projectTitle(project))}
+              {shortText(projectTitle(t, project))}
             </p>
           </div>
           <span className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
-            {proCount} pro{proCount === 1 ? '' : 's'} sent
+            {t(proCount === 1 ? 'projects.card.proSentSingular' : 'projects.card.proSentPlural', { count: proCount })}
           </span>
         </div>
 
@@ -401,11 +442,11 @@ function ProjectCard({
           )}
           {project.attachmentUrls?.length ? (
             <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
-              {project.attachmentUrls.length} attachment{project.attachmentUrls.length === 1 ? '' : 's'}
+              {t(project.attachmentUrls.length === 1 ? 'projects.card.attachmentSingular' : 'projects.card.attachmentPlural', { count: project.attachmentUrls.length })}
             </span>
           ) : null}
           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-400">
-            {project.updatedAt ? `Updated ${timeAgo(project.updatedAt)}` : timeAgo(project.createdAt)}
+            {project.updatedAt ? t('projects.card.updated', { time: timeAgo(t, project.updatedAt) }) : timeAgo(t, project.createdAt)}
           </span>
         </div>
 
@@ -423,9 +464,9 @@ function ProjectCard({
         {marketplaceQuotes.length > 0 && (
           <section className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="mb-3">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-500">Marketplace quotes</p>
+              <p className="text-xs font-black uppercase tracking-widest text-slate-500">{t('projects.card.marketplace.title')}</p>
               <p className="mt-1 text-sm text-slate-600">
-                These pros found your open project. They stay separate from the pros you chose directly.
+                {t('projects.card.marketplace.body')}
               </p>
             </div>
             <div className="flex flex-col gap-3">
@@ -433,10 +474,10 @@ function ProjectCard({
                 <div key={quote.id} className="rounded-xl border border-white bg-white p-3 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-sm font-bold text-gray-900">{quote.proName || 'Mestermind Pro'}</p>
+                      <p className="text-sm font-bold text-gray-900">{quote.proName || t('projects.card.marketplace.proFallback')}</p>
                       <p className="text-xs text-gray-500">
-                        {quote.proCategoryName || project.categoryName}
-                        {quote.quotedAt || quote.createdAt ? ` · ${timeAgo(quote.quotedAt ?? quote.createdAt ?? null)}` : ''}
+                        {translateCategory(t, quote.proCategoryName || project.categoryName)}
+                        {quote.quotedAt || quote.createdAt ? ` · ${timeAgo(t, quote.quotedAt ?? quote.createdAt ?? null)}` : ''}
                       </p>
                     </div>
                     <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-bold ${
@@ -444,7 +485,7 @@ function ProjectCard({
                         ? 'border-green-200 bg-green-50 text-green-700'
                         : 'border-slate-200 bg-slate-50 text-slate-700'
                     }`}>
-                      {quote.status === 'accepted' ? 'Accepted' : 'Marketplace quote'}
+                      {quote.status === 'accepted' ? t('projects.card.marketplace.accepted') : t('projects.card.marketplace.badge')}
                     </span>
                   </div>
                   <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
@@ -456,7 +497,7 @@ function ProjectCard({
                   </div>
                   {quote.status === 'accepted' && quote.requestId ? (
                     <Link href={`/requests/${quote.requestId}`} className="mt-3 inline-block text-sm font-bold text-slate-700 hover:underline">
-                      View accepted request →
+                      {t('projects.card.marketplace.viewAccepted')}
                     </Link>
                   ) : (
                     <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -466,7 +507,7 @@ function ProjectCard({
                         disabled={busyQuoteId === quote.id}
                         className="rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {busyQuoteId === quote.id ? 'Working...' : 'Accept quote'}
+                        {busyQuoteId === quote.id ? t('projects.card.marketplace.working') : t('projects.card.marketplace.accept')}
                       </button>
                       <button
                         type="button"
@@ -474,7 +515,7 @@ function ProjectCard({
                         disabled={busyQuoteId === quote.id}
                         className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Decline
+                        {t('projects.card.marketplace.decline')}
                       </button>
                     </div>
                   )}
@@ -490,13 +531,13 @@ function ProjectCard({
           href={`/instant-results?q=${encodeURIComponent(project.categoryName)}`}
           className="rounded-lg bg-orange-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600"
         >
-          Send to another pro
+          {t('projects.card.sendAnother')}
         </Link>
         <Link
           href={`/requests?projectId=${encodeURIComponent(project.id)}`}
           className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
         >
-          View related requests
+          {t('projects.card.viewRelated')}
         </Link>
         {!project.hasAppointment && (
           <button
@@ -505,7 +546,7 @@ function ProjectCard({
             disabled={isDeleting}
             className="rounded-lg border border-red-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
-            {isDeleting ? 'Deleting...' : 'Delete project'}
+            {isDeleting ? t('projects.card.deleting') : t('projects.card.delete')}
           </button>
         )}
       </div>
@@ -514,6 +555,7 @@ function ProjectCard({
 }
 
 export default function ProjectsPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [projects, setProjects] = useState<ProjectDoc[]>([])
@@ -559,7 +601,7 @@ export default function ProjectsPage() {
 
   async function handleDeleteProject(project: ProjectDoc) {
     const confirmed = window.confirm(
-      'Delete this project? Related requests will be hidden from your account, and any active requests will be cancelled. Projects with completed jobs or appointments cannot be deleted.',
+      t('projects.delete.confirm'),
     )
     if (!confirmed) return
 
@@ -569,7 +611,7 @@ export default function ProjectsPage() {
       await authenticatedFetch(`/api/projects/${project.id}`, { method: 'DELETE' })
       setProjects(prev => prev.filter(item => item.id !== project.id))
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Could not delete project.')
+      setDeleteError(err instanceof Error ? err.message : t('projects.delete.error'))
     } finally {
       setDeletingProjectId(null)
     }
@@ -598,7 +640,7 @@ export default function ProjectsPage() {
         : item))
       setAcceptingQuote(null)
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Could not accept marketplace quote.')
+      setDeleteError(err instanceof Error ? err.message : t('projects.errors.acceptQuote'))
     } finally {
       setBusyQuoteId(null)
     }
@@ -623,7 +665,7 @@ export default function ProjectsPage() {
         : item))
       setDecliningQuote(null)
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Could not decline marketplace quote.')
+      setDeleteError(err instanceof Error ? err.message : t('projects.errors.declineQuote'))
     } finally {
       setBusyQuoteId(null)
     }
@@ -634,15 +676,15 @@ export default function ProjectsPage() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className={styles.title}>My projects</h1>
-            <p className={styles.subtitle}>Reusable job briefs you can send to more pros without filling out the form again.</p>
+            <h1 className={styles.title}>{t('projects.header.title')}</h1>
+            <p className={styles.subtitle}>{t('projects.header.subtitle')}</p>
           </div>
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
             className="rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 cursor-pointer border-none"
           >
-            Create project
+            {t('projects.header.create')}
           </button>
         </div>
 
@@ -654,10 +696,10 @@ export default function ProjectsPage() {
           </div>
         ) : projects.length === 0 ? (
           <div className={`${styles.card} ${styles.empty}`}>
-            <p className={styles.emptyTitle}>No active projects</p>
-            <p>Projects appear here after you request an estimate from a pro.</p>
+            <p className={styles.emptyTitle}>{t('projects.empty.title')}</p>
+            <p>{t('projects.empty.body')}</p>
             <button type="button" onClick={() => setCreateOpen(true)} className={styles.linkBtn}>
-              Create project
+              {t('projects.empty.cta')}
             </button>
           </div>
         ) : (
@@ -690,14 +732,14 @@ export default function ProjectsPage() {
       )}
       {acceptingQuote && (
         <AcceptQuoteModal
-          proName={acceptingQuote.quote.proName || 'this pro'}
+          proName={acceptingQuote.quote.proName || t('projects.card.marketplace.thisPro')}
           onClose={() => setAcceptingQuote(null)}
           onSubmit={handleAcceptMarketplaceQuote}
         />
       )}
       {decliningQuote && (
         <DeclineQuoteModal
-          proName={decliningQuote.quote.proName || 'this pro'}
+          proName={decliningQuote.quote.proName || t('projects.card.marketplace.thisPro')}
           onClose={() => setDecliningQuote(null)}
           onConfirm={handleDeclineMarketplaceQuote}
         />

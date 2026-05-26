@@ -15,6 +15,8 @@ import {
   type MessageRole,
 } from './utils'
 import styles from './messages.module.css'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 
 type ConversationRow = Conversation & { id: string; proAvatarUrl?: string | null }
 
@@ -38,6 +40,8 @@ export default function ConversationList({
   emptyCta,
   role,
 }: Props) {
+  const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const [conversations, setConversations] = useState<ConversationRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -69,28 +73,28 @@ export default function ConversationList({
     if (!needle) return conversations
     return conversations.filter(c => {
       const haystack = [
-        partnerDisplayName(c, role),
+        partnerDisplayName(c, role, t('messages.thread.customerFallback')),
         c.categoryName,
         c.lastMessage,
       ].join(' ').toLowerCase()
       return haystack.includes(needle)
     })
-  }, [conversations, role, search])
+  }, [conversations, role, search, t])
 
-  const roleLabel = role === 'customer' ? 'Customer inbox' : 'Pro inbox'
+  const roleLabel = role === 'customer' ? t('messages.list.customerInbox') : t('messages.list.proInbox')
   const helperTitle = role === 'customer'
-    ? 'Before you message the pro'
-    : 'Before you message the customer'
+    ? t('messages.list.customerHelperTitle')
+    : t('messages.list.proHelperTitle')
   const helperItems = role === 'customer'
     ? [
-        'Confirm what is included in the quote before work starts.',
-        'Share timing, access, parking, pets, and anything fragile nearby.',
-        'Keep scope changes in the conversation so both sides have the same record.',
+        t('messages.list.customerTipQuote'),
+        t('messages.list.customerTipAccess'),
+        t('messages.list.customerTipScope'),
       ]
     : [
-        'Confirm the start window, exact access details, and any prep needed.',
-        'Call out materials, parking, or extra costs before arriving.',
-        'Use the job page if you need the full project brief while replying.',
+        t('messages.list.proTipStart'),
+        t('messages.list.proTipCosts'),
+        t('messages.list.proTipBrief'),
       ]
 
   return (
@@ -99,14 +103,14 @@ export default function ConversationList({
         <section className={styles.inboxPane}>
           <header className={styles.listHeader}>
             <p className={styles.listEyebrow}>{roleLabel}</p>
-            <h1 className={styles.listTitle}>Messages</h1>
+            <h1 className={styles.listTitle}>{t('messages.list.title')}</h1>
             <p className={styles.listSubtitle}>{subtitle}</p>
             <label className={styles.searchWrap}>
-              <span className={styles.searchIcon}>Search</span>
+              <span className={styles.searchIcon}>{t('messages.list.searchLabel')}</span>
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search people, jobs, or messages"
+                placeholder={t('messages.list.searchPlaceholder')}
                 className={styles.searchInput}
               />
             </label>
@@ -129,13 +133,13 @@ export default function ConversationList({
               </div>
             ) : visibleConversations.length === 0 ? (
               <div className={styles.centered}>
-                <p className={styles.centeredTitle}>No conversations found</p>
-                <p className={styles.centeredText}>Try a customer, pro, service, or message keyword.</p>
+                <p className={styles.centeredTitle}>{t('messages.list.noResultsTitle')}</p>
+                <p className={styles.centeredText}>{t('messages.list.noResultsBody')}</p>
               </div>
             ) : (
               <ul className={styles.listRows}>
                 {visibleConversations.map(c => {
-                  const name = partnerDisplayName(c, role)
+                  const name = partnerDisplayName(c, role, t('messages.thread.customerFallback'))
                   return (
                     <li key={c.id} className={styles.listRow}>
                       <Link href={`${basePath}/${c.id}`} className={styles.listLink}>
@@ -143,10 +147,10 @@ export default function ConversationList({
                         <div className={styles.listBody}>
                           <div className={styles.listNameRow}>
                             <p className={styles.listName}>{name}</p>
-                            <span className={styles.listTime}>{formatListTime(c.lastMessageAt)}</span>
+                            <span className={styles.listTime}>{formatListTime(c.lastMessageAt, locale, t)}</span>
                           </div>
                           <p className={styles.listPreview}>{c.lastMessage}</p>
-                          <span className={styles.listCategory}>{c.categoryName}</span>
+                          <span className={styles.listCategory}>{translateCategory(t, c.categoryName)}</span>
                         </div>
                       </Link>
                     </li>
@@ -160,7 +164,7 @@ export default function ConversationList({
         <aside className={styles.inboxAside}>
           {role === 'pro' && <ProUpgradeCta className="mb-4" />}
           <div className={styles.asideCard}>
-            <p className={styles.asideKicker}>Message smarter</p>
+            <p className={styles.asideKicker}>{t('messages.list.asideKicker')}</p>
             <h2 className={styles.asideTitle}>{helperTitle}</h2>
             <ul className={styles.tipList}>
               {helperItems.map(item => (

@@ -15,8 +15,7 @@ import {
 import {
   districtLabel,
   formatAnswers,
-  requestStatusLabel,
-  timeAgo,
+  timestampMillis,
   type AppointmentKind,
   type ServiceRequest,
 } from '@/app/requests/shared'
@@ -30,6 +29,10 @@ import {
 } from './utils'
 import ReportUserButton from '@/app/components/reports/ReportUserButton'
 import styles from './messages.module.css'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
+
+type Translator = ReturnType<typeof useTranslations>
 
 type Props = {
   role: MessageRole
@@ -52,15 +55,15 @@ function SendIcon() {
   )
 }
 
-function detailValue(value?: string | null): string {
-  return value && value.trim() ? value : 'Not shared yet'
+function detailValue(t: Translator, value?: string | null): string {
+  return value && value.trim() ? value : t('messages.thread.notShared')
 }
 
-function formatAppointmentDateTime(date: string, time: string): string {
-  if (!date || !time) return [date, time].filter(Boolean).join(' at ')
+function formatAppointmentDateTime(date: string, time: string, locale: string, t: Translator): string {
+  if (!date || !time) return [date, time].filter(Boolean).join(` ${t('messages.common.at')} `)
   const parsed = new Date(`${date}T${time}`)
-  if (Number.isNaN(parsed.getTime())) return `${date} at ${time}`
-  return parsed.toLocaleString(undefined, {
+  if (Number.isNaN(parsed.getTime())) return `${date} ${t('messages.common.at')} ${time}`
+  return parsed.toLocaleString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -69,27 +72,53 @@ function formatAppointmentDateTime(date: string, time: string): string {
   })
 }
 
-function conversationStatusLabel(request: ServiceRequest, role: MessageRole): string {
+function timeAgo(t: Translator, ts: ServiceRequest['createdAt']): string {
+  const millis = timestampMillis(ts)
+  if (!millis) return ''
+  const seconds = Math.floor((Date.now() - millis) / 1000)
+  if (seconds < 60) return t('customerRequests.time.justNow')
+  if (seconds < 3600) return t('customerRequests.time.minutesAgo', { count: Math.floor(seconds / 60) })
+  if (seconds < 86400) return t('customerRequests.time.hoursAgo', { count: Math.floor(seconds / 3600) })
+  return t('customerRequests.time.daysAgo', { count: Math.floor(seconds / 86400) })
+}
+
+function optionKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+}
+
+function translatedDetails(t: Translator, request: ServiceRequest) {
+  return formatAnswers(request.answers).map(item => ({
+    key: t(`projects.answers.keys.${optionKey(item.key)}`, { defaultValue: item.key }),
+    value: t(`projects.answers.values.${optionKey(item.value)}`, { defaultValue: item.value }),
+  }))
+}
+
+function conversationStatusLabel(t: Translator, request: ServiceRequest, role: MessageRole): string {
   if (request.status === 'declined' && request.declinedBy === 'customer') {
-    return role === 'customer' ? 'You declined' : 'Declined by customer'
+    return role === 'customer' ? t('customerRequests.status.youDeclined') : t('messages.thread.status.declinedByCustomer')
   }
   if (request.status === 'declined' && request.declinedBy === 'pro') {
-    return role === 'pro' ? 'You declined' : 'Declined by pro'
+    return role === 'pro' ? t('customerRequests.status.youDeclined') : t('customerRequests.status.declinedByPro')
   }
-  return requestStatusLabel(request.status, request.declinedBy)
+  return t(`customerRequests.status.${request.status}`)
 }
 
 function RoleChecklist({ role, partnerName }: { role: MessageRole; partnerName: string }) {
+  const t = useTranslations()
   const items = role === 'customer'
     ? [
-        `Ask ${partnerName} to confirm timing, materials, and what is included.`,
-        'Share access notes like parking, pets, gate codes, or elevator limits.',
-        'Keep scope changes here so the quote and job details stay clear.',
+        t('messages.thread.checklist.customerConfirm', { name: partnerName }),
+        t('messages.thread.checklist.customerAccess'),
+        t('messages.thread.checklist.customerScope'),
       ]
     : [
-        'Confirm the customer address, start window, and any prep needed.',
-        'Mention extra costs before the visit, especially materials or parking.',
-        'Summarize next steps so the customer knows what happens after this chat.',
+        t('messages.thread.checklist.proAddress'),
+        t('messages.thread.checklist.proCosts'),
+        t('messages.thread.checklist.proNextSteps'),
       ]
 
   return (
@@ -112,6 +141,7 @@ function AppointmentModal({
   onClose: () => void
   onSubmit: (input: AppointmentRequestInput) => Promise<void>
 }) {
+  const t = useTranslations()
   const existingAppointment = request?.appointmentChangeRequest ?? request?.appointmentRequest
   const [kind, setKind] = useState<AppointmentKind>(
     existingAppointment?.kind ?? (request?.status === 'accepted' ? 'service' : 'quote')
@@ -127,7 +157,7 @@ function AppointmentModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!date || !time) {
-      setError('Choose a date and time.')
+      setError(t('messages.appointmentModal.errors.dateTime'))
       return
     }
     setError('')
@@ -142,7 +172,7 @@ function AppointmentModal({
         notes,
       })
     } catch {
-      setError('Could not send the appointment request. Please try again.')
+      setError(t('messages.appointmentModal.errors.send'))
       setSubmitting(false)
     }
   }
@@ -152,21 +182,21 @@ function AppointmentModal({
       <div className={styles.modalPanel} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div>
-            <p className={styles.asideKicker}>Appointment request</p>
-            <h2 className={styles.modalTitle}>Schedule with {customerName}</h2>
-            <p className={styles.modalSubtitle}>Propose a time for a quote visit or the service appointment.</p>
+            <p className={styles.asideKicker}>{t('messages.appointmentModal.kicker')}</p>
+            <h2 className={styles.modalTitle}>{t('messages.appointmentModal.title', { name: customerName })}</h2>
+            <p className={styles.modalSubtitle}>{t('messages.appointmentModal.subtitle')}</p>
           </div>
-          <button type="button" onClick={onClose} className={styles.modalClose} aria-label="Close">
+          <button type="button" onClick={onClose} className={styles.modalClose} aria-label={t('messages.common.close')}>
             ×
           </button>
         </div>
 
         <form className={styles.modalForm} onSubmit={handleSubmit}>
           <fieldset className={styles.appointmentChoices}>
-            <legend>Appointment type</legend>
+            <legend>{t('messages.appointmentModal.type')}</legend>
             {[
-              { id: 'quote' as AppointmentKind, label: 'Quote visit', body: 'Inspect the scope before a firm price.' },
-              { id: 'service' as AppointmentKind, label: 'Service appointment', body: 'Schedule the actual work.' },
+              { id: 'quote' as AppointmentKind, label: t('messages.appointmentModal.quoteVisit'), body: t('messages.appointmentModal.quoteVisitBody') },
+              { id: 'service' as AppointmentKind, label: t('messages.appointmentModal.serviceAppointment'), body: t('messages.appointmentModal.serviceAppointmentBody') },
             ].map(option => (
               <label key={option.id} className={kind === option.id ? styles.choiceSelected : styles.choice}>
                 <input
@@ -184,49 +214,56 @@ function AppointmentModal({
 
           <div className={styles.modalGrid}>
             <label>
-              Date
+              {t('messages.appointmentModal.date')}
               <input type="date" value={date} onChange={e => setDate(e.target.value)} />
             </label>
             <label>
-              Time
+              {t('messages.appointmentModal.time')}
               <input type="time" value={time} onChange={e => setTime(e.target.value)} />
             </label>
             <label>
-              Duration
+              {t('messages.appointmentModal.duration')}
               <select value={duration} onChange={e => setDuration(e.target.value)}>
-                {['30 minutes', '60 minutes', '90 minutes', '2 hours', 'Half day', 'Full day'].map(option => (
-                  <option key={option} value={option}>{option}</option>
+                {[
+                  { value: '30 minutes', label: t('messages.appointmentModal.durations.30') },
+                  { value: '60 minutes', label: t('messages.appointmentModal.durations.60') },
+                  { value: '90 minutes', label: t('messages.appointmentModal.durations.90') },
+                  { value: '2 hours', label: t('messages.appointmentModal.durations.2h') },
+                  { value: 'Half day', label: t('messages.appointmentModal.durations.halfDay') },
+                  { value: 'Full day', label: t('messages.appointmentModal.durations.fullDay') },
+                ].map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
             </label>
           </div>
 
           <label>
-            Location or meeting note
+            {t('messages.appointmentModal.location')}
             <input
               type="text"
               value={location}
               onChange={e => setLocation(e.target.value)}
-              placeholder="Customer address, district, or video call"
+              placeholder={t('messages.appointmentModal.locationPlaceholder')}
             />
           </label>
 
           <label>
-            Message to customer
+            {t('messages.appointmentModal.message')}
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={4}
-              placeholder="Mention what you will inspect, what the customer should prepare, and whether this is for the quote or service."
+              placeholder={t('messages.appointmentModal.messagePlaceholder')}
             />
           </label>
 
           {error && <p className={styles.modalError}>{error}</p>}
 
           <div className={styles.modalActions}>
-            <button type="button" className={styles.secondaryBtn} onClick={onClose}>Cancel</button>
+            <button type="button" className={styles.secondaryBtn} onClick={onClose}>{t('messages.common.cancel')}</button>
             <button type="submit" className={styles.primaryBtn} disabled={submitting || !date || !time}>
-              {submitting ? 'Sending...' : 'Send appointment request'}
+              {submitting ? t('messages.appointmentModal.sending') : t('messages.appointmentModal.submit')}
             </button>
           </div>
         </form>
@@ -236,6 +273,8 @@ function AppointmentModal({
 }
 
 export default function ConversationThread({ role, basePath }: Props) {
+  const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const params = useParams()
   const requestId = params.requestId as string
@@ -405,7 +444,7 @@ export default function ConversationThread({ role, basePath }: Props) {
     return (
       <div className={styles.shell}>
         <div className={styles.centered}>
-          <p className={styles.centeredText}>Loading…</p>
+          <p className={styles.centeredText}>{t('messages.thread.loading')}</p>
         </div>
       </div>
     )
@@ -415,22 +454,22 @@ export default function ConversationThread({ role, basePath }: Props) {
     return (
       <div className={styles.shell}>
         <div className={styles.centered}>
-          <p className={styles.centeredTitle}>Conversation not found</p>
+          <p className={styles.centeredTitle}>{t('messages.thread.notFound')}</p>
           <Link href={basePath} className={styles.ctaBtn}>
-            Back to Messages
+            {t('messages.thread.backToMessages')}
           </Link>
         </div>
       </div>
     )
   }
 
-  const name = partnerDisplayName(conv, role)
+  const name = partnerDisplayName(conv, role, t('messages.thread.customerFallback'))
   const reportTargetUid = role === 'customer' ? conv.proUid : conv.customerUid
   const reportTargetRole = role === 'customer' ? 'pro' : 'customer'
-  const groups = groupMessagesByDay(messages)
-  const details = request ? formatAnswers(request.answers) : []
-  const statusLabel = request ? conversationStatusLabel(request, role) : 'Conversation open'
-  const requestStarted = request?.createdAt ? timeAgo(request.createdAt) : ''
+  const groups = groupMessagesByDay(messages, locale, t)
+  const details = request ? translatedDetails(t, request) : []
+  const statusLabel = request ? conversationStatusLabel(t, request, role) : t('messages.thread.conversationOpen')
+  const requestStarted = request?.createdAt ? timeAgo(t, request.createdAt) : ''
   const district = request?.customerDistrict ? districtLabel(request.customerDistrict) : ''
   const quote = request?.quote
   const acceptance = request?.acceptance
@@ -440,16 +479,16 @@ export default function ConversationThread({ role, basePath }: Props) {
       <div className={styles.threadLayout}>
         <section className={styles.chatPane}>
           <header className={styles.threadHeader}>
-            <Link href={basePath} className={styles.backBtn} aria-label="Back">
+            <Link href={basePath} className={styles.backBtn} aria-label={t('messages.thread.back')}>
               <ChevronLeft />
             </Link>
             <MessageAvatar name={name} imageUrl={partnerAvatarUrl} size="sm" />
             <div className={styles.headerCenter}>
               <p className={styles.headerName}>{name}</p>
-              <p className={styles.headerSub}>{conv.categoryName} · {statusLabel}</p>
+              <p className={styles.headerSub}>{translateCategory(t, conv.categoryName)} · {statusLabel}</p>
             </div>
             <Link href={requestHref(requestId, role)} className={styles.headerAction}>
-              Open {role === 'customer' ? 'request' : 'job'}
+              {role === 'customer' ? t('messages.thread.openRequest') : t('messages.thread.openJob')}
             </Link>
             <ReportUserButton
               targetUid={reportTargetUid}
@@ -458,7 +497,7 @@ export default function ConversationThread({ role, basePath }: Props) {
               reporterRole={role}
               contextType="conversation"
               requestId={requestId}
-              buttonLabel="Report"
+              buttonLabel={t('messages.thread.report')}
               className={styles.headerReportAction}
             />
           </header>
@@ -466,7 +505,7 @@ export default function ConversationThread({ role, basePath }: Props) {
           <div className={styles.messageArea}>
             {messages.length === 0 ? (
               <div className={styles.emptyThread}>
-                Send a message to start the conversation.
+                {t('messages.thread.emptyThread')}
               </div>
             ) : (
               groups.map(group => (
@@ -502,16 +541,16 @@ export default function ConversationThread({ role, basePath }: Props) {
                 resizeComposer()
               }}
               onKeyDown={handleKeyDown}
-              placeholder={`Message ${name}`}
+              placeholder={t('messages.thread.messagePlaceholder', { name })}
               rows={1}
               className={styles.composerField}
-              aria-label="Message"
+              aria-label={t('messages.thread.messageAria')}
             />
             <button
               type="submit"
               disabled={sending || !text.trim()}
               className={styles.sendBtn}
-              aria-label="Send"
+              aria-label={t('messages.thread.send')}
             >
               <SendIcon />
             </button>
@@ -524,22 +563,26 @@ export default function ConversationThread({ role, basePath }: Props) {
             <div>
               <p className={styles.profileName}>{name}</p>
               <p className={styles.profileMeta}>
-                {role === 'customer' ? 'Your pro' : 'Customer'} for {conv.categoryName}
+                {role === 'customer'
+                  ? t('messages.thread.profileProFor', { category: translateCategory(t, conv.categoryName) })
+                  : t('messages.thread.profileCustomerFor', { category: translateCategory(t, conv.categoryName) })}
               </p>
             </div>
           </div>
 
           {role === 'pro' && (
             <div className={styles.asideCard}>
-              <p className={styles.asideKicker}>Primary action</p>
-              <h2 className={styles.asideTitle}>Schedule appointment</h2>
+              <p className={styles.asideKicker}>{t('messages.thread.primaryAction')}</p>
+              <h2 className={styles.asideTitle}>{t('messages.thread.scheduleAppointment')}</h2>
               {request?.appointmentChangeRequest && (
                 <div className={styles.appointmentSummary}>
-                  <span>Pending change request</span>
+                  <span>{t('messages.thread.pendingChangeRequest')}</span>
                   <strong>
                     {formatAppointmentDateTime(
                       request.appointmentChangeRequest.date,
-                      request.appointmentChangeRequest.time
+                      request.appointmentChangeRequest.time,
+                      locale,
+                      t
                     )}
                   </strong>
                   <small>{request.appointmentChangeRequest.duration}</small>
@@ -547,18 +590,20 @@ export default function ConversationThread({ role, basePath }: Props) {
               )}
               {request?.appointmentRequest ? (
                 <div className={styles.appointmentSummary}>
-                  <span>{request.appointmentRequest.kind === 'quote' ? 'Quote visit' : 'Service appointment'}</span>
+                  <span>{request.appointmentRequest.kind === 'quote' ? t('messages.appointmentModal.quoteVisit') : t('messages.appointmentModal.serviceAppointment')}</span>
                   <strong>
                     {formatAppointmentDateTime(
                       request.appointmentRequest.date,
-                      request.appointmentRequest.time
+                      request.appointmentRequest.time,
+                      locale,
+                      t
                     )}
                   </strong>
                   <small>{request.appointmentRequest.duration}</small>
                 </div>
               ) : (
                 <p className={styles.asideText}>
-                  Propose a time for a quote visit or the service appointment.
+                  {t('messages.thread.proposeTime')}
                 </p>
               )}
               <button
@@ -566,21 +611,23 @@ export default function ConversationThread({ role, basePath }: Props) {
                 className={styles.primaryBtn}
                 onClick={() => setShowAppointmentModal(true)}
               >
-                {request?.appointmentRequest ? 'Update appointment request' : 'Schedule appointment'}
+                {request?.appointmentRequest ? t('messages.thread.updateAppointment') : t('messages.thread.scheduleAppointment')}
               </button>
             </div>
           )}
 
           {role === 'customer' && request?.appointmentChangeRequest && (
             <div className={`${styles.asideCard} ${styles.confirmAppointmentCard}`}>
-              <p className={styles.asideKicker}>Appointment change request</p>
-              <h2 className={styles.asideTitle}>Approve new time</h2>
+              <p className={styles.asideKicker}>{t('messages.thread.appointmentChangeRequest')}</p>
+              <h2 className={styles.asideTitle}>{t('messages.thread.approveNewTime')}</h2>
               <div className={styles.appointmentSummary}>
-                <span>{request.appointmentChangeRequest.kind === 'quote' ? 'Quote visit' : 'Service appointment'}</span>
+                <span>{request.appointmentChangeRequest.kind === 'quote' ? t('messages.appointmentModal.quoteVisit') : t('messages.appointmentModal.serviceAppointment')}</span>
                 <strong>
                   {formatAppointmentDateTime(
                     request.appointmentChangeRequest.date,
-                    request.appointmentChangeRequest.time
+                    request.appointmentChangeRequest.time,
+                    locale,
+                    t
                   )}
                 </strong>
                 <small>{request.appointmentChangeRequest.duration}</small>
@@ -596,23 +643,25 @@ export default function ConversationThread({ role, basePath }: Props) {
                 className={styles.primaryBtn}
                 onClick={handleConfirmAppointment}
               >
-                Approve change
+                {t('messages.thread.approveChange')}
               </button>
             </div>
           )}
 
           {role === 'customer' && request?.appointmentRequest && (
             <div className={`${styles.asideCard} ${styles.confirmAppointmentCard}`}>
-              <p className={styles.asideKicker}>Appointment request</p>
+              <p className={styles.asideKicker}>{t('messages.thread.appointmentRequest')}</p>
               <h2 className={styles.asideTitle}>
-                {request.appointmentRequest.status === 'confirmed' ? 'Appointment confirmed' : 'Confirm appointment'}
+                {request.appointmentRequest.status === 'confirmed' ? t('messages.thread.appointmentConfirmed') : t('messages.thread.confirmAppointment')}
               </h2>
               <div className={styles.appointmentSummary}>
-                <span>{request.appointmentRequest.kind === 'quote' ? 'Quote visit' : 'Service appointment'}</span>
+                <span>{request.appointmentRequest.kind === 'quote' ? t('messages.appointmentModal.quoteVisit') : t('messages.appointmentModal.serviceAppointment')}</span>
                 <strong>
                   {formatAppointmentDateTime(
                     request.appointmentRequest.date,
-                    request.appointmentRequest.time
+                    request.appointmentRequest.time,
+                    locale,
+                    t
                   )}
                 </strong>
                 <small>{request.appointmentRequest.duration}</small>
@@ -629,41 +678,41 @@ export default function ConversationThread({ role, basePath }: Props) {
                   className={styles.primaryBtn}
                   onClick={handleConfirmAppointment}
                 >
-                  Confirm appointment
+                  {t('messages.thread.confirmAppointment')}
                 </button>
               )}
             </div>
           )}
 
           <div className={styles.asideCard}>
-            <p className={styles.asideKicker}>{role === 'customer' ? 'Request snapshot' : 'Job snapshot'}</p>
-            <h2 className={styles.asideTitle}>{conv.categoryName}</h2>
+            <p className={styles.asideKicker}>{role === 'customer' ? t('messages.thread.requestSnapshot') : t('messages.thread.jobSnapshot')}</p>
+            <h2 className={styles.asideTitle}>{translateCategory(t, conv.categoryName)}</h2>
             <div className={styles.detailGrid}>
               <div>
-                <span>Status</span>
+                <span>{t('messages.thread.statusLabel')}</span>
                 <strong>{statusLabel}</strong>
               </div>
               {requestStarted && (
                 <div>
-                  <span>Started</span>
+                  <span>{t('messages.thread.started')}</span>
                   <strong>{requestStarted}</strong>
                 </div>
               )}
               {district && (
                 <div>
-                  <span>Area</span>
+                  <span>{t('messages.thread.area')}</span>
                   <strong>{district}</strong>
                 </div>
               )}
               {quote?.price && (
                 <div>
-                  <span>{role === 'customer' ? 'Quoted price' : 'Your quote'}</span>
+                  <span>{role === 'customer' ? t('messages.thread.quotedPrice') : t('messages.thread.yourQuote')}</span>
                   <strong>{quote.price}</strong>
                 </div>
               )}
               {quote?.timeline && (
                 <div>
-                  <span>Timeline</span>
+                  <span>{t('messages.thread.timeline')}</span>
                   <strong>{quote.timeline}</strong>
                 </div>
               )}
@@ -672,36 +721,36 @@ export default function ConversationThread({ role, basePath }: Props) {
 
           {role === 'pro' && acceptance && (
             <div className={styles.asideCard}>
-              <p className={styles.asideKicker}>Customer details</p>
-              <h2 className={styles.asideTitle}>Useful while replying</h2>
+              <p className={styles.asideKicker}>{t('messages.thread.customerDetails')}</p>
+              <h2 className={styles.asideTitle}>{t('messages.thread.usefulWhileReplying')}</h2>
               <div className={styles.detailGrid}>
                 <div>
-                  <span>Phone</span>
-                  <strong>{detailValue(acceptance.phone)}</strong>
+                  <span>{t('messages.thread.phone')}</span>
+                  <strong>{detailValue(t, acceptance.phone)}</strong>
                 </div>
                 <div>
-                  <span>Address</span>
-                  <strong>{detailValue(acceptance.address)}</strong>
+                  <span>{t('messages.thread.address')}</span>
+                  <strong>{detailValue(t, acceptance.address)}</strong>
                 </div>
                 <div>
-                  <span>Preferred start</span>
-                  <strong>{detailValue(acceptance.preferredStart)}</strong>
+                  <span>{t('messages.thread.preferredStart')}</span>
+                  <strong>{detailValue(t, acceptance.preferredStart)}</strong>
                 </div>
               </div>
             </div>
           )}
 
           <div className={styles.asideCard}>
-            <p className={styles.asideKicker}>Helpful prompts</p>
+            <p className={styles.asideKicker}>{t('messages.thread.helpfulPrompts')}</p>
             <h2 className={styles.asideTitle}>
-              {role === 'customer' ? 'What to ask the pro' : 'What to confirm'}
+              {role === 'customer' ? t('messages.thread.whatToAskPro') : t('messages.thread.whatToConfirm')}
             </h2>
             <RoleChecklist role={role} partnerName={name} />
           </div>
 
           {details.length > 0 && (
             <div className={styles.asideCard}>
-              <p className={styles.asideKicker}>Project brief</p>
+              <p className={styles.asideKicker}>{t('messages.thread.projectBrief')}</p>
               <div className={styles.briefList}>
                 {details.slice(0, 5).map(({ key, value }) => (
                   <div key={key}>
@@ -711,7 +760,7 @@ export default function ConversationThread({ role, basePath }: Props) {
                 ))}
               </div>
               <Link href={requestHref(requestId, role)} className={styles.textLink}>
-                View full {role === 'customer' ? 'request' : 'job'}
+                {role === 'customer' ? t('messages.thread.viewFullRequest') : t('messages.thread.viewFullJob')}
               </Link>
             </div>
           )}

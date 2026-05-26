@@ -5,11 +5,20 @@ import { MdVerified, MdLocationOn, MdStar } from 'react-icons/md'
 import {
   dg,
   districtNameById,
-  pricingLabel,
   proAvatarBg,
   proInitials,
   type ProSummary,
 } from '../shared'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
+
+type Translator = ReturnType<typeof useTranslations>
+
+function pricingLabel(t: Translator, pro: ProSummary): string {
+  if (pro.pricingType === 'hourly' && pro.hourlyRate) return t('customerRequests.proCard.pricing.hourly', { rate: pro.hourlyRate })
+  if (pro.pricingType === 'fixed' && pro.hourlyRate) return t('customerRequests.proCard.pricing.fixed', { rate: pro.hourlyRate })
+  return t('customerRequests.proCard.pricing.quote')
+}
 
 export function ProAvatar({ pro, size = 56 }: { pro: ProSummary; size?: number }) {
   if (pro.avatarUrl) {
@@ -38,13 +47,14 @@ export function ProAvatar({ pro, size = 56 }: { pro: ProSummary; size?: number }
 }
 
 export function ProRating({ pro }: { pro: ProSummary }) {
+  const t = useTranslations()
   const rating = pro.rating
   const count = pro.reviewCount ?? 0
   if (!pro.subscriptionActive) {
-    return <p className="text-xs font-semibold text-gray-400">Reviews available with Pro</p>
+    return <p className="text-xs font-semibold text-gray-400">{t('customerRequests.proCard.reviewsWithPro')}</p>
   }
   if (!rating || count === 0) {
-    return <p className="text-xs font-semibold text-gray-400">No reviews yet</p>
+    return <p className="text-xs font-semibold text-gray-400">{t('customerRequests.proCard.noReviews')}</p>
   }
   return (
     <div className="flex items-center gap-1.5">
@@ -65,6 +75,7 @@ export function ProRating({ pro }: { pro: ProSummary }) {
 
 /** Sidebar / detail pro panel */
 export function ProDetailCard({ pro }: { pro: ProSummary }) {
+  const t = useTranslations()
   const topDistricts = pro.districts.slice(0, 4)
   const moreDistricts = pro.districts.length - topDistricts.length
 
@@ -81,7 +92,7 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
           >
             {pro.fullName}
           </Link>
-          <p className="text-sm text-gray-500 mt-0.5">{pro.categoryName}</p>
+          <p className="text-sm text-gray-500 mt-0.5">{translateCategory(t, pro.categoryName)}</p>
           <div className="mt-2">
             <ProRating pro={pro} />
           </div>
@@ -90,17 +101,17 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
         <div className="flex flex-wrap gap-1.5 mt-3">
           {pro.subscriptionActive && (
             <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">
-              <MdVerified size={14} /> Verified
+              <MdVerified size={14} /> {t('customerRequests.proCard.verified')}
             </span>
           )}
           {pro.regulated && (
             <span className="text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">
-              Licensed trade
+              {t('customerRequests.proCard.licensedTrade')}
             </span>
           )}
           {pro.yearsExp && (
             <span className="text-xs font-medium text-gray-600 bg-gray-100 rounded-full px-2 py-0.5">
-              {pro.yearsExp} experience
+              {t('customerRequests.proCard.experience', { years: pro.yearsExp })}
             </span>
           )}
         </div>
@@ -111,24 +122,24 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
 
         <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1">Typical pricing</p>
-            <p className="text-sm font-semibold text-gray-900">{pricingLabel(pro)}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1">{t('customerRequests.proCard.typicalPricing')}</p>
+            <p className="text-sm font-semibold text-gray-900">{pricingLabel(t, pro)}</p>
           </div>
 
           {pro.services.length > 0 && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">Services</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5">{t('customerRequests.proCard.services')}</p>
               <div className="flex flex-wrap gap-1">
                 {pro.services.slice(0, 5).map(s => (
                   <span
                     key={s}
                     className="text-xs bg-orange-50 text-orange-800 border border-orange-100 rounded-full px-2 py-0.5"
                   >
-                    {s}
+                    {translateService(t, s)}
                   </span>
                 ))}
                 {pro.services.length > 5 && (
-                  <span className="text-xs text-gray-400">+{pro.services.length - 5} more</span>
+                  <span className="text-xs text-gray-400">{t('customerRequests.proCard.more', { count: pro.services.length - 5 })}</span>
                 )}
               </div>
             </div>
@@ -137,17 +148,17 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
           {topDistricts.length > 0 && (
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1.5 flex items-center gap-1">
-                <MdLocationOn size={14} /> Serves
+                <MdLocationOn size={14} /> {t('customerRequests.proCard.serves')}
               </p>
               <p className="text-sm text-gray-700">
                 {topDistricts.map(id => districtNameById(id)).join(', ')}
-                {moreDistricts > 0 ? ` +${moreDistricts} more` : ''}
+                {moreDistricts > 0 ? ` ${t('customerRequests.proCard.more', { count: moreDistricts })}` : ''}
               </p>
             </div>
           )}
 
           {pro.postcode && (
-            <p className="text-xs text-gray-400">Based near {pro.postcode}</p>
+            <p className="text-xs text-gray-400">{t('customerRequests.proCard.basedNear', { postcode: pro.postcode })}</p>
           )}
         </div>
 
@@ -155,7 +166,7 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
           href={`/pro/${pro.uid}`}
           className="mt-5 block w-full text-center py-2.5 rounded-lg bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 transition-colors"
         >
-          View full profile
+          {t('customerRequests.proCard.viewFullProfile')}
         </Link>
       </div>
     </div>
@@ -164,12 +175,13 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
 
 /** Compact row for list cards */
 export function ProListSnippet({ pro }: { pro: ProSummary }) {
+  const t = useTranslations()
   return (
     <div className="flex items-center gap-3 min-w-0">
       <ProAvatar pro={pro} size={48} />
       <div className="min-w-0">
         <p className="font-bold text-gray-900 truncate" style={dg}>{pro.fullName}</p>
-        <p className="text-xs text-gray-500 truncate">{pro.categoryName}</p>
+        <p className="text-xs text-gray-500 truncate">{translateCategory(t, pro.categoryName)}</p>
         <ProRating pro={pro} />
       </div>
     </div>
