@@ -3,6 +3,13 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireAdmin } from '@/firebase/adminAccess'
 import { sendLifecycleEmail } from '@/firebase/notifications'
+import {
+  deleteAuthUser,
+  deleteDocumentTree,
+  deleteQueryResults,
+  deleteStoragePrefix,
+  FirestoreWriteQueue,
+} from '../../deleteUtils'
 
 type ProStatus = 'active' | 'suspended' | 'rejected'
 
@@ -84,5 +91,136 @@ export async function PATCH(
     }
     console.error('[/api/admin/pros/[uid] PATCH]', err)
     return Response.json({ error: 'Could not update pro.' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ uid: string }> },
+) {
+  try {
+    await requireAdmin(request)
+    const { uid } = await params
+    const proRef = adminDb.collection('pros').doc(uid)
+    const proSnap = await proRef.get()
+
+    if (!proSnap.exists) {
+      return Response.json({ error: 'Pro not found.' }, { status: 404 })
+    }
+
+    const queue = new FirestoreWriteQueue()
+    const seen = new Set<string>()
+    const counts = {
+      serviceRequests: 0,
+      conversations: 0,
+      marketplaceQuotes: 0,
+      reviews: 0,
+      messageDigests: 0,
+      notifications: 0,
+      reports: 0,
+      mailEvents: 0,
+      projectsUpdated: 0,
+    }
+
+    counts.serviceRequests += await deleteQueryResults(
+      adminDb.collection('serviceRequests').where('proUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.conversations += await deleteQueryResults(
+      adminDb.collection('conversations').where('proUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.marketplaceQuotes += await deleteQueryResults(
+      adminDb.collection('marketplaceQuotes').where('proUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.reviews += await deleteQueryResults(
+      adminDb.collection('reviews').where('proUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.messageDigests += await deleteQueryResults(
+      adminDb.collection('messageDigests').where('proUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.messageDigests += await deleteQueryResults(
+      adminDb.collection('messageDigests').where('recipientUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.notifications += await deleteQueryResults(
+      adminDb.collectionGroup('items').where('actorUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.notifications += await deleteQueryResults(
+      adminDb.collectionGroup('items').where('recipientUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.reports += await deleteQueryResults(
+      adminDb.collection('reports').where('targetUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.reports += await deleteQueryResults(
+      adminDb.collection('reports').where('reporterUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.reports += await deleteQueryResults(
+      adminDb.collection('reports').where('requestContext.proUid', '==', uid),
+      queue,
+      seen,
+    )
+    counts.mailEvents += await deleteQueryResults(
+      adminDb.collection('mailEvents').where('metadata.proUid', '==', uid),
+      queue,
+      seen,
+    )
+
+    const invitedProjectsSnap = await adminDb
+      .collection('projects')
+      .where('invitedProUids', 'array-contains', uid)
+      .get()
+    for (const doc of invitedProjectsSnap.docs) {
+      await queue.update(doc.ref, {
+        invitedProUids: FieldValue.arrayRemove(uid),
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+      counts.projectsUpdated += 1
+    }
+
+    await deleteDocumentTree(adminDb.collection('notifications').doc(uid), queue, seen)
+    await deleteDocumentTree(adminDb.collection('users').doc(uid), queue, seen)
+    await deleteDocumentTree(proRef, queue, seen)
+    await queue.commit()
+
+    await Promise.all([
+      deleteStoragePrefix(`pros/${uid}/`).catch(err => {
+        console.error('[/api/admin/pros/[uid] DELETE] storage cleanup failed', err)
+      }),
+      deleteAuthUser(uid),
+    ])
+
+    return Response.json({
+      ok: true,
+      deletedDocuments: queue.deleted,
+      updatedDocuments: queue.updated,
+      counts,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+      return Response.json({ error: 'You must be signed in.' }, { status: 401 })
+    }
+    if (err instanceof Error && err.message === 'FORBIDDEN') {
+      return Response.json({ error: 'Admin access required.' }, { status: 403 })
+    }
+    console.error('[/api/admin/pros/[uid] DELETE]', err)
+    return Response.json({ error: 'Could not delete pro.' }, { status: 500 })
   }
 }

@@ -76,6 +76,25 @@ export default function AdminProsPage() {
     }
   }
 
+  async function deletePro(pro: AdminPro) {
+    const label = pro.fullName || pro.account?.email || pro.uid
+    const confirmed = window.confirm(
+      `Delete ${label}? This permanently removes the pro account, requests, appointments, conversations, quotes, reviews, notifications, and uploaded pro files.`,
+    )
+    if (!confirmed) return
+
+    setBusyUid(pro.uid)
+    setError('')
+    try {
+      await authenticatedFetch(`/api/admin/pros/${pro.uid}`, { method: 'DELETE' })
+      await loadPros()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete pro.')
+    } finally {
+      setBusyUid(null)
+    }
+  }
+
   return (
     <>
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -148,10 +167,11 @@ export default function AdminProsPage() {
                   <a key={label} href={url} target="_blank" rel="noreferrer" className="font-semibold text-orange-600 hover:underline">{label}</a>
                 ) : null)}
               </div>
-              <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-4">
                 <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'approve')} className="cursor-pointer rounded-xl border-none bg-orange-500 py-2.5 font-bold text-white disabled:opacity-60">Approve</button>
                 <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'reject')} className="cursor-pointer rounded-xl border border-gray-200 bg-white py-2.5 font-semibold text-gray-700 disabled:opacity-60">Reject</button>
                 <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'suspend')} className="cursor-pointer rounded-xl border-none bg-slate-800 py-2.5 font-semibold text-white disabled:opacity-60">Suspend</button>
+                <button disabled={busyUid === pro.uid} onClick={() => deletePro(pro)} className="cursor-pointer rounded-xl border border-red-200 bg-red-50 py-2.5 font-semibold text-red-700 disabled:opacity-60">Delete</button>
               </div>
             </article>
           ))}

@@ -8,6 +8,7 @@ import { onAuthChange } from '@/firebase/auth'
 const navItems = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/pros', label: 'Pros' },
+  { href: '/admin/users', label: 'Customers' },
   { href: '/admin/requests', label: 'Requests' },
   { href: '/admin/projects', label: 'Projects' },
   { href: '/admin/reports', label: 'Reports' },

@@ -175,8 +175,9 @@ export default function AdminOverviewPage() {
 
   return (
     <>
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Pros" value={overview.totals.pros ?? 0} href="/admin/pros" />
+        <StatCard label="Customers" value={overview.totals.users ?? 0} href="/admin/users" />
         <StatCard label="Service requests" value={overview.totals.serviceRequests ?? 0} href="/admin/requests" />
         <StatCard label="Projects" value={overview.totals.projects ?? 0} href="/admin/projects" />
         <StatCard label="Reports" value={overview.totals.reports ?? 0} href="/admin/reports" />
