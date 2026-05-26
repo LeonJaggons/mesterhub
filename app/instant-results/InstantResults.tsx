@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
 
 async function queryPros(searchQ: string, districtRoman: string | undefined): Promise<unknown[]> {
   const params = new URLSearchParams()
@@ -13,6 +14,16 @@ async function queryPros(searchQ: string, districtRoman: string | undefined): Pr
   if (!response.ok) throw new Error('Could not load professionals.')
   const data = await response.json()
   return (data.pros as unknown[]) ?? []
+}
+
+type Translator = ReturnType<typeof useTranslations>
+
+function formatMoney(locale: string, value: number): string {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'HUF',
+    maximumFractionDigits: 0,
+  }).format(value)
 }
 
 // ---- Types ----
@@ -89,10 +100,12 @@ function Stars({ rating }: { rating: number }) {
 }
 
 function OnlineDot() {
-  return <span className={styles.onlinePulse} aria-label="Online" />
+  const t = useTranslations()
+  return <span className={styles.onlinePulse} aria-label={t('instantResults.card.online')} />
 }
 
 function TopProBadge() {
+  const t = useTranslations()
   return (
     <span className="flex items-center gap-1 text-xs text-gray-500">
       <svg
@@ -105,7 +118,7 @@ function TopProBadge() {
       >
         <path d="M8.627 5.246L7.342 1.258a.356.356 0 00-.684 0L5.373 5.244l-4.015.049c-.346.004-.489.466-.212.682l3.222 2.513-1.197 4.018c-.103.345.272.63.553.421L7 10.494l3.276 2.435c.282.209.656-.076.553-.422L9.632 8.49l3.222-2.513c.277-.216.134-.677-.211-.682l-4.016-.048z" />
       </svg>
-      Top Pro
+      {t('instantResults.card.topPro')}
     </span>
   )
 }
@@ -223,6 +236,8 @@ function ChatBubbleIcon() {
 }
 
 function ProCard({ pro }: { pro: Pro }) {
+  const t = useTranslations()
+  const locale = useLocale()
   const avatarProps = { initials: pro.initials, color: pro.initialsColor, bg: pro.initialsBg, avatarUrl: pro.avatarUrl }
   return (
     <Link href={`/pro/${pro.id}`} className="block mb-2 last:mb-0 group">
@@ -269,18 +284,25 @@ function ProCard({ pro }: { pro: Pro }) {
                     {pro.isOnline ? (
                       <li className="text-sm flex items-start gap-1.5">
                         <OnlineDot />
-                        <span>Online Now &middot; responds in about <strong className="text-gray-700">{pro.responseTime}</strong></span>
+                        <span>
+                          {t('instantResults.card.onlineNow')} &middot; {t('instantResults.card.respondsInAbout')}{' '}
+                          <strong className="text-gray-700">{pro.responseTime}</strong>
+                        </span>
                       </li>
                     ) : (
                       <li className="text-sm flex items-start gap-1.5">
                         <ChatIcon />
-                        <span>Responds in about <strong className="text-gray-700">{pro.responseTime}</strong></span>
+                        <span>{t('instantResults.card.respondsInAbout')} <strong className="text-gray-700">{pro.responseTime}</strong></span>
                       </li>
                     )}
                     {pro.hires !== null && (
                       <li className="text-sm flex items-start gap-1.5">
                         <TrophyIcon />
-                        <span>{pro.hires.toLocaleString()} hires on Mestermind</span>
+                        <span>
+                          {t(pro.hires === 1 ? 'instantResults.card.hiresSingular' : 'instantResults.card.hiresPlural', {
+                            count: pro.hires.toLocaleString(locale),
+                          })}
+                        </span>
                       </li>
                     )}
                     <li className="text-sm flex items-start gap-1.5">
@@ -295,7 +317,7 @@ function ProCard({ pro }: { pro: Pro }) {
                       <p className={`text-sm text-gray-600 leading-relaxed ${styles.descriptionClamp}`}>
                         {pro.review}
                       </p>
-                      <span className="text-sm text-slate-600 hover:underline">See more</span>
+                      <span className="text-sm text-slate-600 hover:underline">{t('instantResults.card.seeMore')}</span>
                     </div>
                   )}
                 </div>
@@ -306,19 +328,19 @@ function ProCard({ pro }: { pro: Pro }) {
                 <div className="flex flex-col md:items-end">
                   {pro.startingPrice !== null ? (
                     <>
-                      <p className="font-bold text-base text-gray-900">{pro.startingPrice.toLocaleString('hu-HU')} Ft</p>
-                      <p className="text-sm text-gray-400">Starting price</p>
+                      <p className="font-bold text-base text-gray-900">{formatMoney(locale, pro.startingPrice)}</p>
+                      <p className="text-sm text-gray-400">{t('instantResults.card.startingPrice')}</p>
                     </>
                   ) : (
                     <div className="flex items-center gap-1 text-sm text-gray-500">
                       <ChatBubbleIcon />
-                      <span className="whitespace-nowrap">Contact for price</span>
+                      <span className="whitespace-nowrap">{t('instantResults.card.contactForPrice')}</span>
                     </div>
                   )}
                 </div>
                 <div className="hidden md:block mt-2">
                   <span className="bg-slate-800 text-white rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">
-                    View profile
+                    {t('instantResults.card.viewProfile')}
                   </span>
                 </div>
               </div>
@@ -332,6 +354,7 @@ function ProCard({ pro }: { pro: Pro }) {
 }
 
 function TopMatchBanner({ pros }: { pros: Pro[] }) {
+  const t = useTranslations()
   const first3 = pros.slice(0, 3)
   if (first3.length === 0) return null
 
@@ -355,16 +378,16 @@ function TopMatchBanner({ pros }: { pros: Pro[] }) {
         ))}
       </div>
       <div className="flex-1 text-center sm:text-left">
-        <p className="font-bold text-sm">Start with your best matches</p>
+        <p className="font-bold text-sm">{t('instantResults.topMatch.title')}</p>
         <p className="text-sm text-gray-600">
-          Open a profile to send a detailed request and receive a quote.
+          {t('instantResults.topMatch.body')}
         </p>
       </div>
       <Link
         href={`/pro/${first3[0].id}`}
         className="bg-slate-800 text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-slate-900 w-full sm:w-auto whitespace-nowrap text-center"
       >
-        View top match
+        {t('instantResults.topMatch.cta')}
       </Link>
     </div>
   )
@@ -385,6 +408,8 @@ function Sidebar({
   resultCount: number
   averagePrice: number | null
 }) {
+  const t = useTranslations()
+  const locale = useLocale()
   function patch(next: Partial<ResultsFilters>) {
     onChange({ ...filters, ...next })
   }
@@ -404,43 +429,65 @@ function Sidebar({
     filters.sort !== 'recommended',
   ].filter(Boolean).length
 
+  const minRatingOptions = [
+    { label: t('instantResults.filters.rating.any'), value: 0 },
+    { label: t('instantResults.filters.rating.fourFiveUp'), value: 4.5 },
+    { label: t('instantResults.filters.rating.fourUp'), value: 4 },
+  ]
+  const priceOptions = [
+    { label: t('instantResults.filters.price.any'), value: null },
+    { label: t('instantResults.filters.price.upTo', { value: formatMoney(locale, 10000) }), value: 10000 },
+    { label: t('instantResults.filters.price.upTo', { value: formatMoney(locale, 25000) }), value: 25000 },
+    { label: t('instantResults.filters.price.upTo', { value: formatMoney(locale, 50000) }), value: 50000 },
+  ]
+  const qualityOptions: Array<{
+    key: keyof Pick<ResultsFilters, 'hasReviews' | 'hasPrice' | 'hasProof' | 'backgroundCheck' | 'experienced'>
+    label: string
+  }> = [
+    { key: 'hasReviews', label: t('instantResults.filters.quality.hasReviews') },
+    { key: 'hasPrice', label: t('instantResults.filters.quality.hasPrice') },
+    { key: 'hasProof', label: t('instantResults.filters.quality.hasProof') },
+    { key: 'backgroundCheck', label: t('instantResults.filters.quality.backgroundCheck') },
+    { key: 'experienced', label: t('instantResults.filters.quality.experienced') },
+  ]
+
   return (
     <aside className="hidden lg:flex flex-col border-r border-gray-200" style={{ width: 288 }}>
       <div className={styles.sidebarInner}>
         <div className="bg-gray-100 rounded-lg p-3 mt-4 mx-3 border border-gray-200">
-          <p className="font-bold text-sm">{q || 'Services'}</p>
+          <p className="font-bold text-sm">{q || t('instantResults.filters.servicesFallback')}</p>
           <p className="text-2xl font-bold text-slate-800 mt-1">
-            {averagePrice ? `${averagePrice.toLocaleString('hu-HU')} Ft` : `${resultCount} pros`}
+            {averagePrice
+              ? formatMoney(locale, averagePrice)
+              : t(resultCount === 1 ? 'instantResults.filters.prosSingular' : 'instantResults.filters.prosPlural', { count: resultCount })}
           </p>
           <p className="text-xs text-gray-500 mt-1 mb-3">
-            {averagePrice ? 'Avg. listed starting price' : 'Matching active pros'}
+            {averagePrice ? t('instantResults.filters.averagePrice') : t('instantResults.filters.matchingActivePros')}
           </p>
           <hr className="border-gray-200" />
-          <p className="text-xs text-gray-500 mt-3">{resultCount} result{resultCount === 1 ? '' : 's'} after filters</p>
+          <p className="text-xs text-gray-500 mt-3">
+            {t(resultCount === 1 ? 'instantResults.filters.resultsAfterSingular' : 'instantResults.filters.resultsAfterPlural', { count: resultCount })}
+          </p>
         </div>
 
         <div className="p-5 pt-4">
           <div className="mb-5">
-            <p className="font-bold text-sm mb-2">Sort by</p>
+            <p className="font-bold text-sm mb-2">{t('instantResults.filters.sortBy')}</p>
             <select
               value={filters.sort}
               onChange={e => patch({ sort: e.target.value as ResultsFilters['sort'] })}
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
             >
-              <option value="recommended">Recommended</option>
-              <option value="rating">Highest rated</option>
-              <option value="reviews">Most reviewed</option>
-              <option value="price">Lowest starting price</option>
+              <option value="recommended">{t('instantResults.filters.sort.recommended')}</option>
+              <option value="rating">{t('instantResults.filters.sort.rating')}</option>
+              <option value="reviews">{t('instantResults.filters.sort.reviews')}</option>
+              <option value="price">{t('instantResults.filters.sort.price')}</option>
             </select>
           </div>
 
           <div className="mb-5">
-            <p className="font-bold text-sm mb-2">Minimum rating</p>
-            {[
-              ['Any rating', 0],
-              ['4.5 and up', 4.5],
-              ['4.0 and up', 4],
-            ].map(([label, value]) => (
+            <p className="font-bold text-sm mb-2">{t('instantResults.filters.minimumRating')}</p>
+            {minRatingOptions.map(({ label, value }) => (
               <label key={String(value)} className={styles.radioWrap}>
                 <input
                   type="radio"
@@ -455,13 +502,8 @@ function Sidebar({
           </div>
 
           <div className="mb-5">
-            <p className="font-bold text-sm mb-2">Starting price</p>
-            {[
-              ['Any price', null],
-              ['Up to 10,000 Ft', 10000],
-              ['Up to 25,000 Ft', 25000],
-              ['Up to 50,000 Ft', 50000],
-            ].map(([label, value]) => (
+            <p className="font-bold text-sm mb-2">{t('instantResults.filters.startingPrice')}</p>
+            {priceOptions.map(({ label, value }) => (
               <label key={String(value)} className={styles.radioWrap}>
                 <input
                   type="radio"
@@ -476,22 +518,15 @@ function Sidebar({
           </div>
 
           <div className="mb-5">
-            <p className="font-bold text-sm mb-2">Profile quality</p>
-            {[
-              ['hasReviews', 'Has customer reviews'],
-              ['hasPrice', 'Shows starting price'],
-              ['hasProof', 'Has photos or projects'],
-              ['backgroundCheck', 'Background check submitted'],
-              ['experienced', '5+ years experience'],
-            ].map(([key, label]) => {
-              const typedKey = key as keyof Pick<ResultsFilters, 'hasReviews' | 'hasPrice' | 'hasProof' | 'backgroundCheck' | 'experienced'>
-              const selected = filters[typedKey]
+            <p className="font-bold text-sm mb-2">{t('instantResults.filters.profileQuality')}</p>
+            {qualityOptions.map(({ key, label }) => {
+              const selected = filters[key]
               return (
                 <label key={key} className={styles.radioWrap}>
                   <input
                     type="checkbox"
                     checked={selected}
-                    onChange={() => toggle(typedKey)}
+                    onChange={() => toggle(key)}
                   />
                   <div className={`${styles.checkCircle} ${selected ? styles.checkCircleSelected : ''}`} />
                   <span className="text-sm text-gray-700">{label}</span>
@@ -507,7 +542,9 @@ function Sidebar({
           className="text-sm text-slate-600 hover:underline ml-5 mb-4 cursor-pointer bg-none border-none disabled:text-gray-300 disabled:no-underline disabled:cursor-not-allowed"
           disabled={activeCount === 0}
         >
-          Reset filters{activeCount > 0 ? ` (${activeCount})` : ''}
+          {activeCount > 0
+            ? t('instantResults.filters.resetWithCount', { count: activeCount })
+            : t('instantResults.filters.reset')}
         </button>
       </div>
     </aside>
@@ -517,8 +554,8 @@ function Sidebar({
 // ---- API → Pro mapper ----
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapApiPro(doc: any): Pro {
-  const name: string = doc.fullName ?? doc.name ?? 'Unknown'
+function mapApiPro(doc: any, t: Translator): Pro {
+  const name: string = doc.fullName ?? doc.name ?? t('instantResults.card.unknownPro')
   const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 1).toUpperCase()
   const BG_COLORS = ['#7c3aed', '#16a34a', '#1e293b', '#334155', '#15803d', '#2563eb', '#475569', '#0369a1']
   const initialsBg = BG_COLORS[name.charCodeAt(0) % BG_COLORS.length]
@@ -539,7 +576,7 @@ function mapApiPro(doc: any): Pro {
     isOnline: false,
     hires: doc.hires ?? null,
     location: doc.postcode ? `Budapest, ${doc.postcode}` : 'Budapest',
-    responseTime: doc.responseTime ?? 'within a day',
+    responseTime: doc.responseTime ?? t('instantResults.card.defaultResponseTime'),
     startingPrice,
     review: doc.bio ?? '',
     services: Array.isArray(doc.services) ? doc.services : [],
@@ -563,6 +600,7 @@ export default function InstantResults({
   q: string
   district?: string
 }) {
+  const t = useTranslations()
   const [pros, setPros] = useState<Pro[]>([])
   const [filters, setFilters] = useState<ResultsFilters>(DEFAULT_FILTERS)
   const [loading, setLoading] = useState(true)
@@ -579,11 +617,11 @@ export default function InstantResults({
       try {
         const docs = await queryPros(q, district)
         if (!active) return
-        setPros(docs.map(mapApiPro))
-      } catch (err: unknown) {
+        setPros(docs.map(doc => mapApiPro(doc, t)))
+      } catch {
         if (!active) return
         setPros([])
-        setError(err instanceof Error ? err.message : 'Could not load professionals.')
+        setError(t('instantResults.errors.loadBody'))
       } finally {
         if (active) setLoading(false)
       }
@@ -593,7 +631,7 @@ export default function InstantResults({
     return () => {
       active = false
     }
-  }, [q, district])
+  }, [q, district, t])
 
   const filteredPros = useMemo(() => {
     const next = pros.filter(pro => {
@@ -640,10 +678,14 @@ export default function InstantResults({
       <div className="flex-1 relative">
         <div className="px-3 py-4 max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-lg font-bold">Matching {q || 'professionals'}</h2>
+            <h2 className="text-lg font-bold">
+              {q
+                ? t('instantResults.header.matchingQuery', { query: q })
+                : t('instantResults.header.matchingProfessionals')}
+            </h2>
           </div>
           {district && (
-            <p className="text-sm text-gray-500 mb-4">District {district}</p>
+            <p className="text-sm text-gray-500 mb-4">{t('instantResults.header.district', { district })}</p>
           )}
 
           {loading ? (
@@ -666,13 +708,13 @@ export default function InstantResults({
               <TopMatchBanner pros={filteredPros} />
               {error ? (
                 <div className="text-center py-16 text-gray-400">
-                  <p className="text-lg font-semibold mb-1">Could not load professionals</p>
+                  <p className="text-lg font-semibold mb-1">{t('instantResults.errors.loadTitle')}</p>
                   <p className="text-sm">{error}</p>
                 </div>
               ) : filteredPros.length === 0 ? (
                 <div className="text-center py-16 text-gray-400">
-                  <p className="text-lg font-semibold mb-1">No professionals match these filters</p>
-                  <p className="text-sm">Try clearing filters or broadening your search.</p>
+                  <p className="text-lg font-semibold mb-1">{t('instantResults.empty.title')}</p>
+                  <p className="text-sm">{t('instantResults.empty.body')}</p>
                 </div>
               ) : (
                 <div>

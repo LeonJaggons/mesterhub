@@ -682,6 +682,564 @@
       "confirm": "Yes, decline"
     }
   },
+  "proMarketplace": {
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago"
+    },
+    "header": {
+      "kicker": "Open marketplace",
+      "title": "Projects looking for quotes",
+      "subtitle": "Browse active customer projects that match your trade and service area. Marketplace quotes stay separate for customers until they choose to hire you.",
+      "backToJobs": "Back to jobs"
+    },
+    "card": {
+      "kicker": "Marketplace project",
+      "fallbackTitle": "{category} project",
+      "districtNotShared": "District not shared",
+      "attachmentSingular": "{count} attachment",
+      "attachmentPlural": "{count} attachments",
+      "updated": "Updated {time}",
+      "sendingQuote": "Sending quote...",
+      "sendQuote": "Send marketplace quote"
+    },
+    "unavailable": {
+      "title": "Marketplace unavailable",
+      "body": "Your account is not eligible for marketplace quoting yet.",
+      "upgrade": "Upgrade to Mestermind Pro"
+    },
+    "empty": {
+      "title": "No matching marketplace projects",
+      "body": "New active projects in your trade and districts will appear here."
+    },
+    "sidebar": {
+      "kicker": "Marketplace quotes",
+      "title": "How it works",
+      "items": {
+        "separateSection": "Customers see these in a separate marketplace section on their project.",
+        "noJobUntilAccepted": "Your quote does not create a job or conversation unless the customer accepts it.",
+        "normalWorkflow": "Accepted marketplace quotes move into your normal jobs workflow."
+      }
+    },
+    "errors": {
+      "sendQuote": "Could not send marketplace quote."
+    }
+  },
+  "proWork": {
+    "header": {
+      "kicker": "Pro dashboard",
+      "title": "My Work",
+      "subtitle": "Confirmed appointments and accepted jobs ready to schedule."
+    },
+    "location": {
+      "approximate": "Approximate job location",
+      "approximateKm": "Approximate job location within {distance} km",
+      "approximateM": "Approximate job location within {distance} m",
+      "district": "District {district}",
+      "notShared": "District not shared"
+    },
+    "customerFallback": "Customer",
+    "appointments": {
+      "kicker": "Confirmed appointments",
+      "title": "Upcoming work",
+      "confirmed": "Confirmed",
+      "empty": "Confirmed customer appointments will appear here.",
+      "dateAtTime": "{date} at {time}"
+    },
+    "summary": {
+      "kicker": "Work summary",
+      "title": "Today's view",
+      "confirmed": "Confirmed",
+      "needScheduling": "Need scheduling"
+    },
+    "schedule": {
+      "kicker": "Needs attention",
+      "title": "Schedule next"
+    }
+  },
+  "proEarnings": {
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago"
+    },
+    "header": {
+      "kicker": "Pro dashboard",
+      "title": "Earnings",
+      "subtitle": "Track real revenue from completed jobs, expected revenue from accepted work, and quote pipeline value."
+    },
+    "metrics": {
+      "real": {
+        "label": "Real earnings",
+        "bodySingular": "{count} completed job",
+        "bodyPlural": "{count} completed jobs"
+      },
+      "expected": {
+        "label": "Expected earnings",
+        "bodySingular": "{count} accepted job still in progress",
+        "bodyPlural": "{count} accepted jobs still in progress"
+      },
+      "pipeline": {
+        "label": "Quote pipeline",
+        "bodySingular": "{count} quote waiting on customers",
+        "bodyPlural": "{count} quotes waiting on customers"
+      },
+      "average": {
+        "label": "Avg completed job",
+        "notAvailable": "n/a",
+        "body": "{rate} of accepted/completed jobs are completed"
+      }
+    },
+    "chart": {
+      "kicker": "Trend",
+      "title": "Expected vs real earnings",
+      "real": "Real",
+      "expected": "Expected",
+      "realTooltip": "{month} real: {value}",
+      "expectedTooltip": "{month} expected: {value}",
+      "expectedAddition": "+ {value} expected"
+    },
+    "forecast": {
+      "kicker": "Forecast",
+      "title": "What is coming",
+      "booked": "Booked but not complete",
+      "openQuote": "Open quote value",
+      "projectedTotal": "Projected total"
+    },
+    "activeJobs": {
+      "singular": "{count} active job",
+      "plural": "{count} active jobs",
+      "body": "Mark finished work complete, then customers can confirm it and move the value into real earnings."
+    },
+    "jobList": {
+      "recentTitle": "Recent real earnings",
+      "recentEmpty": "Completed jobs will appear here after customers confirm the work.",
+      "expectedTitle": "Expected earnings",
+      "expectedEmpty": "Accepted jobs will appear here before they are completed.",
+      "serviceJob": "Service job",
+      "customer": "Customer",
+      "quoteOnRequest": "Quote on request"
+    }
+  },
+  "instantResults": {
+    "header": {
+      "matchingQuery": "Matching {query}",
+      "matchingProfessionals": "Matching professionals",
+      "district": "District {district}"
+    },
+    "card": {
+      "online": "Online",
+      "topPro": "Top Pro",
+      "onlineNow": "Online Now",
+      "respondsInAbout": "responds in about",
+      "hiresSingular": "{count} hire on Mestermind",
+      "hiresPlural": "{count} hires on Mestermind",
+      "seeMore": "See more",
+      "startingPrice": "Starting price",
+      "contactForPrice": "Contact for price",
+      "viewProfile": "View profile",
+      "unknownPro": "Unknown",
+      "defaultResponseTime": "within a day"
+    },
+    "topMatch": {
+      "title": "Start with your best matches",
+      "body": "Open a profile to send a detailed request and receive a quote.",
+      "cta": "View top match"
+    },
+    "filters": {
+      "servicesFallback": "Services",
+      "prosSingular": "{count} pro",
+      "prosPlural": "{count} pros",
+      "averagePrice": "Avg. listed starting price",
+      "matchingActivePros": "Matching active pros",
+      "resultsAfterSingular": "{count} result after filters",
+      "resultsAfterPlural": "{count} results after filters",
+      "sortBy": "Sort by",
+      "sort": {
+        "recommended": "Recommended",
+        "rating": "Highest rated",
+        "reviews": "Most reviewed",
+        "price": "Lowest starting price"
+      },
+      "minimumRating": "Minimum rating",
+      "rating": {
+        "any": "Any rating",
+        "fourFiveUp": "4.5 and up",
+        "fourUp": "4.0 and up"
+      },
+      "startingPrice": "Starting price",
+      "price": {
+        "any": "Any price",
+        "upTo": "Up to {value}"
+      },
+      "profileQuality": "Profile quality",
+      "quality": {
+        "hasReviews": "Has customer reviews",
+        "hasPrice": "Shows starting price",
+        "hasProof": "Has photos or projects",
+        "backgroundCheck": "Background check submitted",
+        "experienced": "5+ years experience"
+      },
+      "reset": "Reset filters",
+      "resetWithCount": "Reset filters ({count})"
+    },
+    "errors": {
+      "loadTitle": "Could not load professionals",
+      "loadBody": "Could not load professionals."
+    },
+    "empty": {
+      "title": "No professionals match these filters",
+      "body": "Try clearing filters or broadening your search."
+    }
+  },
+  "proProfile": {
+    "common": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "optional": "optional",
+      "remove": "Remove",
+      "learnMore": "Learn more",
+      "notSpecified": "Not specified",
+      "askBeforeBooking": "Ask before booking",
+      "askForAvailability": "Ask for availability",
+      "askForCoverage": "Ask for coverage",
+      "postcode": "Postcode {postcode}",
+      "distanceKm": "{distance} km",
+      "district": "District {district}",
+      "yearSingular": "{years} year",
+      "yearPlural": "{years} years"
+    },
+    "breadcrumb": {
+      "aria": "Breadcrumb",
+      "pros": "Pros"
+    },
+    "notFound": {
+      "title": "Profile not found",
+      "body": "This professional's profile doesn't exist or has been removed.",
+      "back": "Back to search"
+    },
+    "pricing": {
+      "hourly": "{value} / hour",
+      "fixed": "From {value}",
+      "quote": "Quote after reviewing the job",
+      "perHour": "Per hour",
+      "startingPrice": "Starting price"
+    },
+    "status": {
+      "active": "Verified and active",
+      "pending": "Verification in progress",
+      "review": "Profile under review"
+    },
+    "serviceSupport": {
+      "emergency": "Urgent requests welcome when available",
+      "installation": "Installation and setup support",
+      "repair": "Diagnosis and repair work",
+      "clean": "One-off or recurring cleaning",
+      "design": "Planning and execution help",
+      "generic": "{category} service"
+    },
+    "faqLabels": {
+      "pricing": "What should customers know about your pricing?",
+      "process": "What is your typical process for working with a new customer?",
+      "advice": "What advice would you give someone hiring a provider in your area?"
+    },
+    "header": {
+      "reviewsUnavailable": "Reviews unavailable",
+      "newPro": "New pro",
+      "verifiedPro": "Verified Pro",
+      "yearInBusiness": "{years} year in business",
+      "yearsInBusiness": "{years} years in business",
+      "share": "Share",
+      "report": "Report profile"
+    },
+    "nav": {
+      "about": "About",
+      "services": "Services",
+      "projects": "Projects",
+      "reviews": "Reviews",
+      "credentials": "Credentials",
+      "faqs": "FAQs"
+    },
+    "why": {
+      "title": "Why this pro?",
+      "experienceSingular": "has been in business for {years} year",
+      "experiencePlural": "has been in business for {years} years",
+      "professionalExperience": "has professional experience",
+      "serviceCopy": " and offers {services} services",
+      "trustCopy": " Verified profile details help customers book with confidence.",
+      "summary": "{name} {experience}{serviceCopy}. Customers can review pricing, photos, credentials, and FAQs before requesting an estimate.{trustCopy}",
+      "disclaimer": "Summarized from the pro's profile. Review their profile for the latest."
+    },
+    "about": {
+      "empty": "{name} has not added a full bio yet. You can still request an estimate and ask about experience, timing, and approach."
+    },
+    "services": {
+      "empty": "No services listed yet."
+    },
+    "projects": {
+      "before": "Before",
+      "after": "After",
+      "singlePhotoAlt": "{jobType} {label}",
+      "beforeAlt": "{jobType} before",
+      "afterAlt": "{jobType} after",
+      "compareAria": "Compare before and after for {jobType}",
+      "workSampleAlt": "Work sample {index}",
+      "empty": "No past projects yet. Ask {name} to share examples relevant to your project."
+    },
+    "reviews": {
+      "recently": "Recently",
+      "writtenComing": "Written reviews will appear here as customers review completed jobs.",
+      "noneYet": "No reviews yet. Reviews appear after customers confirm completed jobs.",
+      "reviewSingular": "{count} review",
+      "reviewPlural": "{count} reviews",
+      "trustCopy": "Your trust means everything to us.",
+      "guidelinesLink": "Learn about our review guidelines.",
+      "searchPlaceholder": "Search reviews",
+      "mentions": "Read reviews that mention:",
+      "customerFallback": "Mestermind customer",
+      "completedJob": "Completed job",
+      "noMatch": "No reviews match that search.",
+      "proOnly": "Reviews are visible after this pro activates Mestermind Pro.",
+      "starsAria": "{rating} out of 5 stars",
+      "rating": {
+        "exceptional": "Exceptional",
+        "excellent": "Excellent",
+        "veryGood": "Very good",
+        "customerRated": "Customer rated"
+      },
+      "sort": {
+        "relevant": "Most relevant",
+        "newest": "Newest",
+        "highest": "Highest rated"
+      }
+    },
+    "details": {
+      "kicker": "At a glance",
+      "title": "Pro details",
+      "trade": "Trade",
+      "experience": "Experience",
+      "pricing": "Pricing",
+      "paymentMethods": "Payment methods",
+      "availability": "Availability",
+      "homeBase": "Home base",
+      "travelRadius": "Travel radius"
+    },
+    "trust": {
+      "kicker": "Trust",
+      "title": "Verification",
+      "phoneVerified": "Phone verified",
+      "backgroundSubmitted": "Background check submitted",
+      "certificateOnFile": "Certificate on file",
+      "insuranceOnFile": "Insurance on file"
+    },
+    "coverage": {
+      "kicker": "Coverage",
+      "title": "Service areas",
+      "more": "+{count} more"
+    },
+    "credentials": {
+      "identity": "Identity verification",
+      "phone": "Phone",
+      "background": "Background check",
+      "certificate": "Certificate",
+      "insurance": "Insurance",
+      "serviceArea": "Service area",
+      "availability": "Availability",
+      "paymentMethods": "Payment methods",
+      "verified": "Verified",
+      "pending": "Verification pending",
+      "submitted": "Submitted",
+      "notRequested": "Not requested",
+      "onFile": "On file",
+      "requested": "Requested",
+      "notRequired": "Not required",
+      "notListed": "Not listed"
+    },
+    "faqFallback": {
+      "included": "What is included in the estimate?",
+      "materials": "Are materials or travel charged separately?",
+      "preparation": "What preparation is needed before arrival?",
+      "pastWork": "Can they share similar past work?"
+    },
+    "mobile": {
+      "dashboard": "Go to dashboard"
+    },
+    "signup": {
+      "kicker": "Create account",
+      "title": "Request your estimate",
+      "subtitle": "Sign up first, then we'll send this estimate request automatically.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "termsPrefix": "By clicking Create account, you agree to the",
+      "terms": "Terms of Use",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "creating": "Creating account...",
+      "submit": "Create account & send request"
+    },
+    "request": {
+      "title": "Request an estimate",
+      "subtitle": "Answer a few job details so {name} can send an accurate quote.",
+      "cta": "Request estimate",
+      "viewDetails": "View details",
+      "existingKicker": "Send an existing project",
+      "projectFallback": "{category} project",
+      "sameCategory": "Same category",
+      "sending": "Sending…",
+      "sendToPro": "Send to this pro",
+      "onlineNow": "Online now",
+      "guaranteeTitle": "Mestermind Guarantee",
+      "guaranteeBody": "If you hire this pro, you're covered by our satisfaction guarantee.",
+      "modalKicker": "Estimate request",
+      "modalTitle": "Tell {name} about the job",
+      "modalSubtitle": "Share the basics now. You can coordinate photos, timing, and final details after the pro replies.",
+      "districtLabel": "Your district",
+      "selectDistrict": "Select district",
+      "urgencyLabel": "Urgency",
+      "selectUrgency": "Select urgency",
+      "selectAnswer": "Select answer",
+      "describeLabel": "Describe the work",
+      "describePlaceholder": "Tell the pro what needs doing, what problem you are seeing, measurements, photos you can share later, and anything unusual about the job.",
+      "attachmentsLabel": "Photos or attachments",
+      "addAttachments": "Add photos or PDFs",
+      "attachmentsHint": "Upload up to {count} files. Photos help pros quote repair, painting, moving, cleaning, and carpentry jobs faster.",
+      "preferredTiming": "Preferred timing",
+      "selectTiming": "Select timing",
+      "sendRequest": "Send request",
+      "sentTitle": "Request sent!",
+      "sentBody": "{name} will get back to you shortly.",
+      "timing": {
+        "asap": "As soon as possible",
+        "fewDays": "Within a few days",
+        "thisWeek": "This week",
+        "nextWeek": "Next week",
+        "flexible": "Flexible"
+      },
+      "errors": {
+        "describeWork": "Please describe the work you need help with.",
+        "chooseDistrict": "Please choose your district.",
+        "chooseUrgency": "Please choose how urgent the job is.",
+        "fileType": "Upload photos or PDF files only.",
+        "fileSize": "Each attachment must be under 10 MB.",
+        "locationSkipped": "Location permission was skipped. We will use your selected district instead.",
+        "locationFailed": "We could not capture browser location. We will use your selected district instead.",
+        "signInExisting": "Sign in to send an existing project.",
+        "sendProject": "Could not send this project.",
+        "sendRequest": "Could not send your request.",
+        "createAccount": "Could not create account."
+      }
+    },
+    "social": {
+      "website": "Website",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "tiktok": "TikTok"
+    }
+  },
+  "proSettings": {
+    "loading": "Loading settings...",
+    "header": {
+      "title": "Pro settings",
+      "subtitle": "Manage the profile customers see after you are approved."
+    },
+    "status": {
+      "approved": "Approved",
+      "suspended": "Suspended",
+      "rejected": "Rejected",
+      "pending": "Pending verification"
+    },
+    "errors": {
+      "save": "Could not save settings.",
+      "stripeUrl": "Stripe did not return a billing URL.",
+      "stripeOpen": "Could not open Stripe billing.",
+      "load": "Could not load your pro profile."
+    },
+    "profile": {
+      "fallbackName": "Your pro profile",
+      "visible": "Visible in search",
+      "paused": "Paused",
+      "details": "Profile details",
+      "complete": "{score}% profile complete",
+      "edit": "Edit profile",
+      "viewPublic": "View public profile",
+      "stats": {
+        "services": "Services",
+        "districts": "Districts",
+        "projects": "Projects",
+        "payments": "Payments"
+      }
+    },
+    "billing": {
+      "kicker": "Growth plan",
+      "title": "Mestermind Pro",
+      "activeBody": "Your Pro benefits are active across search, reviews, and customer inquiries.",
+      "inactiveBody": "Turn your profile into a higher-converting listing with priority visibility and trust signals.",
+      "manageCopy": "Manage your billing any time in Stripe.",
+      "subscribeCopy": "Start with your included trial, then keep Pro active through Stripe.",
+      "opening": "Opening Stripe...",
+      "manage": "Manage billing",
+      "subscribe": "Subscribe with Stripe",
+      "status": {
+        "active": "active",
+        "trialing": "trialing",
+        "inactive": "inactive",
+        "past_due": "past due",
+        "unpaid": "unpaid",
+        "canceled": "canceled"
+      },
+      "features": {
+        "inquiries": "Unlimited job inquiries",
+        "priority": "Priority search placement",
+        "badge": "Verified badge",
+        "reviews": "Reviews visible on profile",
+        "featured": "Featured category placement",
+        "messages": "Direct customer messages"
+      }
+    },
+    "visibility": {
+      "title": "Profile visibility",
+      "visibleBody": "Your approved profile can appear in customer search and receive estimate requests.",
+      "pausedBody": "Your profile is paused and hidden from search. Existing conversations are unchanged.",
+      "pendingBody": "Your profile will appear in search after approval.",
+      "resumed": "Profile visibility resumed.",
+      "pausedSaved": "Profile paused.",
+      "resume": "Resume profile",
+      "pause": "Pause profile"
+    },
+    "notifications": {
+      "title": "Notification preferences",
+      "subtitle": "Choose what should trigger pro alerts during the MVP launch.",
+      "saved": "Notification preferences saved.",
+      "items": {
+        "newLeads": "New estimate requests",
+        "messages": "Customer messages",
+        "appointments": "Appointment updates",
+        "email": "Email notifications",
+        "sms": "SMS notifications"
+      }
+    },
+    "verification": {
+      "title": "Verification center",
+      "subtitle": "Track what has been submitted for approval and what customers can trust.",
+      "complete": "Complete",
+      "missing": "Missing",
+      "viewDetails": "View verification details",
+      "items": {
+        "identity": "Identity document",
+        "selfie": "Selfie match",
+        "phone": "Phone verification",
+        "certificate": "Certificate",
+        "insurance": "Insurance",
+        "background": "Background check"
+      }
+    }
+  },
   "proLanding": {
     "hero": {
       "eyebrow": "For professionals",

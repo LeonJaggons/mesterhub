@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from '../../account/account.module.css'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 
 type ProProfile = {
   uid?: string
@@ -74,11 +76,13 @@ function initials(name?: string) {
   return name ? name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase() : 'MP'
 }
 
-function statusCopy(status?: string) {
-  if (status === 'active') return 'Approved'
-  if (status === 'suspended') return 'Suspended'
-  if (status === 'rejected') return 'Rejected'
-  return 'Pending verification'
+type Translator = ReturnType<typeof useTranslations>
+
+function statusCopy(t: Translator, status?: string) {
+  if (status === 'active') return t('proSettings.status.approved')
+  if (status === 'suspended') return t('proSettings.status.suspended')
+  if (status === 'rejected') return t('proSettings.status.rejected')
+  return t('proSettings.status.pending')
 }
 
 function completionScore(profile: ProProfile, account: AccountData, verification: VerificationData) {
@@ -153,6 +157,7 @@ const darkButton = {
 
 export default function ProSettingsPage() {
   const router = useRouter()
+  const t = useTranslations()
   const [profile, setProfile] = useState<ProProfile>({})
   const [account, setAccount] = useState<AccountData>({})
   const [verification, setVerification] = useState<VerificationData>({})
@@ -184,7 +189,7 @@ export default function ProSettingsPage() {
       }
       setSaved(successMessage)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save settings.')
+      setError(err instanceof Error ? err.message : t('proSettings.errors.save'))
     } finally {
       setSaving(false)
     }
@@ -192,7 +197,7 @@ export default function ProSettingsPage() {
 
   function toggleNotification(key: keyof NotificationPreferences) {
     const next = { ...notifications, [key]: !notifications[key] }
-    saveSettings({ notificationPreferences: next }, 'Notification preferences saved.')
+    saveSettings({ notificationPreferences: next }, t('proSettings.notifications.saved'))
   }
 
   async function openBilling(path: '/api/stripe/checkout' | '/api/stripe/portal') {
@@ -202,10 +207,10 @@ export default function ProSettingsPage() {
     try {
       const res = await authenticatedFetch(path, { method: 'POST' })
       const data = (await res.json()) as { url?: string }
-      if (!data.url) throw new Error('Stripe did not return a billing URL.')
+      if (!data.url) throw new Error(t('proSettings.errors.stripeUrl'))
       window.location.href = data.url
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not open Stripe billing.')
+      setError(err instanceof Error ? err.message : t('proSettings.errors.stripeOpen'))
       setBillingLoading(false)
     }
   }
@@ -230,17 +235,17 @@ export default function ProSettingsPage() {
           ...(data.account?.notificationPreferences ?? {}),
         })
       } catch {
-        setError('Could not load your pro profile.')
+        setError(t('proSettings.errors.load'))
       } finally {
         setLoading(false)
       }
     })
-  }, [router])
+  }, [router, t])
 
   if (loading) {
     return (
       <main className={styles.page}>
-        <div className={styles.wrap}><p className={styles.subtitle}>Loading settings...</p></div>
+        <div className={styles.wrap}><p className={styles.subtitle}>{t('proSettings.loading')}</p></div>
       </main>
     )
   }
@@ -253,19 +258,19 @@ export default function ProSettingsPage() {
   const hasProPlan = hasProFeatures(subscriptionStatus, subscriptionCurrentPeriodEnd)
   const canManageBilling = Boolean(account.stripeCustomerId) && ['active', 'past_due', 'unpaid'].includes(subscriptionStatus)
   const verificationItems = [
-    ['Identity document', Boolean(verification.idDocumentUrl)],
-    ['Selfie match', Boolean(verification.selfieUrl)],
-    ['Phone verification', Boolean(profile.phoneVerified || account.phone)],
-    ['Certificate', !verification.regulated || Boolean(verification.certificateUrl)],
-    ['Insurance', Boolean(verification.insuranceUrl)],
-    ['Background check', Boolean(verification.backgroundCheck)],
+    [t('proSettings.verification.items.identity'), Boolean(verification.idDocumentUrl)],
+    [t('proSettings.verification.items.selfie'), Boolean(verification.selfieUrl)],
+    [t('proSettings.verification.items.phone'), Boolean(profile.phoneVerified || account.phone)],
+    [t('proSettings.verification.items.certificate'), !verification.regulated || Boolean(verification.certificateUrl)],
+    [t('proSettings.verification.items.insurance'), Boolean(verification.insuranceUrl)],
+    [t('proSettings.verification.items.background'), Boolean(verification.backgroundCheck)],
   ] as const
 
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>Pro settings</h1>
-        <p className={styles.subtitle}>Manage the profile customers see after you are approved.</p>
+        <h1 className={styles.title}>{t('proSettings.header.title')}</h1>
+        <p className={styles.subtitle}>{t('proSettings.header.subtitle')}</p>
 
         <div className={styles.card} style={{ marginBottom: '1rem' }}>
           {error && <p className={styles.errorText}>{error}</p>}
@@ -280,26 +285,26 @@ export default function ProSettingsPage() {
             )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <p className={styles.emptyTitle} style={{ marginBottom: 0 }}>{profile.fullName || 'Your pro profile'}</p>
+                <p className={styles.emptyTitle} style={{ marginBottom: 0 }}>{profile.fullName || t('proSettings.profile.fallbackName')}</p>
                 <span style={{ borderRadius: 999, padding: '0.2rem 0.55rem', fontSize: '0.75rem', fontWeight: 800, background: isVisibleInSearch ? '#dcfce7' : '#f3f4f6', color: isVisibleInSearch ? '#166534' : '#6b7280' }}>
-                  {isVisibleInSearch ? 'Visible in search' : visibility === 'paused' ? 'Paused' : statusCopy(profile.status)}
+                  {isVisibleInSearch ? t('proSettings.profile.visible') : visibility === 'paused' ? t('proSettings.profile.paused') : statusCopy(t, profile.status)}
                 </span>
               </div>
               <p className={styles.subtitle} style={{ margin: '0.25rem 0 0.75rem' }}>
-                {profile.categoryName || 'Profile details'} · {statusCopy(profile.status)}
+                {profile.categoryName ? translateCategory(t, profile.categoryName) : t('proSettings.profile.details')} · {statusCopy(t, profile.status)}
               </p>
               <div style={{ height: 8, borderRadius: 999, background: '#e5e7eb', overflow: 'hidden', marginBottom: '0.5rem' }}>
                 <div style={{ width: `${score}%`, height: '100%', background: '#f97316' }} />
               </div>
-              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280' }}>{score}% profile complete</p>
+              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280' }}>{t('proSettings.profile.complete', { score })}</p>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
             {[
-              ['Services', profile.services?.length ?? 0],
-              ['Districts', profile.districts?.length ?? 0],
-              ['Projects', profile.pastProjects?.length ?? profile.workPhotoUrls?.length ?? 0],
-              ['Payments', profile.paymentMethods?.length ?? 0],
+              [t('proSettings.profile.stats.services'), profile.services?.length ?? 0],
+              [t('proSettings.profile.stats.districts'), profile.districts?.length ?? 0],
+              [t('proSettings.profile.stats.projects'), profile.pastProjects?.length ?? profile.workPhotoUrls?.length ?? 0],
+              [t('proSettings.profile.stats.payments'), profile.paymentMethods?.length ?? 0],
             ].map(([label, value]) => (
               <div key={label} style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.75rem' }}>
                 <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#111827' }}>{value}</p>
@@ -308,11 +313,11 @@ export default function ProSettingsPage() {
             ))}
           </div>
           <Link href="/pro/settings/profile" style={primaryButton}>
-            Edit profile
+            {t('proSettings.profile.edit')}
           </Link>
           {profile.uid && (
             <Link href={`/pro/${profile.uid}`} style={{ ...secondaryButton, marginLeft: '0.75rem' }}>
-              View public profile
+              {t('proSettings.profile.viewPublic')}
             </Link>
           )}
         </div>
@@ -349,29 +354,29 @@ export default function ProSettingsPage() {
                 </span>
                 <div>
                   <p style={{ margin: '0 0 0.25rem', color: '#f97316', fontSize: '0.72rem', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                    Growth plan
+                    {t('proSettings.billing.kicker')}
                   </p>
-                  <h2 style={{ margin: 0 }}>Mestermind Pro</h2>
+                  <h2 style={{ margin: 0 }}>{t('proSettings.billing.title')}</h2>
                   <p style={{ margin: '0.4rem 0 0', color: '#4b5563', maxWidth: 520 }}>
                     {hasProPlan
-                      ? 'Your Pro benefits are active across search, reviews, and customer inquiries.'
-                      : 'Turn your profile into a higher-converting listing with priority visibility and trust signals.'}
+                      ? t('proSettings.billing.activeBody')
+                      : t('proSettings.billing.inactiveBody')}
                   </p>
                 </div>
               </div>
               <span style={{ borderRadius: 999, padding: '0.32rem 0.75rem', fontSize: '0.75rem', fontWeight: 900, background: hasProPlan ? '#dcfce7' : '#fff7ed', border: `1px solid ${hasProPlan ? '#bbf7d0' : '#fed7aa'}`, color: hasProPlan ? '#166534' : '#c2410c', textTransform: 'capitalize' }}>
-                {subscriptionStatus.replaceAll('_', ' ')}
+                {t(`proSettings.billing.status.${subscriptionStatus.replaceAll('-', '_')}`, { defaultValue: subscriptionStatus.replaceAll('_', ' ') })}
               </span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.55rem', marginBottom: '1.1rem' }}>
               {[
-                'Unlimited job inquiries',
-                'Priority search placement',
-                'Verified badge',
-                'Reviews visible on profile',
-                'Featured category placement',
-                'Direct customer messages',
+                t('proSettings.billing.features.inquiries'),
+                t('proSettings.billing.features.priority'),
+                t('proSettings.billing.features.badge'),
+                t('proSettings.billing.features.reviews'),
+                t('proSettings.billing.features.featured'),
+                t('proSettings.billing.features.messages'),
               ].map(feature => (
                 <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', color: '#374151', fontWeight: 750, background: 'rgba(255, 255, 255, 0.72)', border: '1px solid rgba(229, 231, 235, 0.85)', borderRadius: 12, padding: '0.55rem 0.65rem' }}>
                   <span style={{ width: 20, height: 20, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: hasProPlan ? '#dcfce7' : '#ffedd5', color: hasProPlan ? '#15803d' : '#ea580c', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
@@ -384,7 +389,7 @@ export default function ProSettingsPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid rgba(229, 231, 235, 0.8)' }}>
               <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>
-                {hasProPlan ? 'Manage your billing any time in Stripe.' : 'Start with your included trial, then keep Pro active through Stripe.'}
+                {hasProPlan ? t('proSettings.billing.manageCopy') : t('proSettings.billing.subscribeCopy')}
               </p>
               <button
                 type="button"
@@ -395,7 +400,7 @@ export default function ProSettingsPage() {
                   boxShadow: canManageBilling ? 'none' : '0 10px 22px rgba(249, 115, 22, 0.18)',
                 }}
               >
-                {billingLoading ? 'Opening Stripe...' : canManageBilling ? 'Manage billing' : 'Subscribe with Stripe'}
+                {billingLoading ? t('proSettings.billing.opening') : canManageBilling ? t('proSettings.billing.manage') : t('proSettings.billing.subscribe')}
               </button>
             </div>
           </section>
@@ -403,36 +408,39 @@ export default function ProSettingsPage() {
 
         <div className={styles.card} style={{ marginBottom: '1rem' }}>
           <section className={styles.helpSection} style={{ marginBottom: 0 }}>
-            <h2>Profile visibility</h2>
+            <h2>{t('proSettings.visibility.title')}</h2>
             <p style={{ marginBottom: '1rem' }}>
               {isVisibleInSearch
-                ? 'Your approved profile can appear in customer search and receive estimate requests.'
+                ? t('proSettings.visibility.visibleBody')
                 : visibility === 'paused'
-                  ? 'Your profile is paused and hidden from search. Existing conversations are unchanged.'
-                  : 'Your profile will appear in search after approval.'}
+                  ? t('proSettings.visibility.pausedBody')
+                  : t('proSettings.visibility.pendingBody')}
             </p>
             <button
               type="button"
               disabled={saving}
-              onClick={() => saveSettings({ profileVisibility: visibility === 'paused' ? 'visible' : 'paused' }, visibility === 'paused' ? 'Profile visibility resumed.' : 'Profile paused.')}
+              onClick={() => saveSettings(
+                { profileVisibility: visibility === 'paused' ? 'visible' : 'paused' },
+                visibility === 'paused' ? t('proSettings.visibility.resumed') : t('proSettings.visibility.pausedSaved')
+              )}
               style={visibility === 'paused' ? primaryButton : darkButton}
             >
-              {visibility === 'paused' ? 'Resume profile' : 'Pause profile'}
+              {visibility === 'paused' ? t('proSettings.visibility.resume') : t('proSettings.visibility.pause')}
             </button>
           </section>
         </div>
 
         <div className={styles.card} style={{ marginBottom: '1rem' }}>
           <section className={styles.helpSection} style={{ marginBottom: 0 }}>
-            <h2>Notification preferences</h2>
-            <p style={{ marginBottom: '1rem' }}>Choose what should trigger pro alerts during the MVP launch.</p>
+            <h2>{t('proSettings.notifications.title')}</h2>
+            <p style={{ marginBottom: '1rem' }}>{t('proSettings.notifications.subtitle')}</p>
             <div style={{ display: 'grid', gap: '0.75rem' }}>
               {[
-                ['newLeads', 'New estimate requests'],
-                ['messages', 'Customer messages'],
-                ['appointments', 'Appointment updates'],
-                ['email', 'Email notifications'],
-                ['sms', 'SMS notifications'],
+                ['newLeads', t('proSettings.notifications.items.newLeads')],
+                ['messages', t('proSettings.notifications.items.messages')],
+                ['appointments', t('proSettings.notifications.items.appointments')],
+                ['email', t('proSettings.notifications.items.email')],
+                ['sms', t('proSettings.notifications.items.sms')],
               ].map(([key, label]) => (
                 <label key={key} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.75rem' }}>
                   <span style={{ fontWeight: 700, color: '#111827' }}>{label}</span>
@@ -450,14 +458,14 @@ export default function ProSettingsPage() {
 
         <div className={styles.card}>
           <section className={styles.helpSection} style={{ marginBottom: 0 }}>
-            <h2>Verification center</h2>
-            <p style={{ marginBottom: '1rem' }}>Track what has been submitted for approval and what customers can trust.</p>
+            <h2>{t('proSettings.verification.title')}</h2>
+            <p style={{ marginBottom: '1rem' }}>{t('proSettings.verification.subtitle')}</p>
             <div style={{ display: 'grid', gap: '0.75rem', marginBottom: '1rem' }}>
               {verificationItems.map(([label, complete]) => (
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: 10, padding: '0.75rem' }}>
                   <span style={{ fontWeight: 700, color: '#111827' }}>{label}</span>
                   <span style={{ fontSize: '0.8125rem', fontWeight: 800, color: complete ? '#15803d' : '#9ca3af' }}>
-                    {complete ? 'Complete' : 'Missing'}
+                    {complete ? t('proSettings.verification.complete') : t('proSettings.verification.missing')}
                   </span>
                 </div>
               ))}
@@ -466,7 +474,7 @@ export default function ProSettingsPage() {
               href="/pro/verification"
               style={secondaryButton}
             >
-              View verification details
+              {t('proSettings.verification.viewDetails')}
             </Link>
           </section>
         </div>

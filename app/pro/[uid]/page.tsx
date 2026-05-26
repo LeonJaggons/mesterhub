@@ -35,8 +35,11 @@ import {
   MAX_PROJECT_ATTACHMENTS,
   URGENCY_OPTIONS,
 } from '@/app/projects/projectQuestions'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
+type Translator = ReturnType<typeof useTranslations>
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -126,30 +129,32 @@ const SOCIAL_LABELS = {
   tiktok: 'TikTok',
 } as const
 
-const FAQ_LABELS = {
-  pricing: 'What should customers know about your pricing?',
-  process: 'What is your typical process for working with a new customer?',
-  advice: 'What advice would you give someone hiring a provider in your area?',
-} as const
-
-function districtName(id: number): string {
-  return districtsData.districts.find(d => d.id === id)?.name ?? `District ${id}`
+function districtName(t: Translator, id: number): string {
+  return districtsData.districts.find(d => d.id === id)?.name ?? t('proProfile.common.district', { district: id })
 }
 
-function pricingSummary(pro: ProProfile): string {
+function money(locale: string, value: number): string {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'HUF',
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function pricingSummary(t: Translator, locale: string, pro: ProProfile): string {
   if (pro.pricingType === 'hourly' && pro.hourlyRate) {
-    return `${Number(pro.hourlyRate).toLocaleString('hu-HU')} Ft / hour`
+    return t('proProfile.pricing.hourly', { value: money(locale, Number(pro.hourlyRate)) })
   }
   if (pro.pricingType === 'fixed' && pro.hourlyRate) {
-    return `From ${Number(pro.hourlyRate).toLocaleString('hu-HU')} Ft`
+    return t('proProfile.pricing.fixed', { value: money(locale, Number(pro.hourlyRate)) })
   }
-  return 'Quote after reviewing the job'
+  return t('proProfile.pricing.quote')
 }
 
-function statusLabel(status: string): string {
-  if (status === 'active') return 'Verified and active'
-  if (status === 'pending_verification') return 'Verification in progress'
-  return 'Profile under review'
+function statusLabel(t: Translator, status: string): string {
+  if (status === 'active') return t('proProfile.status.active')
+  if (status === 'pending_verification') return t('proProfile.status.pending')
+  return t('proProfile.status.review')
 }
 
 function periodEndMillis(value: ProProfile['subscriptionCurrentPeriodEnd']): number | null {
@@ -163,14 +168,14 @@ function hasPaidProFeatures(pro: Pick<ProProfile, 'subscriptionStatus' | 'subscr
   return end === null || end > Date.now()
 }
 
-function serviceSupportText(service: string, categoryName: string): string {
+function serviceSupportText(t: Translator, service: string, categoryName: string): string {
   const lower = service.toLowerCase()
-  if (lower.includes('emergency')) return 'Urgent requests welcome when available'
-  if (lower.includes('installation') || lower.includes('fitting')) return 'Installation and setup support'
-  if (lower.includes('repair')) return 'Diagnosis and repair work'
-  if (lower.includes('clean')) return 'One-off or recurring cleaning'
-  if (lower.includes('design')) return 'Planning and execution help'
-  return `${categoryName} service`
+  if (lower.includes('emergency')) return t('proProfile.serviceSupport.emergency')
+  if (lower.includes('installation') || lower.includes('fitting')) return t('proProfile.serviceSupport.installation')
+  if (lower.includes('repair')) return t('proProfile.serviceSupport.repair')
+  if (lower.includes('clean')) return t('proProfile.serviceSupport.clean')
+  if (lower.includes('design')) return t('proProfile.serviceSupport.design')
+  return t('proProfile.serviceSupport.generic', { category: translateCategory(t, categoryName) })
 }
 
 function serviceIcon(service: string): IconType {
@@ -182,15 +187,15 @@ function serviceIcon(service: string): IconType {
   return MdBuild
 }
 
-function credentialIcon(label: string): IconType {
-  if (label === 'Identity verification') return MdVerified
-  if (label === 'Phone') return MdPhoneIphone
-  if (label === 'Background check') return MdShield
-  if (label === 'Certificate') return MdWorkspacePremium
-  if (label === 'Insurance') return MdHealthAndSafety
-  if (label === 'Service area') return MdLocationOn
-  if (label === 'Availability') return MdAccessTime
-  if (label === 'Payment methods') return MdPayments
+function credentialIcon(key: string): IconType {
+  if (key === 'identity') return MdVerified
+  if (key === 'phone') return MdPhoneIphone
+  if (key === 'background') return MdShield
+  if (key === 'certificate') return MdWorkspacePremium
+  if (key === 'insurance') return MdHealthAndSafety
+  if (key === 'serviceArea') return MdLocationOn
+  if (key === 'availability') return MdAccessTime
+  if (key === 'paymentMethods') return MdPayments
   return MdAccountBalanceWallet
 }
 
@@ -198,24 +203,26 @@ function externalHref(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`
 }
 
-function socialEntries(pro: ProProfile) {
+function socialEntries(t: Translator, pro: ProProfile) {
   return (Object.keys(SOCIAL_LABELS) as Array<keyof typeof SOCIAL_LABELS>)
-    .map(key => ({ key, label: SOCIAL_LABELS[key], url: pro.socialLinks?.[key]?.trim() ?? '' }))
+    .map(key => ({ key, label: t(`proProfile.social.${key}`, { defaultValue: SOCIAL_LABELS[key] }), url: pro.socialLinks?.[key]?.trim() ?? '' }))
     .filter(item => item.url)
 }
 
-function faqEntries(pro: ProProfile) {
-  return (Object.keys(FAQ_LABELS) as Array<keyof typeof FAQ_LABELS>)
-    .map(key => ({ key, question: FAQ_LABELS[key], answer: pro.faqs?.[key]?.trim() ?? '' }))
+function faqEntries(t: Translator, pro: ProProfile) {
+  return (['pricing', 'process', 'advice'] as const)
+    .map(key => ({ key, question: t(`proProfile.faqLabels.${key}`), answer: pro.faqs?.[key]?.trim() ?? '' }))
     .filter(item => item.answer)
 }
 
-function whyThisPro(pro: ProProfile): string {
-  const services = pro.services?.slice(0, 3).join(', ')
-  const experience = pro.yearsExp ? `has been in business for ${pro.yearsExp} ${pro.yearsExp === '1' ? 'year' : 'years'}` : 'has professional experience'
-  const serviceCopy = services ? ` and offers ${services.toLowerCase()} services` : ''
-  const trustCopy = hasPaidProFeatures(pro) ? ' Verified profile details help customers book with confidence.' : ''
-  return `${pro.fullName} ${experience}${serviceCopy}. Customers can review pricing, photos, credentials, and FAQs before requesting an estimate.${trustCopy}`
+function whyThisPro(t: Translator, pro: ProProfile): string {
+  const services = pro.services?.slice(0, 3).map(service => translateService(t, service)).join(', ')
+  const experience = pro.yearsExp
+    ? t(pro.yearsExp === '1' ? 'proProfile.why.experienceSingular' : 'proProfile.why.experiencePlural', { years: pro.yearsExp })
+    : t('proProfile.why.professionalExperience')
+  const serviceCopy = services ? t('proProfile.why.serviceCopy', { services: services.toLowerCase() }) : ''
+  const trustCopy = hasPaidProFeatures(pro) ? t('proProfile.why.trustCopy') : ''
+  return t('proProfile.why.summary', { name: pro.fullName, experience, serviceCopy, trustCopy })
 }
 
 function toApproximateJobLocation(position: GeolocationPosition): JobLocation {
@@ -226,26 +233,38 @@ function toApproximateJobLocation(position: GeolocationPosition): JobLocation {
   }
 }
 
-function optionalLocationNotice(err: unknown): string {
+function optionalLocationNotice(t: Translator, err: unknown): string {
   if (err && typeof err === 'object' && 'code' in err && err.code === 1) {
-    return 'Location permission was skipped. We will use your selected district instead.'
+    return t('proProfile.request.errors.locationSkipped')
   }
-  return 'We could not capture browser location. We will use your selected district instead.'
+  return t('proProfile.request.errors.locationFailed')
 }
 
 function validAttachment(file: File): boolean {
   return file.type.startsWith('image/') || file.type === 'application/pdf'
 }
 
-function projectSummaryTitle(project: ProjectSummary): string {
+function projectSummaryTitle(t: Translator, project: ProjectSummary): string {
   return project.answers.project_details
     || project.answers.task
     || project.answers.issue
-    || `${project.categoryName} project`
+    || t('proProfile.request.projectFallback', { category: translateCategory(t, project.categoryName) })
 }
 
 function shortText(value: string, max = 72): string {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
+}
+
+function optionKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+}
+
+function translateOption(t: Translator, namespace: string, value: string): string {
+  const key = optionKey(value)
+  return key ? t(`${namespace}.${key}`, { defaultValue: value }) : value
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -276,22 +295,22 @@ function StarRating({ rating, count }: { rating: number; count: number }) {
   )
 }
 
-function formatReviewDate(value?: string): string {
-  if (!value) return 'Recently'
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return 'Recently'
-  return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 function reviewerInitials(name: string): string {
   return name.split(/\s+/).filter(Boolean).map(part => part[0]).join('').slice(0, 2).toUpperCase() || 'MC'
 }
 
-function ratingLabel(rating: number): string {
-  if (rating >= 4.8) return 'Exceptional'
-  if (rating >= 4.5) return 'Excellent'
-  if (rating >= 4) return 'Very good'
-  return 'Customer rated'
+function formatReviewDate(t: Translator, locale: string, value?: string): string {
+  if (!value) return t('proProfile.reviews.recently')
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return t('proProfile.reviews.recently')
+  return parsed.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function ratingLabel(t: Translator, rating: number): string {
+  if (rating >= 4.8) return t('proProfile.reviews.rating.exceptional')
+  if (rating >= 4.5) return t('proProfile.reviews.rating.excellent')
+  if (rating >= 4) return t('proProfile.reviews.rating.veryGood')
+  return t('proProfile.reviews.rating.customerRated')
 }
 
 function reviewKeywords(reviews: PublicReview[]): Array<{ word: string; count: number }> {
@@ -317,8 +336,9 @@ function reviewKeywords(reviews: PublicReview[]): Array<{ word: string; count: n
 }
 
 function ReviewStars({ rating, size = 18 }: { rating: number; size?: number }) {
+  const t = useTranslations()
   return (
-    <span className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
+    <span className="flex gap-0.5" aria-label={t('proProfile.reviews.starsAria', { rating })}>
       {[1, 2, 3, 4, 5].map(value => (
         <MdStar key={value} size={size} color={value <= Math.round(rating) ? '#2fbf8f' : '#d1d5db'} />
       ))}
@@ -335,6 +355,8 @@ function ReviewSection({
   rating?: number
   reviewCount?: number
 }) {
+  const t = useTranslations()
+  const locale = useLocale()
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<'relevant' | 'newest' | 'highest'>('relevant')
   const averageRating = rating ?? (reviews.length
@@ -369,14 +391,14 @@ function ReviewSection({
         <div>
           <StarRating rating={rating} count={reviewCount} />
           <p className="mt-3 text-sm text-gray-500">
-            Written reviews will appear here as customers review completed jobs.
+            {t('proProfile.reviews.writtenComing')}
           </p>
         </div>
       )
     }
     return (
       <div>
-        <p className="text-sm text-gray-500">No reviews yet. Reviews appear after customers confirm completed jobs.</p>
+        <p className="text-sm text-gray-500">{t('proProfile.reviews.noneYet')}</p>
       </div>
     )
   }
@@ -386,13 +408,13 @@ function ReviewSection({
       <div className="grid gap-6 md:grid-cols-[230px_minmax(0,1fr)] md:items-start">
         <div>
           <p className="text-2xl font-black leading-none text-emerald-500" style={dg}>
-            {ratingLabel(averageRating)} {averageRating.toFixed(1)}
+            {ratingLabel(t, averageRating)} {averageRating.toFixed(1)}
           </p>
           <div className="mt-3">
             <ReviewStars rating={averageRating} size={34} />
           </div>
           <p className="mt-2 text-sm font-semibold text-gray-700">
-            {totalReviews} review{totalReviews === 1 ? '' : 's'}
+            {t(totalReviews === 1 ? 'proProfile.reviews.reviewSingular' : 'proProfile.reviews.reviewPlural', { count: totalReviews })}
           </p>
         </div>
 
@@ -417,7 +439,8 @@ function ReviewSection({
       </div>
 
       <p className="mt-5 text-sm text-gray-700">
-        Your trust means everything to us. <Link href="/help" className="font-bold text-sky-600 hover:underline">Learn about our review guidelines.</Link>
+        {t('proProfile.reviews.trustCopy')}{' '}
+        <Link href="/help" className="font-bold text-sky-600 hover:underline">{t('proProfile.reviews.guidelinesLink')}</Link>
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_250px]">
@@ -426,7 +449,7 @@ function ReviewSection({
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search reviews"
+            placeholder={t('proProfile.reviews.searchPlaceholder')}
             className="h-12 w-full rounded-sm border border-gray-300 bg-white pl-12 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
           />
         </label>
@@ -436,9 +459,9 @@ function ReviewSection({
             onChange={e => setSort(e.target.value as typeof sort)}
             className="h-12 w-full appearance-none rounded-sm border border-gray-300 bg-white px-4 pr-10 text-sm text-gray-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
           >
-            <option value="relevant">Most relevant</option>
-            <option value="newest">Newest</option>
-            <option value="highest">Highest rated</option>
+            <option value="relevant">{t('proProfile.reviews.sort.relevant')}</option>
+            <option value="newest">{t('proProfile.reviews.sort.newest')}</option>
+            <option value="highest">{t('proProfile.reviews.sort.highest')}</option>
           </select>
           <MdKeyboardArrowDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-700" size={24} aria-hidden="true" />
         </label>
@@ -446,7 +469,7 @@ function ReviewSection({
 
       {keywords.length > 0 && (
         <div className="mt-5">
-          <p className="mb-3 text-sm font-semibold text-gray-700">Read reviews that mention:</p>
+          <p className="mb-3 text-sm font-semibold text-gray-700">{t('proProfile.reviews.mentions')}</p>
           <div className="flex flex-wrap gap-2">
             {keywords.map(item => (
               <button
@@ -467,20 +490,20 @@ function ReviewSection({
           <article key={review.id} className="py-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-700">
-                {reviewerInitials(review.customerName || 'Mestermind customer')}
+                {reviewerInitials(review.customerName || t('proProfile.reviews.customerFallback'))}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-lg font-black text-gray-900" style={dg}>{review.customerName || 'Mestermind customer'}</p>
+                    <p className="text-lg font-black text-gray-900" style={dg}>{review.customerName || t('proProfile.reviews.customerFallback')}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
                       <ReviewStars rating={review.rating} size={18} />
                       <span className="font-semibold text-gray-700">{review.rating}/5</span>
                       <span>·</span>
-                      <span>{review.categoryName || 'Completed job'}</span>
+                      <span>{review.categoryName ? translateCategory(t, review.categoryName) : t('proProfile.reviews.completedJob')}</span>
                     </div>
                   </div>
-                  <p className="shrink-0 text-sm text-gray-500">{formatReviewDate(review.createdAt)}</p>
+                  <p className="shrink-0 text-sm text-gray-500">{formatReviewDate(t, locale, review.createdAt)}</p>
                 </div>
                 <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7 text-gray-800">
                   {review.comment}
@@ -489,7 +512,7 @@ function ReviewSection({
             </div>
           </article>
         )) : (
-          <p className="py-8 text-sm text-gray-500">No reviews match that search.</p>
+          <p className="py-8 text-sm text-gray-500">{t('proProfile.reviews.noMatch')}</p>
         )}
       </div>
     </div>
@@ -505,15 +528,16 @@ function BeforeAfterViewer({
   afterUrl?: string
   jobType: string
 }) {
+  const t = useTranslations()
   const [position, setPosition] = useState(50)
 
   if (!beforeUrl && !afterUrl) return null
   if (!beforeUrl || !afterUrl) {
     const url = beforeUrl || afterUrl
-    const label = beforeUrl ? 'Before' : 'After'
+    const label = beforeUrl ? t('proProfile.projects.before') : t('proProfile.projects.after')
     return (
       <div className="relative aspect-[4/3] bg-gray-100">
-        <img src={url} alt={`${jobType} ${label.toLowerCase()}`} className="h-full w-full object-cover" />
+        <img src={url} alt={t('proProfile.projects.singlePhotoAlt', { jobType, label: label.toLowerCase() })} className="h-full w-full object-cover" />
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-700">{label}</span>
       </div>
     )
@@ -523,23 +547,23 @@ function BeforeAfterViewer({
     <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
       <img
         src={beforeUrl}
-        alt={`${jobType} before`}
+        alt={t('proProfile.projects.beforeAlt', { jobType })}
         className="absolute inset-0 h-full w-full object-cover"
       />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${position}%` }}>
         <img
           src={afterUrl}
-          alt={`${jobType} after`}
+          alt={t('proProfile.projects.afterAlt', { jobType })}
           className="h-full w-full object-cover"
           style={{ width: `${10000 / Math.max(position, 1)}%`, maxWidth: 'none' }}
         />
       </div>
       <div className="absolute inset-y-0 w-0.5 bg-white shadow" style={{ left: `${position}%` }} />
       <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-700">
-        After
+        {t('proProfile.projects.after')}
       </div>
       <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-700">
-        Before
+        {t('proProfile.projects.before')}
       </div>
       <input
         type="range"
@@ -547,7 +571,7 @@ function BeforeAfterViewer({
         max={100}
         value={position}
         onChange={e => setPosition(Number(e.target.value))}
-        aria-label={`Compare before and after for ${jobType}`}
+        aria-label={t('proProfile.projects.compareAria', { jobType })}
         className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
       />
       <div
@@ -561,30 +585,32 @@ function BeforeAfterViewer({
 }
 
 function TrustAndDetails({ pro }: { pro: ProProfile }) {
+  const t = useTranslations()
+  const locale = useLocale()
   const topDistricts = pro.districts?.slice(0, 6) ?? []
   const moreDistricts = (pro.districts?.length ?? 0) - topDistricts.length
   const checks = [
-    { label: statusLabel(pro.status), active: pro.status === 'active' },
-    { label: 'Phone verified', active: Boolean(pro.phoneVerified) },
-    { label: 'Background check submitted', active: Boolean(pro.backgroundCheck) },
-    { label: 'Certificate on file', active: Boolean(pro.certificateUrl) },
-    { label: 'Insurance on file', active: Boolean(pro.insuranceUrl) },
-  ].filter(item => item.active || item.label === statusLabel(pro.status))
+    { key: 'identity', label: statusLabel(t, pro.status), active: pro.status === 'active' },
+    { key: 'phone', label: t('proProfile.trust.phoneVerified'), active: Boolean(pro.phoneVerified) },
+    { key: 'background', label: t('proProfile.trust.backgroundSubmitted'), active: Boolean(pro.backgroundCheck) },
+    { key: 'certificate', label: t('proProfile.trust.certificateOnFile'), active: Boolean(pro.certificateUrl) },
+    { key: 'insurance', label: t('proProfile.trust.insuranceOnFile'), active: Boolean(pro.insuranceUrl) },
+  ].filter(item => item.active || item.key === 'identity')
 
   return (
     <div className="flex flex-col gap-4">
       <section className="bg-white rounded-2xl border border-gray-200 p-5">
-        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">At a glance</p>
-        <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Pro details</h2>
+        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proProfile.details.kicker')}</p>
+        <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proProfile.details.title')}</h2>
         <div className="divide-y divide-gray-100">
           {[
-            ['Trade', pro.categoryName || 'Not specified'],
-            ['Experience', pro.yearsExp ? `${pro.yearsExp} years` : 'Not specified'],
-            ['Pricing', pricingSummary(pro)],
-            ['Payment methods', pro.paymentMethods?.length ? pro.paymentMethods.join(', ') : 'Ask before booking'],
-            ['Availability', pro.availability?.length ? pro.availability.join(', ') : 'Ask for availability'],
-            ['Home base', pro.postcode ? `Postcode ${pro.postcode}` : 'Budapest'],
-            ['Travel radius', pro.radius ? `${pro.radius} km` : 'Ask for coverage'],
+            [t('proProfile.details.trade'), pro.categoryName ? translateCategory(t, pro.categoryName) : t('proProfile.common.notSpecified')],
+            [t('proProfile.details.experience'), pro.yearsExp ? t(pro.yearsExp === '1' ? 'proProfile.common.yearSingular' : 'proProfile.common.yearPlural', { years: pro.yearsExp }) : t('proProfile.common.notSpecified')],
+            [t('proProfile.details.pricing'), pricingSummary(t, locale, pro)],
+            [t('proProfile.details.paymentMethods'), pro.paymentMethods?.length ? pro.paymentMethods.join(', ') : t('proProfile.common.askBeforeBooking')],
+            [t('proProfile.details.availability'), pro.availability?.length ? pro.availability.join(', ') : t('proProfile.common.askForAvailability')],
+            [t('proProfile.details.homeBase'), pro.postcode ? t('proProfile.common.postcode', { postcode: pro.postcode }) : 'Budapest'],
+            [t('proProfile.details.travelRadius'), pro.radius ? t('proProfile.common.distanceKm', { distance: pro.radius }) : t('proProfile.common.askForCoverage')],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex justify-between gap-4 text-sm">
               <span className="text-gray-500">{label}</span>
@@ -595,8 +621,8 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
       </section>
 
       <section className="bg-white rounded-2xl border border-gray-200 p-5">
-        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Trust</p>
-        <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Verification</h2>
+        <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proProfile.trust.kicker')}</p>
+        <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proProfile.trust.title')}</h2>
         <div className="flex flex-col gap-2">
           {checks.map(check => (
             <div key={check.label} className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
@@ -609,17 +635,17 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
 
       {topDistricts.length > 0 && (
         <section className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Coverage</p>
-          <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Service areas</h2>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proProfile.coverage.kicker')}</p>
+          <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proProfile.coverage.title')}</h2>
           <div className="flex flex-wrap gap-2">
             {topDistricts.map(id => (
               <span key={id} className="bg-gray-100 text-gray-700 text-xs font-semibold rounded-full px-3 py-1">
-                {districtName(id)}
+                {districtName(t, id)}
               </span>
             ))}
             {moreDistricts > 0 && (
               <span className="bg-slate-50 text-slate-700 text-xs font-semibold rounded-full px-3 py-1">
-                +{moreDistricts} more
+                {t('proProfile.coverage.more', { count: moreDistricts })}
               </span>
             )}
           </div>
@@ -648,6 +674,7 @@ function RequestSignupModal({
   loading: boolean
   error: string | null
 }) {
+  const t = useTranslations()
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -675,17 +702,17 @@ function RequestSignupModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">Create account</p>
-            <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>Request your estimate</h2>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proProfile.signup.kicker')}</p>
+            <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.signup.title')}</h2>
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              Sign up first, then we&apos;ll send this estimate request automatically.
+              {t('proProfile.signup.subtitle')}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer"
-            aria-label="Close"
+            aria-label={t('proProfile.common.close')}
           >
             ×
           </button>
@@ -694,7 +721,7 @@ function RequestSignupModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              First name
+              {t('proProfile.signup.firstName')}
               <input
                 name="firstName"
                 value={form.firstName}
@@ -704,7 +731,7 @@ function RequestSignupModal({
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Last name
+              {t('proProfile.signup.lastName')}
               <input
                 name="lastName"
                 value={form.lastName}
@@ -716,7 +743,7 @@ function RequestSignupModal({
           </div>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Email
+            {t('proProfile.signup.email')}
             <input
               name="email"
               type="email"
@@ -728,7 +755,7 @@ function RequestSignupModal({
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Password
+            {t('proProfile.signup.password')}
             <input
               name="password"
               type="password"
@@ -741,10 +768,10 @@ function RequestSignupModal({
           </label>
 
           <p className="text-sm text-gray-500">
-            By clicking Create account, you agree to the{' '}
-            <Link href="/terms" target="_blank" className="text-slate-700 hover:underline">Terms of Use</Link>{' '}
-            and{' '}
-            <Link href="/privacy" target="_blank" className="text-slate-700 hover:underline">Privacy Policy</Link>.
+            {t('proProfile.signup.termsPrefix')}{' '}
+            <Link href="/terms" target="_blank" className="text-slate-700 hover:underline">{t('proProfile.signup.terms')}</Link>{' '}
+            {t('proProfile.signup.and')}{' '}
+            <Link href="/privacy" target="_blank" className="text-slate-700 hover:underline">{t('proProfile.signup.privacy')}</Link>.
           </p>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -755,7 +782,7 @@ function RequestSignupModal({
               onClick={onClose}
               className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
             >
-              Cancel
+              {t('proProfile.common.cancel')}
             </button>
             <button
               type="submit"
@@ -763,7 +790,7 @@ function RequestSignupModal({
               className="flex-1 rounded-xl border-none bg-orange-500 py-3 text-base font-bold text-white hover:bg-orange-600 disabled:opacity-50 cursor-pointer"
               style={dg}
             >
-              {loading ? 'Creating account...' : 'Create account & send request'}
+              {loading ? t('proProfile.signup.creating') : t('proProfile.signup.submit')}
             </button>
           </div>
         </form>
@@ -773,6 +800,8 @@ function RequestSignupModal({
 }
 
 function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
+  const t = useTranslations()
+  const locale = useLocale()
   const questions = (CATEGORY_QUESTIONS[pro.categoryName] ?? []).filter(q => q.id !== 'urgency')
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [customerDistrict, setCustomerDistrict] = useState('')
@@ -822,15 +851,15 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
   function validateEstimate(): boolean {
     const trimmedDetails = projectDetails.trim()
     if (!trimmedDetails) {
-      setError('Please describe the work you need help with.')
+      setError(t('proProfile.request.errors.describeWork'))
       return false
     }
     if (!customerDistrict) {
-      setError('Please choose your district.')
+      setError(t('proProfile.request.errors.chooseDistrict'))
       return false
     }
     if (!urgency) {
-      setError('Please choose how urgent the job is.')
+      setError(t('proProfile.request.errors.chooseUrgency'))
       return false
     }
     return true
@@ -841,11 +870,11 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
     e.target.value = ''
     setError(null)
     if (files.some(file => !validAttachment(file))) {
-      setError('Upload photos or PDF files only.')
+      setError(t('proProfile.request.errors.fileType'))
       return
     }
     if (files.some(file => file.size > MAX_ATTACHMENT_SIZE)) {
-      setError('Each attachment must be under 10 MB.')
+      setError(t('proProfile.request.errors.fileSize'))
       return
     }
     setAttachments(prev => [...prev, ...files].slice(0, MAX_PROJECT_ATTACHMENTS))
@@ -873,7 +902,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
       setJobLocation(approximateLocation)
       return approximateLocation
     } catch (err) {
-      setError(optionalLocationNotice(err))
+      setError(optionalLocationNotice(t, err))
       return null
     }
   }
@@ -911,7 +940,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
   async function sendExistingProject(project: ProjectSummary) {
     const user = auth.currentUser
     if (!user) {
-      setError('Sign in to send an existing project.')
+      setError(t('proProfile.request.errors.signInExisting'))
       setRequestOpen(true)
       return
     }
@@ -935,7 +964,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
       )))
       setSubmitted(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send this project.')
+      setError(err instanceof Error ? err.message : t('proProfile.request.errors.sendProject'))
     } finally {
       setProjectSendingId(null)
     }
@@ -957,7 +986,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
       }
       await submitEstimate(user, location)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send your request.')
+      setError(err instanceof Error ? err.message : t('proProfile.request.errors.sendRequest'))
     } finally {
       setSubmitting(false)
     }
@@ -977,7 +1006,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
       await submitEstimate(user, location)
       setSignupOpen(false)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Could not create account.'
+      const message = err instanceof Error ? err.message : t('proProfile.request.errors.createAccount')
       setSignupError(message.replace('Firebase: ', '').replace(/ \(auth\/.*\)\.?/, ''))
     } finally {
       setSubmitting(false)
@@ -992,9 +1021,9 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
             <path d="M5 13l4 4L19 7" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <p className="font-black text-gray-900 text-base mb-1" style={dg}>Request sent!</p>
+        <p className="font-black text-gray-900 text-base mb-1" style={dg}>{t('proProfile.request.sentTitle')}</p>
         <p className="text-sm text-gray-500">
-          {pro.fullName} will get back to you shortly.
+          {t('proProfile.request.sentBody', { name: pro.fullName })}
         </p>
       </div>
     )
@@ -1007,22 +1036,22 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           <>
             <div className="mb-4">
               <div className="text-lg font-black text-gray-900">
-                {Number(pro.hourlyRate).toLocaleString('hu-HU')} Ft
+                {money(locale, Number(pro.hourlyRate))}
               </div>
               <div className="text-sm text-gray-500">
-                {pro.pricingType === 'hourly' ? 'Per hour' : 'Starting price'}
+                {pro.pricingType === 'hourly' ? t('proProfile.pricing.perHour') : t('proProfile.pricing.startingPrice')}
               </div>
               <button type="button" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })} className="mt-1 text-sm font-semibold text-slate-700 hover:underline">
-                View details
+                {t('proProfile.request.viewDetails')}
               </button>
             </div>
             <hr className="border-gray-200 mb-4" />
           </>
         )}
 
-        <h2 className="text-2xl font-black leading-none text-gray-900 mb-2" style={dg}>Request an estimate</h2>
+        <h2 className="text-2xl font-black leading-none text-gray-900 mb-2" style={dg}>{t('proProfile.request.title')}</h2>
         <p className="text-sm leading-relaxed text-gray-500 mb-4">
-          Answer a few job details so {pro.fullName} can send an accurate quote.
+          {t('proProfile.request.subtitle', { name: pro.fullName })}
         </p>
 
         <button
@@ -1035,13 +1064,13 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black rounded-sm py-3 text-base transition-colors cursor-pointer border-none"
           style={dg}
         >
-          Request estimate
+          {t('proProfile.request.cta')}
         </button>
 
         {reusableProjects.length > 0 && (
           <div className="mt-4 rounded-sm border border-slate-200 bg-slate-50 p-3">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-700 mb-2">
-              Send an existing project
+              {t('proProfile.request.existingKicker')}
             </p>
             <div className="flex flex-col gap-2">
               {reusableProjects.map(project => {
@@ -1050,12 +1079,12 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                   <div key={project.id} className="rounded-sm border border-slate-200 bg-white p-3">
                     <div className="mb-2">
                       <p className="text-sm font-bold leading-snug text-gray-900">
-                        {shortText(projectSummaryTitle(project))}
+                        {shortText(projectSummaryTitle(t, project))}
                       </p>
                       <p className="mt-1 text-xs text-gray-500">
-                        {project.categoryName}
-                        {project.customerDistrict ? ` · District ${project.customerDistrict}` : ''}
-                        {categoryMatch ? ' · Same category' : ''}
+                        {translateCategory(t, project.categoryName)}
+                        {project.customerDistrict ? ` · ${t('proProfile.common.district', { district: project.customerDistrict })}` : ''}
+                        {categoryMatch ? ` · ${t('proProfile.request.sameCategory')}` : ''}
                       </p>
                     </div>
                     <button
@@ -1064,7 +1093,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                       disabled={projectSendingId === project.id}
                       className="w-full rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
                     >
-                      {projectSendingId === project.id ? 'Sending…' : 'Send to this pro'}
+                      {projectSendingId === project.id ? t('proProfile.request.sending') : t('proProfile.request.sendToPro')}
                     </button>
                   </div>
                 )
@@ -1078,7 +1107,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           <svg width="16" height="16" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 3h3c2.205 0 4 1.794 4 4s-1.795 4-4 4H6.761l-2.76 1.401V9.642l-.198-.266A3.95 3.95 0 013 7c0-2.206 1.795-4 4-4zm.24 10H10c3.31 0 6-2.691 6-6s-2.69-6-6-6H7C3.691 1 1 3.691 1 7c0 1.17.345 2.3 1 3.288v5.371L7.24 13zm9.504-.964a1 1 0 00-1.412-.078A7.978 7.978 0 0110 14H7.957a1 1 0 100 2H10a9.98 9.98 0 006.668-2.552 1 1 0 00.076-1.412z" />
           </svg>
-          <span><span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 mr-1" />Online now</span>
+          <span><span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 mr-1" />{t('proProfile.request.onlineNow')}</span>
         </div>
 
         <hr className="border-gray-100 my-4" />
@@ -1089,11 +1118,11 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
               <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M9 12l2 2 4-4" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className="text-sm font-bold text-gray-900">Mestermind Guarantee</span>
+            <span className="text-sm font-bold text-gray-900">{t('proProfile.request.guaranteeTitle')}</span>
           </div>
           <p className="text-xs text-gray-500 leading-relaxed">
-            If you hire this pro, you&apos;re covered by our satisfaction guarantee.{' '}
-            <Link href="/help#mestermind-guarantee" className="text-slate-700 hover:underline">Learn more</Link>
+            {t('proProfile.request.guaranteeBody')}{' '}
+            <Link href="/help#mestermind-guarantee" className="text-slate-700 hover:underline">{t('proProfile.common.learnMore')}</Link>
           </p>
         </div>
       </div>
@@ -1110,17 +1139,17 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           >
             <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
               <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">Estimate request</p>
-                <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>Tell {pro.fullName} about the job</h2>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proProfile.request.modalKicker')}</p>
+                <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.request.modalTitle', { name: pro.fullName })}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                  Share the basics now. You can coordinate photos, timing, and final details after the pro replies.
+                  {t('proProfile.request.modalSubtitle')}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setRequestOpen(false)}
                 className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer"
-                aria-label="Close"
+                aria-label={t('proProfile.common.close')}
               >
                 ×
               </button>
@@ -1129,7 +1158,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
             <form onSubmit={(e) => { e.preventDefault(); handleSubmit() }} className="flex flex-col gap-5 p-6">
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  Your district <span className="text-orange-500">*</span>
+                  {t('proProfile.request.districtLabel')} <span className="text-orange-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -1137,7 +1166,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                     onChange={e => setCustomerDistrict(e.target.value)}
                     className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white pr-8 focus:outline-none focus:border-orange-400 transition-colors"
                   >
-                    <option value="">Select district</option>
+                    <option value="">{t('proProfile.request.selectDistrict')}</option>
                     {districtsData.districts.map(d => (
                       <option key={d.id} value={d.roman}>{d.roman}. {d.name}</option>
                     ))}
@@ -1148,16 +1177,16 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  Urgency <span className="text-orange-500">*</span>
+                  {t('proProfile.request.urgencyLabel')} <span className="text-orange-500">*</span>
                 </label>
                 <select
                   value={urgency}
                   onChange={e => setUrgency(e.target.value)}
                   className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
                 >
-                  <option value="">Select urgency</option>
+                  <option value="">{t('proProfile.request.selectUrgency')}</option>
                   {URGENCY_OPTIONS.map(option => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>{translateOption(t, 'proProfile.request.urgencyOptions', option)}</option>
                   ))}
                 </select>
               </div>
@@ -1166,7 +1195,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {questions.map(q => (
                     <div key={q.id}>
-                      <label className="block text-sm font-bold text-gray-800 mb-1.5">{q.label}</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-1.5">{t(`proProfile.request.questions.${q.id}.label`, { defaultValue: q.label })}</label>
                       {q.type === 'select' ? (
                         <div className="relative">
                           <select
@@ -1174,8 +1203,8 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                             onChange={e => setAnswers(p => ({ ...p, [q.id]: e.target.value }))}
                             className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white pr-8 focus:outline-none focus:border-orange-400 transition-colors"
                           >
-                            <option value="">Select answer</option>
-                            {q.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                            <option value="">{t('proProfile.request.selectAnswer')}</option>
+                            {q.options?.map(o => <option key={o.value} value={o.value}>{translateOption(t, `proProfile.request.questionOptions.${q.id}`, o.label)}</option>)}
                           </select>
                           <ChevronDown />
                         </div>
@@ -1184,7 +1213,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                           type="text"
                           value={answers[q.id] ?? ''}
                           onChange={e => setAnswers(p => ({ ...p, [q.id]: e.target.value }))}
-                          placeholder={q.placeholder}
+                          placeholder={q.placeholder ? t(`proProfile.request.questions.${q.id}.placeholder`, { defaultValue: q.placeholder }) : undefined}
                           className="w-full border border-gray-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-orange-400 transition-colors"
                         />
                       )}
@@ -1195,12 +1224,12 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  Describe the work <span className="text-orange-500">*</span>
+                  {t('proProfile.request.describeLabel')} <span className="text-orange-500">*</span>
                 </label>
                 <textarea
                   value={projectDetails}
                   onChange={e => setProjectDetails(e.target.value)}
-                  placeholder="Tell the pro what needs doing, what problem you are seeing, measurements, photos you can share later, and anything unusual about the job."
+                  placeholder={t('proProfile.request.describePlaceholder')}
                   className="w-full min-h-32 resize-y border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-orange-400 transition-colors"
                   required
                 />
@@ -1208,7 +1237,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  Photos or attachments <span className="text-gray-400 font-normal">(optional)</span>
+                  {t('proProfile.request.attachmentsLabel')} <span className="text-gray-400 font-normal">({t('proProfile.common.optional')})</span>
                 </label>
                 <div className="rounded-sm border border-dashed border-gray-300 bg-gray-50 p-4">
                   <input
@@ -1223,10 +1252,10 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                     htmlFor="request-attachments"
                     className="block cursor-pointer rounded-sm bg-white px-4 py-3 text-center text-sm font-bold text-slate-700 border border-gray-200 hover:bg-slate-50"
                   >
-                    Add photos or PDFs
+                    {t('proProfile.request.addAttachments')}
                   </label>
                   <p className="mt-2 text-xs text-gray-500">
-                    Upload up to {MAX_PROJECT_ATTACHMENTS} files. Photos help pros quote repair, painting, moving, cleaning, and carpentry jobs faster.
+                    {t('proProfile.request.attachmentsHint', { count: MAX_PROJECT_ATTACHMENTS })}
                   </p>
                   {attachments.length > 0 && (
                     <ul className="mt-3 flex flex-col gap-2">
@@ -1238,7 +1267,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                             onClick={() => removeAttachment(index)}
                             className="shrink-0 border-none bg-transparent text-xs font-bold text-gray-400 hover:text-red-500 cursor-pointer"
                           >
-                            Remove
+                            {t('proProfile.common.remove')}
                           </button>
                         </li>
                       ))}
@@ -1248,18 +1277,18 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-800 mb-1.5">Preferred timing</label>
+                <label className="block text-sm font-bold text-gray-800 mb-1.5">{t('proProfile.request.preferredTiming')}</label>
                 <select
                   value={preferredTiming}
                   onChange={e => setPreferredTiming(e.target.value)}
                   className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
                 >
-                  <option value="">Select timing</option>
-                  <option value="As soon as possible">As soon as possible</option>
-                  <option value="Within a few days">Within a few days</option>
-                  <option value="This week">This week</option>
-                  <option value="Next week">Next week</option>
-                  <option value="Flexible">Flexible</option>
+                  <option value="">{t('proProfile.request.selectTiming')}</option>
+                  <option value="As soon as possible">{t('proProfile.request.timing.asap')}</option>
+                  <option value="Within a few days">{t('proProfile.request.timing.fewDays')}</option>
+                  <option value="This week">{t('proProfile.request.timing.thisWeek')}</option>
+                  <option value="Next week">{t('proProfile.request.timing.nextWeek')}</option>
+                  <option value="Flexible">{t('proProfile.request.timing.flexible')}</option>
                 </select>
               </div>
 
@@ -1271,7 +1300,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                   onClick={() => setRequestOpen(false)}
                   className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
                 >
-                  Cancel
+                  {t('proProfile.common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -1279,7 +1308,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                   className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-xl py-3 text-base transition-colors cursor-pointer disabled:cursor-not-allowed border-none"
                   style={dg}
                 >
-                  {submitting ? 'Sending…' : 'Send request'}
+                  {submitting ? t('proProfile.request.sending') : t('proProfile.request.sendRequest')}
                 </button>
               </div>
             </form>
@@ -1303,6 +1332,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
 export default function ProProfilePage({ params }: { params: Promise<{ uid: string }> }) {
   const { uid } = use(params)
+  const t = useTranslations()
   const [pro, setPro] = useState<ProProfile | null>(null)
   const [reviews, setReviews] = useState<PublicReview[]>([])
   const [currentUid, setCurrentUid] = useState<string | null>(null)
@@ -1364,10 +1394,10 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
   if (notFound || !pro) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>Profile not found</p>
-        <p className="text-gray-500 mb-6">This professional&apos;s profile doesn&apos;t exist or has been removed.</p>
+        <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>{t('proProfile.notFound.title')}</p>
+        <p className="text-gray-500 mb-6">{t('proProfile.notFound.body')}</p>
         <Link href="/" className="inline-block bg-orange-500 text-white font-semibold rounded-lg px-6 py-2.5 text-sm hover:bg-orange-600 transition-colors">
-          Back to search
+          {t('proProfile.notFound.back')}
         </Link>
       </div>
     )
@@ -1377,8 +1407,8 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
   const moreDistricts = (pro.districts?.length ?? 0) - topDistricts.length
   const isOwnProfile = currentUid === pro.uid
   const paidPro = hasPaidProFeatures(pro)
-  const profileSocialLinks = socialEntries(pro)
-  const profileFaqs = faqEntries(pro)
+  const profileSocialLinks = socialEntries(t, pro)
+  const profileFaqs = faqEntries(t, pro)
   const categoryHref = `/instant-results?q=${encodeURIComponent(pro.categoryName || '')}`
   const scrollToEstimate = () => {
     const button = document.getElementById('request-estimate-button') as HTMLButtonElement | null
@@ -1392,10 +1422,10 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
   return (
     <main className="min-h-screen bg-white pb-16 text-gray-900">
       <div className="mx-auto max-w-[1000px] px-4 pt-4">
-        <nav className="mb-8 flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-400" aria-label="Breadcrumb">
+        <nav className="mb-8 flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-400" aria-label={t('proProfile.breadcrumb.aria')}>
           <Link href="/" className="hover:text-gray-700">Mestermind</Link>
           <span aria-hidden="true">&gt;</span>
-          <Link href={categoryHref} className="hover:text-gray-700">{pro.categoryName || 'Pros'}</Link>
+          <Link href={categoryHref} className="hover:text-gray-700">{pro.categoryName ? translateCategory(t, pro.categoryName) : t('proProfile.breadcrumb.pros')}</Link>
           <span aria-hidden="true">&gt;</span>
           <span className="text-gray-600" aria-current="page">{pro.fullName}</span>
         </nav>
@@ -1410,20 +1440,20 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                   <StarRating rating={pro.rating} count={pro.reviewCount} />
                 ) : !paidPro ? (
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="font-bold text-gray-500">Reviews unavailable</span>
+                    <span className="font-bold text-gray-500">{t('proProfile.header.reviewsUnavailable')}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="font-bold text-emerald-600">New pro</span>
+                    <span className="font-bold text-emerald-600">{t('proProfile.header.newPro')}</span>
                     <span className="flex gap-0.5">{[1,2,3,4,5].map(i => <MdStar key={i} size={15} color="#22c55e" />)}</span>
                     <span className="text-gray-400">(0)</span>
                   </div>
                 )}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                {paidPro && <span className="inline-flex items-center gap-1 font-semibold text-slate-700"><MdVerified size={16} /> Verified Pro</span>}
-                {pro.categoryName && <span>{pro.categoryName}</span>}
-                {pro.yearsExp && <span>{pro.yearsExp} years in business</span>}
+                {paidPro && <span className="inline-flex items-center gap-1 font-semibold text-slate-700"><MdVerified size={16} /> {t('proProfile.header.verifiedPro')}</span>}
+                {pro.categoryName && <span>{translateCategory(t, pro.categoryName)}</span>}
+                {pro.yearsExp && <span>{t(pro.yearsExp === '1' ? 'proProfile.header.yearInBusiness' : 'proProfile.header.yearsInBusiness', { years: pro.yearsExp })}</span>}
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -1435,7 +1465,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                   }}
                   className="inline-flex items-center gap-2 rounded-sm border border-gray-300 bg-white px-6 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
                 >
-                  <MdShare size={16} /> Share
+                  <MdShare size={16} /> {t('proProfile.header.share')}
                 </button>
                 {!isOwnProfile && (
                   <ReportUserButton
@@ -1444,7 +1474,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                     targetName={pro.fullName}
                     reporterRole="customer"
                     contextType="pro_profile"
-                    buttonLabel="Report profile"
+                    buttonLabel={t('proProfile.header.report')}
                     className="inline-flex items-center rounded-sm border border-red-100 bg-white px-6 py-2 text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer"
                   />
                 )}
@@ -1454,12 +1484,12 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
 
           <nav className="mt-8 flex gap-7 overflow-x-auto border-b border-gray-200 text-sm font-semibold text-gray-500">
             {[
-              ['#about', 'About'],
-              ['#services', 'Services'],
-              ['#projects', 'Projects'],
-              ['#reviews', 'Reviews'],
-              ['#credentials', 'Credentials'],
-              ['#faqs', 'FAQs'],
+              ['#about', t('proProfile.nav.about')],
+              ['#services', t('proProfile.nav.services')],
+              ['#projects', t('proProfile.nav.projects')],
+              ['#reviews', t('proProfile.nav.reviews')],
+              ['#credentials', t('proProfile.nav.credentials')],
+              ['#faqs', t('proProfile.nav.faqs')],
             ].map(([href, label]) => (
               <a key={href} href={href} className="whitespace-nowrap border-b-2 border-transparent pb-4 hover:border-slate-800 hover:text-gray-900">
                 {label}
@@ -1473,23 +1503,23 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
             <section className="rounded-sm bg-gray-50 p-5">
               <div className="mb-3 flex items-center gap-2">
                 <span className="text-xl">✧</span>
-                <h2 className="text-base font-black text-gray-900">Why this pro?</h2>
+                <h2 className="text-base font-black text-gray-900">{t('proProfile.why.title')}</h2>
               </div>
-              <p className="text-sm leading-relaxed text-gray-600">{whyThisPro(pro)}</p>
-              <p className="mt-3 text-xs text-gray-400">Summarized from the pro&apos;s profile. Review their profile for the latest.</p>
+              <p className="text-sm leading-relaxed text-gray-600">{whyThisPro(t, pro)}</p>
+              <p className="mt-3 text-xs text-gray-400">{t('proProfile.why.disclaimer')}</p>
             </section>
 
             <section id="about" className="scroll-mt-6">
-              <h2 className="mb-3 text-2xl font-black leading-none text-gray-900" style={dg}>About</h2>
+              <h2 className="mb-3 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.nav.about')}</h2>
               {pro.bio ? (
                 <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-gray-700">{pro.bio}</p>
               ) : (
-                <p className="text-sm leading-relaxed text-gray-500">{pro.fullName} has not added a full bio yet. You can still request an estimate and ask about experience, timing, and approach.</p>
+                <p className="text-sm leading-relaxed text-gray-500">{t('proProfile.about.empty', { name: pro.fullName })}</p>
               )}
             </section>
 
             <section id="services" className="scroll-mt-6">
-              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>Services</h2>
+              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.nav.services')}</h2>
               {pro.services?.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {pro.services.map(s => {
@@ -1499,19 +1529,19 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                         <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-700">
                           <Icon size={20} aria-hidden="true" />
                         </div>
-                        <p className="font-bold text-gray-900">{s}</p>
-                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{serviceSupportText(s, pro.categoryName)}</p>
+                        <p className="font-bold text-gray-900">{translateService(t, s)}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{serviceSupportText(t, s, pro.categoryName)}</p>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No services listed yet.</p>
+                <p className="text-sm text-gray-500">{t('proProfile.services.empty')}</p>
               )}
             </section>
 
             <section id="projects" className="scroll-mt-6">
-              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>Projects</h2>
+              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.nav.projects')}</h2>
               {pro.pastProjects?.length ? (
                 <div className="grid grid-cols-1 gap-5">
                   {pro.pastProjects.map(project => (
@@ -1537,38 +1567,38 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {pro.workPhotoUrls.map((url, i) => (
                       <div key={i} className="aspect-square overflow-hidden rounded-sm border border-gray-100">
-                        <img src={url} alt={`Work sample ${i + 1}`} className="h-full w-full object-cover" />
+                        <img src={url} alt={t('proProfile.projects.workSampleAlt', { index: i + 1 })} className="h-full w-full object-cover" />
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">No past projects yet. Ask {pro.fullName} to share examples relevant to your project.</p>
+                  <p className="text-sm text-gray-500">{t('proProfile.projects.empty', { name: pro.fullName })}</p>
                 )}
             </section>
 
             <section id="reviews" className="scroll-mt-6">
-              <h2 className="mb-3 text-2xl font-black leading-none text-gray-900" style={dg}>Reviews</h2>
+              <h2 className="mb-3 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.nav.reviews')}</h2>
               {paidPro ? (
                 <ReviewSection reviews={reviews} rating={pro.rating} reviewCount={pro.reviewCount} />
               ) : (
-                <p className="text-sm text-gray-500">Reviews are visible after this pro activates Mestermind Pro.</p>
+                <p className="text-sm text-gray-500">{t('proProfile.reviews.proOnly')}</p>
               )}
             </section>
 
             <section id="credentials" className="scroll-mt-6">
-              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>Credentials</h2>
+              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.nav.credentials')}</h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {[
-                  ['Identity verification', pro.status === 'active' ? 'Verified' : statusLabel(pro.status)],
-                  ['Phone', pro.phoneVerified ? 'Verified' : 'Verification pending'],
-                  ['Background check', pro.backgroundCheck ? 'Submitted' : 'Not requested'],
-                  ['Certificate', pro.certificateUrl ? 'On file' : pro.regulated ? 'Requested' : 'Not required'],
-                  ['Insurance', pro.insuranceUrl ? 'On file' : 'Not listed'],
-                  ['Service area', topDistricts.length ? `${topDistricts.map(id => districtName(id)).join(', ')}${moreDistricts > 0 ? ` +${moreDistricts} more` : ''}` : 'Budapest'],
-                  ['Availability', pro.availability?.length ? pro.availability.join(', ') : 'Ask for availability'],
-                  ['Payment methods', pro.paymentMethods?.length ? pro.paymentMethods.join(', ') : 'Ask before booking'],
-                ].map(([label, value]) => {
-                  const Icon = credentialIcon(label)
+                  ['identity', t('proProfile.credentials.identity'), pro.status === 'active' ? t('proProfile.credentials.verified') : statusLabel(t, pro.status)],
+                  ['phone', t('proProfile.credentials.phone'), pro.phoneVerified ? t('proProfile.credentials.verified') : t('proProfile.credentials.pending')],
+                  ['background', t('proProfile.credentials.background'), pro.backgroundCheck ? t('proProfile.credentials.submitted') : t('proProfile.credentials.notRequested')],
+                  ['certificate', t('proProfile.credentials.certificate'), pro.certificateUrl ? t('proProfile.credentials.onFile') : pro.regulated ? t('proProfile.credentials.requested') : t('proProfile.credentials.notRequired')],
+                  ['insurance', t('proProfile.credentials.insurance'), pro.insuranceUrl ? t('proProfile.credentials.onFile') : t('proProfile.credentials.notListed')],
+                  ['serviceArea', t('proProfile.credentials.serviceArea'), topDistricts.length ? `${topDistricts.map(id => districtName(t, id)).join(', ')}${moreDistricts > 0 ? ` ${t('proProfile.coverage.more', { count: moreDistricts })}` : ''}` : 'Budapest'],
+                  ['availability', t('proProfile.credentials.availability'), pro.availability?.length ? pro.availability.join(', ') : t('proProfile.common.askForAvailability')],
+                  ['paymentMethods', t('proProfile.credentials.paymentMethods'), pro.paymentMethods?.length ? pro.paymentMethods.join(', ') : t('proProfile.common.askBeforeBooking')],
+                ].map(([key, label, value]) => {
+                  const Icon = credentialIcon(key)
                   return (
                     <div key={label} className="rounded-sm border border-gray-200 bg-white p-4 text-sm">
                       <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-700">
@@ -1592,7 +1622,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
             </section>
 
             <section id="faqs" className="scroll-mt-6">
-              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>FAQs</h2>
+              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.nav.faqs')}</h2>
               {profileFaqs.length > 0 ? (
                 <div className="divide-y divide-gray-200 border-y border-gray-200">
                   {profileFaqs.map(item => (
@@ -1605,10 +1635,10 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
               ) : (
                 <ul className="grid grid-cols-1 gap-3 text-sm text-gray-600 sm:grid-cols-2">
                   {[
-                    'What is included in the estimate?',
-                    'Are materials or travel charged separately?',
-                    'What preparation is needed before arrival?',
-                    'Can they share similar past work?',
+                    t('proProfile.faqFallback.included'),
+                    t('proProfile.faqFallback.materials'),
+                    t('proProfile.faqFallback.preparation'),
+                    t('proProfile.faqFallback.pastWork'),
                   ].map(item => (
                     <li key={item} className="rounded-sm bg-gray-50 p-3">{item}</li>
                   ))}
@@ -1632,11 +1662,11 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
       <div className="fixed bottom-0 left-0 right-0 z-30 flex gap-2 border-t border-gray-200 bg-white p-3 lg:hidden">
         {isOwnProfile ? (
           <Link href="/pro/jobs" className="flex-1 rounded-sm bg-orange-500 py-3 text-center text-sm font-bold text-white hover:bg-orange-600" style={dg}>
-            Go to dashboard
+            {t('proProfile.mobile.dashboard')}
           </Link>
         ) : (
           <button type="button" onClick={scrollToEstimate} className="flex-1 rounded-sm bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600" style={dg}>
-            Request estimate
+            {t('proProfile.request.cta')}
           </button>
         )}
       </div>

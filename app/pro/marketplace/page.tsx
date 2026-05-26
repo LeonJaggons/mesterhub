@@ -5,8 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { QuoteModal, type QuoteFormData } from '@/app/pro/jobs/JobModals'
-import { dg, districtLabel, formatAnswers, timeAgo, type TimestampLike } from '@/app/requests/shared'
+import { dg, districtLabel, formatAnswers, timestampMillis, type TimestampLike } from '@/app/requests/shared'
 import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
+import { useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
+
+type Translator = ReturnType<typeof useTranslations>
 
 type MarketplaceProject = {
   id: string
@@ -24,11 +28,21 @@ type MarketplaceAccess = {
   reason?: string
 }
 
-function projectTitle(project: MarketplaceProject): string {
+function timeAgo(t: Translator, ts: TimestampLike | null): string {
+  const millis = timestampMillis(ts)
+  if (!millis) return ''
+  const seconds = Math.floor((Date.now() - millis) / 1000)
+  if (seconds < 60) return t('proMarketplace.time.justNow')
+  if (seconds < 3600) return t('proMarketplace.time.minutesAgo', { count: Math.floor(seconds / 60) })
+  if (seconds < 86400) return t('proMarketplace.time.hoursAgo', { count: Math.floor(seconds / 3600) })
+  return t('proMarketplace.time.daysAgo', { count: Math.floor(seconds / 86400) })
+}
+
+function projectTitle(t: Translator, project: MarketplaceProject): string {
   return project.answers.project_details
     || project.answers.task
     || project.answers.issue
-    || `${project.categoryName} project`
+    || t('proMarketplace.card.fallbackTitle', { category: translateCategory(t, project.categoryName) })
 }
 
 function shortText(value: string, max = 180): string {
@@ -44,30 +58,39 @@ function ProjectCard({
   onQuote: (project: MarketplaceProject) => void
   submitting: boolean
 }) {
+  const t = useTranslations()
   const details = formatAnswers(project.answers).filter(item => item.key !== 'Project Details').slice(0, 4)
+  const categoryLabel = translateCategory(t, project.categoryName)
 
   return (
     <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:border-slate-300 hover:shadow-md">
       <div className="p-5">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">Marketplace project</p>
-            <h2 className="text-2xl font-black leading-none text-gray-900" style={dg}>{project.categoryName}</h2>
-            <p className="mt-2 text-sm leading-6 text-gray-600">{shortText(projectTitle(project))}</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proMarketplace.card.kicker')}</p>
+            <h2 className="text-2xl font-black leading-none text-gray-900" style={dg}>{categoryLabel}</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">{shortText(projectTitle(t, project))}</p>
           </div>
           <span className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
-            {project.customerDistrict ? districtLabel(project.customerDistrict) : 'District not shared'}
+            {project.customerDistrict ? districtLabel(project.customerDistrict) : t('proMarketplace.card.districtNotShared')}
           </span>
         </div>
 
         <div className="mb-4 flex flex-wrap gap-2">
           {project.attachmentUrls?.length ? (
             <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
-              {project.attachmentUrls.length} attachment{project.attachmentUrls.length === 1 ? '' : 's'}
+              {t(
+                project.attachmentUrls.length === 1
+                  ? 'proMarketplace.card.attachmentSingular'
+                  : 'proMarketplace.card.attachmentPlural',
+                { count: project.attachmentUrls.length }
+              )}
             </span>
           ) : null}
           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-400">
-            {project.updatedAt ? `Updated ${timeAgo(project.updatedAt)}` : timeAgo(project.createdAt ?? null)}
+            {project.updatedAt
+              ? t('proMarketplace.card.updated', { time: timeAgo(t, project.updatedAt) })
+              : timeAgo(t, project.createdAt ?? null)}
           </span>
         </div>
 
@@ -90,7 +113,7 @@ function ProjectCard({
           disabled={submitting}
           className="w-full rounded-lg bg-slate-800 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
-          {submitting ? 'Sending quote...' : 'Send marketplace quote'}
+          {submitting ? t('proMarketplace.card.sendingQuote') : t('proMarketplace.card.sendQuote')}
         </button>
       </div>
     </article>
@@ -99,6 +122,7 @@ function ProjectCard({
 
 export default function ProMarketplacePage() {
   const router = useRouter()
+  const t = useTranslations()
   const [projects, setProjects] = useState<MarketplaceProject[]>([])
   const [access, setAccess] = useState<MarketplaceAccess | null>(null)
   const [loading, setLoading] = useState(true)
@@ -140,7 +164,7 @@ export default function ProMarketplacePage() {
       setProjects(prev => prev.filter(project => project.id !== quoteProject.id))
       setQuoteProject(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send marketplace quote.')
+      setError(err instanceof Error ? err.message : t('proMarketplace.errors.sendQuote'))
     } finally {
       setSubmittingProjectId(null)
     }
@@ -151,16 +175,16 @@ export default function ProMarketplacePage() {
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-700">Open marketplace</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proMarketplace.header.kicker')}</p>
             <h1 className="text-5xl font-black leading-[1.05] text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
-              Projects looking for quotes
+              {t('proMarketplace.header.title')}
             </h1>
             <p className="mt-2 max-w-2xl text-base text-gray-500">
-              Browse active customer projects that match your trade and service area. Marketplace quotes stay separate for customers until they choose to hire you.
+              {t('proMarketplace.header.subtitle')}
             </p>
           </div>
           <Link href="/pro/jobs" className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50">
-            Back to jobs
+            {t('proMarketplace.header.backToJobs')}
           </Link>
         </div>
 
@@ -180,20 +204,20 @@ export default function ProMarketplacePage() {
               </div>
             ) : access && !access.eligible ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-                <p className="text-2xl font-black text-gray-900" style={dg}>Marketplace unavailable</p>
+                <p className="text-2xl font-black text-gray-900" style={dg}>{t('proMarketplace.unavailable.title')}</p>
                 <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
-                  {access.reason ?? 'Your account is not eligible for marketplace quoting yet.'}
+                  {access.reason ?? t('proMarketplace.unavailable.body')}
                 </p>
                 {!access.hasProPlan && (
                   <Link href="/pro/settings" className="mt-5 inline-block rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-orange-600">
-                    Upgrade to Mestermind Pro
+                    {t('proMarketplace.unavailable.upgrade')}
                   </Link>
                 )}
               </div>
             ) : projects.length === 0 ? (
               <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
-                <p className="text-xl font-black text-gray-900" style={dg}>No matching marketplace projects</p>
-                <p className="mt-1 text-sm">New active projects in your trade and districts will appear here.</p>
+                <p className="text-xl font-black text-gray-900" style={dg}>{t('proMarketplace.empty.title')}</p>
+                <p className="mt-1 text-sm">{t('proMarketplace.empty.body')}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -212,12 +236,12 @@ export default function ProMarketplacePage() {
           <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
             <ProUpgradeCta />
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-700">Marketplace quotes</p>
-              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>How it works</h2>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proMarketplace.sidebar.kicker')}</p>
+              <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proMarketplace.sidebar.title')}</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
-                <li>Customers see these in a separate marketplace section on their project.</li>
-                <li>Your quote does not create a job or conversation unless the customer accepts it.</li>
-                <li>Accepted marketplace quotes move into your normal jobs workflow.</li>
+                {['separateSection', 'noJobUntilAccepted', 'normalWorkflow'].map(item => (
+                  <li key={item}>{t(`proMarketplace.sidebar.items.${item}`)}</li>
+                ))}
               </ul>
             </div>
           </aside>

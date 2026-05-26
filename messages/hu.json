@@ -683,6 +683,564 @@
       "confirm": "Igen, elutasítom"
     }
   },
+  "proMarketplace": {
+    "time": {
+      "justNow": "épp most",
+      "minutesAgo": "{count} perce",
+      "hoursAgo": "{count} órája",
+      "daysAgo": "{count} napja"
+    },
+    "header": {
+      "kicker": "Nyitott piactér",
+      "title": "Projektek, amelyek ajánlatot várnak",
+      "subtitle": "Böngéssz aktív ügyfélprojekteket, amelyek illenek a szakmádhoz és a szolgáltatási területedhez. A piactéri ajánlatok külön maradnak az ügyfeleknek, amíg nem döntenek úgy, hogy téged választanak.",
+      "backToJobs": "Vissza a munkákhoz"
+    },
+    "card": {
+      "kicker": "Piactéri projekt",
+      "fallbackTitle": "{category} projekt",
+      "districtNotShared": "A kerület nincs megadva",
+      "attachmentSingular": "{count} melléklet",
+      "attachmentPlural": "{count} melléklet",
+      "updated": "Frissítve: {time}",
+      "sendingQuote": "Ajánlat küldése...",
+      "sendQuote": "Piactéri ajánlat küldése"
+    },
+    "unavailable": {
+      "title": "A piactér nem érhető el",
+      "body": "A fiókod még nem jogosult piactéri ajánlatadásra.",
+      "upgrade": "Frissítés Mestermind Próra"
+    },
+    "empty": {
+      "title": "Nincs hozzád illő piactéri projekt",
+      "body": "Az új, aktív projektek a szakmádban és kerületeidben itt jelennek meg."
+    },
+    "sidebar": {
+      "kicker": "Piactéri ajánlatok",
+      "title": "Így működik",
+      "items": {
+        "separateSection": "Az ügyfelek ezeket a projektjük külön piactéri részében látják.",
+        "noJobUntilAccepted": "Az ajánlatod nem hoz létre munkát vagy beszélgetést, amíg az ügyfél el nem fogadja.",
+        "normalWorkflow": "Az elfogadott piactéri ajánlatok bekerülnek a megszokott munkafolyamatodba."
+      }
+    },
+    "errors": {
+      "sendQuote": "Nem sikerült elküldeni a piactéri ajánlatot."
+    }
+  },
+  "proWork": {
+    "header": {
+      "kicker": "Szakember irányítópult",
+      "title": "Munkáim",
+      "subtitle": "Megerősített időpontok és elfogadott munkák, amelyeket ütemezni kell."
+    },
+    "location": {
+      "approximate": "Hozzávetőleges munkavégzési hely",
+      "approximateKm": "Hozzávetőleges munkavégzési hely {distance} km-en belül",
+      "approximateM": "Hozzávetőleges munkavégzési hely {distance} m-en belül",
+      "district": "{district}. kerület",
+      "notShared": "A kerület nincs megadva"
+    },
+    "customerFallback": "Ügyfél",
+    "appointments": {
+      "kicker": "Megerősített időpontok",
+      "title": "Közelgő munkák",
+      "confirmed": "Megerősítve",
+      "empty": "A megerősített ügyfélidőpontok itt jelennek meg.",
+      "dateAtTime": "{date}, {time}"
+    },
+    "summary": {
+      "kicker": "Munkaösszefoglaló",
+      "title": "Mai nézet",
+      "confirmed": "Megerősítve",
+      "needScheduling": "Ütemezés szükséges"
+    },
+    "schedule": {
+      "kicker": "Figyelmet igényel",
+      "title": "Következő ütemezés"
+    }
+  },
+  "proEarnings": {
+    "time": {
+      "justNow": "épp most",
+      "minutesAgo": "{count} perce",
+      "hoursAgo": "{count} órája",
+      "daysAgo": "{count} napja"
+    },
+    "header": {
+      "kicker": "Szakember irányítópult",
+      "title": "Bevételek",
+      "subtitle": "Kövesd a befejezett munkák tényleges bevételét, az elfogadott munkák várható bevételét és az ajánlati csővezeték értékét."
+    },
+    "metrics": {
+      "real": {
+        "label": "Tényleges bevétel",
+        "bodySingular": "{count} befejezett munka",
+        "bodyPlural": "{count} befejezett munka"
+      },
+      "expected": {
+        "label": "Várható bevétel",
+        "bodySingular": "{count} elfogadott munka még folyamatban",
+        "bodyPlural": "{count} elfogadott munka még folyamatban"
+      },
+      "pipeline": {
+        "label": "Ajánlati csővezeték",
+        "bodySingular": "{count} ajánlat vár ügyfélre",
+        "bodyPlural": "{count} ajánlat vár ügyfélre"
+      },
+      "average": {
+        "label": "Átlagos befejezett munka",
+        "notAvailable": "nincs adat",
+        "body": "Az elfogadott/befejezett munkák {rate}-a befejezett"
+      }
+    },
+    "chart": {
+      "kicker": "Trend",
+      "title": "Várható és tényleges bevétel",
+      "real": "Tényleges",
+      "expected": "Várható",
+      "realTooltip": "{month} tényleges: {value}",
+      "expectedTooltip": "{month} várható: {value}",
+      "expectedAddition": "+ {value} várható"
+    },
+    "forecast": {
+      "kicker": "Előrejelzés",
+      "title": "Mi várható",
+      "booked": "Lefoglalva, de még nincs kész",
+      "openQuote": "Nyitott ajánlatok értéke",
+      "projectedTotal": "Várható összesen"
+    },
+    "activeJobs": {
+      "singular": "{count} aktív munka",
+      "plural": "{count} aktív munka",
+      "body": "Jelöld késznek a befejezett munkát, majd az ügyfelek megerősíthetik, és az érték átkerül a tényleges bevételek közé."
+    },
+    "jobList": {
+      "recentTitle": "Legutóbbi tényleges bevételek",
+      "recentEmpty": "A befejezett munkák itt jelennek meg, miután az ügyfelek megerősítik a munkát.",
+      "expectedTitle": "Várható bevételek",
+      "expectedEmpty": "Az elfogadott munkák itt jelennek meg, mielőtt befejeződnek.",
+      "serviceJob": "Szolgáltatási munka",
+      "customer": "Ügyfél",
+      "quoteOnRequest": "Ajánlat kérésre"
+    }
+  },
+  "instantResults": {
+    "header": {
+      "matchingQuery": "Találatok erre: {query}",
+      "matchingProfessionals": "Megfelelő szakemberek",
+      "district": "{district}. kerület"
+    },
+    "card": {
+      "online": "Online",
+      "topPro": "Kiemelt szakember",
+      "onlineNow": "Most online",
+      "respondsInAbout": "válaszidő kb.",
+      "hiresSingular": "{count} megbízás a Mesterminden",
+      "hiresPlural": "{count} megbízás a Mesterminden",
+      "seeMore": "Tovább",
+      "startingPrice": "Induló ár",
+      "contactForPrice": "Ár egyeztetéssel",
+      "viewProfile": "Profil megtekintése",
+      "unknownPro": "Ismeretlen",
+      "defaultResponseTime": "egy napon belül"
+    },
+    "topMatch": {
+      "title": "Kezdd a legjobb találatokkal",
+      "body": "Nyiss meg egy profilt, küldj részletes kérést, és kérj ajánlatot.",
+      "cta": "Legjobb találat megtekintése"
+    },
+    "filters": {
+      "servicesFallback": "Szolgáltatások",
+      "prosSingular": "{count} szakember",
+      "prosPlural": "{count} szakember",
+      "averagePrice": "Átlagos feltüntetett induló ár",
+      "matchingActivePros": "Megfelelő aktív szakemberek",
+      "resultsAfterSingular": "{count} találat a szűrők után",
+      "resultsAfterPlural": "{count} találat a szűrők után",
+      "sortBy": "Rendezés",
+      "sort": {
+        "recommended": "Ajánlott",
+        "rating": "Legjobb értékelés",
+        "reviews": "Legtöbb értékelés",
+        "price": "Legalacsonyabb induló ár"
+      },
+      "minimumRating": "Minimum értékelés",
+      "rating": {
+        "any": "Bármilyen értékelés",
+        "fourFiveUp": "4,5 vagy magasabb",
+        "fourUp": "4,0 vagy magasabb"
+      },
+      "startingPrice": "Induló ár",
+      "price": {
+        "any": "Bármilyen ár",
+        "upTo": "Legfeljebb {value}"
+      },
+      "profileQuality": "Profilminőség",
+      "quality": {
+        "hasReviews": "Vannak ügyfélértékelései",
+        "hasPrice": "Mutat induló árat",
+        "hasProof": "Vannak fotói vagy projektjei",
+        "backgroundCheck": "Háttérellenőrzés beküldve",
+        "experienced": "5+ év tapasztalat"
+      },
+      "reset": "Szűrők törlése",
+      "resetWithCount": "Szűrők törlése ({count})"
+    },
+    "errors": {
+      "loadTitle": "Nem sikerült betölteni a szakembereket",
+      "loadBody": "Nem sikerült betölteni a szakembereket."
+    },
+    "empty": {
+      "title": "Nincs szakember, aki megfelel ezeknek a szűrőknek",
+      "body": "Próbáld törölni a szűrőket vagy bővíteni a keresést."
+    }
+  },
+  "proProfile": {
+    "common": {
+      "close": "Bezárás",
+      "cancel": "Mégse",
+      "optional": "opcionális",
+      "remove": "Eltávolítás",
+      "learnMore": "Tudj meg többet",
+      "notSpecified": "Nincs megadva",
+      "askBeforeBooking": "Foglalás előtt kérdezz rá",
+      "askForAvailability": "Kérdezz rá az elérhetőségre",
+      "askForCoverage": "Kérdezz rá a lefedettségre",
+      "postcode": "Irányítószám {postcode}",
+      "distanceKm": "{distance} km",
+      "district": "{district}. kerület",
+      "yearSingular": "{years} év",
+      "yearPlural": "{years} év"
+    },
+    "breadcrumb": {
+      "aria": "Morzsanavigáció",
+      "pros": "Szakemberek"
+    },
+    "notFound": {
+      "title": "A profil nem található",
+      "body": "Ez a szakemberprofil nem létezik vagy eltávolították.",
+      "back": "Vissza a kereséshez"
+    },
+    "pricing": {
+      "hourly": "{value} / óra",
+      "fixed": "{value}-tól",
+      "quote": "Ajánlat a munka áttekintése után",
+      "perHour": "Óránként",
+      "startingPrice": "Induló ár"
+    },
+    "status": {
+      "active": "Ellenőrzött és aktív",
+      "pending": "Ellenőrzés folyamatban",
+      "review": "Profil ellenőrzés alatt"
+    },
+    "serviceSupport": {
+      "emergency": "Sürgős kérések vállalása elérhetőség szerint",
+      "installation": "Telepítési és beállítási segítség",
+      "repair": "Hibakeresés és javítás",
+      "clean": "Egyszeri vagy rendszeres takarítás",
+      "design": "Tervezési és kivitelezési segítség",
+      "generic": "{category} szolgáltatás"
+    },
+    "faqLabels": {
+      "pricing": "Mit érdemes tudni az árazásról?",
+      "process": "Mi a szokásos folyamat új ügyféllel?",
+      "advice": "Milyen tanácsot adna annak, aki ezen a területen keres szolgáltatót?"
+    },
+    "header": {
+      "reviewsUnavailable": "Értékelések nem elérhetők",
+      "newPro": "Új szakember",
+      "verifiedPro": "Ellenőrzött szakember",
+      "yearInBusiness": "{years} éve dolgozik",
+      "yearsInBusiness": "{years} éve dolgozik",
+      "share": "Megosztás",
+      "report": "Profil jelentése"
+    },
+    "nav": {
+      "about": "Bemutatkozás",
+      "services": "Szolgáltatások",
+      "projects": "Projektek",
+      "reviews": "Értékelések",
+      "credentials": "Igazolások",
+      "faqs": "GYIK"
+    },
+    "why": {
+      "title": "Miért ő?",
+      "experienceSingular": "{years} éve dolgozik",
+      "experiencePlural": "{years} éve dolgozik",
+      "professionalExperience": "szakmai tapasztalattal rendelkezik",
+      "serviceCopy": " és {services} szolgáltatásokat kínál",
+      "trustCopy": " Az ellenőrzött profiladatok segítenek magabiztosan foglalni.",
+      "summary": "{name} {experience}{serviceCopy}. Az ügyfelek az ajánlatkérés előtt áttekinthetik az árazást, fotókat, igazolásokat és GYIK-et.{trustCopy}",
+      "disclaimer": "A szakember profilja alapján összefoglalva. A legfrissebb információkért nézd át a profilt."
+    },
+    "about": {
+      "empty": "{name} még nem adott hozzá részletes bemutatkozást. Ettől még kérhetsz ajánlatot, és rákérdezhetsz a tapasztalatra, időzítésre és munkamódszerre."
+    },
+    "services": {
+      "empty": "Még nincsenek szolgáltatások megadva."
+    },
+    "projects": {
+      "before": "Előtte",
+      "after": "Utána",
+      "singlePhotoAlt": "{jobType} {label}",
+      "beforeAlt": "{jobType} előtte",
+      "afterAlt": "{jobType} utána",
+      "compareAria": "Előtte-utána összehasonlítás ehhez: {jobType}",
+      "workSampleAlt": "Munkaminta {index}",
+      "empty": "Még nincsenek korábbi projektek. Kérd meg {name}-t, hogy osszon meg a projektedhez hasonló példákat."
+    },
+    "reviews": {
+      "recently": "Nemrég",
+      "writtenComing": "Az írásos értékelések itt jelennek meg, ahogy az ügyfelek értékelik a befejezett munkákat.",
+      "noneYet": "Még nincsenek értékelések. Az értékelések az ügyfelek által megerősített befejezett munkák után jelennek meg.",
+      "reviewSingular": "{count} értékelés",
+      "reviewPlural": "{count} értékelés",
+      "trustCopy": "A bizalmad számunkra mindennél fontosabb.",
+      "guidelinesLink": "Olvasd el az értékelési irányelveinket.",
+      "searchPlaceholder": "Értékelések keresése",
+      "mentions": "Értékelések ezekkel a kifejezésekkel:",
+      "customerFallback": "Mestermind ügyfél",
+      "completedJob": "Befejezett munka",
+      "noMatch": "Nincs értékelés erre a keresésre.",
+      "proOnly": "Az értékelések akkor láthatók, amikor a szakember aktiválja a Mestermind Prót.",
+      "starsAria": "{rating} az 5 csillagból",
+      "rating": {
+        "exceptional": "Kiemelkedő",
+        "excellent": "Kiváló",
+        "veryGood": "Nagyon jó",
+        "customerRated": "Ügyfélértékelés"
+      },
+      "sort": {
+        "relevant": "Legrelevánsabb",
+        "newest": "Legújabb",
+        "highest": "Legjobb értékelés"
+      }
+    },
+    "details": {
+      "kicker": "Röviden",
+      "title": "Szakember adatai",
+      "trade": "Szakma",
+      "experience": "Tapasztalat",
+      "pricing": "Árazás",
+      "paymentMethods": "Fizetési módok",
+      "availability": "Elérhetőség",
+      "homeBase": "Bázis",
+      "travelRadius": "Utazási körzet"
+    },
+    "trust": {
+      "kicker": "Bizalom",
+      "title": "Ellenőrzés",
+      "phoneVerified": "Telefonszám ellenőrizve",
+      "backgroundSubmitted": "Háttérellenőrzés beküldve",
+      "certificateOnFile": "Bizonyítvány feltöltve",
+      "insuranceOnFile": "Biztosítás feltöltve"
+    },
+    "coverage": {
+      "kicker": "Lefedettség",
+      "title": "Szolgáltatási területek",
+      "more": "+{count} további"
+    },
+    "credentials": {
+      "identity": "Személyazonosság ellenőrzése",
+      "phone": "Telefon",
+      "background": "Háttérellenőrzés",
+      "certificate": "Bizonyítvány",
+      "insurance": "Biztosítás",
+      "serviceArea": "Szolgáltatási terület",
+      "availability": "Elérhetőség",
+      "paymentMethods": "Fizetési módok",
+      "verified": "Ellenőrizve",
+      "pending": "Ellenőrzés függőben",
+      "submitted": "Beküldve",
+      "notRequested": "Nincs kérve",
+      "onFile": "Feltöltve",
+      "requested": "Kérve",
+      "notRequired": "Nem szükséges",
+      "notListed": "Nincs feltüntetve"
+    },
+    "faqFallback": {
+      "included": "Mit tartalmaz az ajánlat?",
+      "materials": "Az anyag vagy utazás külön díjas?",
+      "preparation": "Milyen előkészület szükséges érkezés előtt?",
+      "pastWork": "Tud hasonló korábbi munkát mutatni?"
+    },
+    "mobile": {
+      "dashboard": "Tovább az irányítópultra"
+    },
+    "signup": {
+      "kicker": "Fiók létrehozása",
+      "title": "Ajánlatkérés",
+      "subtitle": "Előbb regisztrálj, utána automatikusan elküldjük ezt az ajánlatkérést.",
+      "firstName": "Keresztnév",
+      "lastName": "Vezetéknév",
+      "email": "E-mail",
+      "password": "Jelszó",
+      "termsPrefix": "A Fiók létrehozása gombra kattintva elfogadod az",
+      "terms": "Felhasználási feltételeket",
+      "and": "és az",
+      "privacy": "Adatvédelmi irányelveket",
+      "creating": "Fiók létrehozása...",
+      "submit": "Fiók létrehozása és kérés küldése"
+    },
+    "request": {
+      "title": "Ajánlatkérés",
+      "subtitle": "Válaszolj néhány kérdésre, hogy {name} pontos ajánlatot küldhessen.",
+      "cta": "Ajánlatkérés",
+      "viewDetails": "Részletek megtekintése",
+      "existingKicker": "Meglévő projekt küldése",
+      "projectFallback": "{category} projekt",
+      "sameCategory": "Azonos kategória",
+      "sending": "Küldés…",
+      "sendToPro": "Küldés ennek a szakembernek",
+      "onlineNow": "Most online",
+      "guaranteeTitle": "Mestermind garancia",
+      "guaranteeBody": "Ha ezt a szakembert választod, elégedettségi garanciánk véd.",
+      "modalKicker": "Ajánlatkérés",
+      "modalTitle": "Mesélj a munkáról {name} számára",
+      "modalSubtitle": "Oszd meg most az alapokat. A fotókat, időzítést és végső részleteket a szakember válasza után egyeztethetitek.",
+      "districtLabel": "Kerületed",
+      "selectDistrict": "Kerület kiválasztása",
+      "urgencyLabel": "Sürgősség",
+      "selectUrgency": "Sürgősség kiválasztása",
+      "selectAnswer": "Válasz kiválasztása",
+      "describeLabel": "Munka leírása",
+      "describePlaceholder": "Írd le, miben kérsz segítséget, milyen problémát látsz, méreteket, később megosztható fotókat és minden szokatlan részletet.",
+      "attachmentsLabel": "Fotók vagy mellékletek",
+      "addAttachments": "Fotók vagy PDF-ek hozzáadása",
+      "attachmentsHint": "Legfeljebb {count} fájlt tölthetsz fel. A fotók segítenek gyorsabban ajánlatot adni javításra, festésre, költöztetésre, takarításra és asztalosmunkára.",
+      "preferredTiming": "Preferált időzítés",
+      "selectTiming": "Időzítés kiválasztása",
+      "sendRequest": "Kérés küldése",
+      "sentTitle": "Kérés elküldve!",
+      "sentBody": "{name} hamarosan jelentkezik.",
+      "timing": {
+        "asap": "Amint lehet",
+        "fewDays": "Néhány napon belül",
+        "thisWeek": "Ezen a héten",
+        "nextWeek": "Jövő héten",
+        "flexible": "Rugalmas"
+      },
+      "errors": {
+        "describeWork": "Írd le, milyen munkában kérsz segítséget.",
+        "chooseDistrict": "Válaszd ki a kerületedet.",
+        "chooseUrgency": "Válaszd ki, mennyire sürgős a munka.",
+        "fileType": "Csak fotókat vagy PDF-fájlokat tölts fel.",
+        "fileSize": "Minden mellékletnek 10 MB alatt kell lennie.",
+        "locationSkipped": "A helyhozzáférést kihagytad. A kiválasztott kerületet használjuk.",
+        "locationFailed": "Nem sikerült lekérni a böngésző helyadatait. A kiválasztott kerületet használjuk.",
+        "signInExisting": "Jelentkezz be meglévő projekt küldéséhez.",
+        "sendProject": "Nem sikerült elküldeni ezt a projektet.",
+        "sendRequest": "Nem sikerült elküldeni a kérésedet.",
+        "createAccount": "Nem sikerült létrehozni a fiókot."
+      }
+    },
+    "social": {
+      "website": "Weboldal",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "tiktok": "TikTok"
+    }
+  },
+  "proSettings": {
+    "loading": "Beállítások betöltése...",
+    "header": {
+      "title": "Szakember beállítások",
+      "subtitle": "Kezeld azt a profilt, amelyet az ügyfelek jóváhagyás után látnak."
+    },
+    "status": {
+      "approved": "Jóváhagyva",
+      "suspended": "Felfüggesztve",
+      "rejected": "Elutasítva",
+      "pending": "Ellenőrzésre vár"
+    },
+    "errors": {
+      "save": "Nem sikerült menteni a beállításokat.",
+      "stripeUrl": "A Stripe nem adott vissza számlázási URL-t.",
+      "stripeOpen": "Nem sikerült megnyitni a Stripe számlázást.",
+      "load": "Nem sikerült betölteni a szakemberprofilodat."
+    },
+    "profile": {
+      "fallbackName": "Szakemberprofilod",
+      "visible": "Látható a keresésben",
+      "paused": "Szüneteltetve",
+      "details": "Profiladatok",
+      "complete": "Profil {score}%-ban kész",
+      "edit": "Profil szerkesztése",
+      "viewPublic": "Nyilvános profil megtekintése",
+      "stats": {
+        "services": "Szolgáltatások",
+        "districts": "Kerületek",
+        "projects": "Projektek",
+        "payments": "Fizetések"
+      }
+    },
+    "billing": {
+      "kicker": "Növekedési csomag",
+      "title": "Mestermind Pro",
+      "activeBody": "A Pro előnyeid aktívak a keresésben, értékelésekben és ügyfélmegkeresésekben.",
+      "inactiveBody": "Alakítsd a profilodat jobban konvertáló megjelenéssé kiemelt láthatósággal és bizalmi jelzésekkel.",
+      "manageCopy": "A számlázást bármikor kezelheted Stripe-ban.",
+      "subscribeCopy": "Kezdj a beépített próbaidőszakkal, majd tartsd aktívan a Prót Stripe-on keresztül.",
+      "opening": "Stripe megnyitása...",
+      "manage": "Számlázás kezelése",
+      "subscribe": "Előfizetés Stripe-pal",
+      "status": {
+        "active": "aktív",
+        "trialing": "próbaidőszak",
+        "inactive": "inaktív",
+        "past_due": "lejárt fizetés",
+        "unpaid": "fizetetlen",
+        "canceled": "lemondva"
+      },
+      "features": {
+        "inquiries": "Korlátlan munkamegkeresések",
+        "priority": "Kiemelt keresési helyezés",
+        "badge": "Ellenőrzött jelvény",
+        "reviews": "Profilon látható értékelések",
+        "featured": "Kategória-kiemelés",
+        "messages": "Közvetlen ügyfélüzenetek"
+      }
+    },
+    "visibility": {
+      "title": "Profil láthatósága",
+      "visibleBody": "A jóváhagyott profilod megjelenhet az ügyfélkeresésekben és fogadhat ajánlatkéréseket.",
+      "pausedBody": "A profilod szüneteltetve van és rejtve marad a keresésből. A meglévő beszélgetések nem változnak.",
+      "pendingBody": "A profilod jóváhagyás után jelenik meg a keresésben.",
+      "resumed": "A profil láthatósága újraindítva.",
+      "pausedSaved": "Profil szüneteltetve.",
+      "resume": "Profil újraindítása",
+      "pause": "Profil szüneteltetése"
+    },
+    "notifications": {
+      "title": "Értesítési beállítások",
+      "subtitle": "Válaszd ki, mi indítson szakember értesítéseket az MVP indulása alatt.",
+      "saved": "Értesítési beállítások mentve.",
+      "items": {
+        "newLeads": "Új ajánlatkérések",
+        "messages": "Ügyfélüzenetek",
+        "appointments": "Időpontfrissítések",
+        "email": "E-mail értesítések",
+        "sms": "SMS értesítések"
+      }
+    },
+    "verification": {
+      "title": "Ellenőrzési központ",
+      "subtitle": "Kövesd, mit küldtél be jóváhagyásra, és miben bízhatnak az ügyfelek.",
+      "complete": "Kész",
+      "missing": "Hiányzik",
+      "viewDetails": "Ellenőrzési részletek megtekintése",
+      "items": {
+        "identity": "Személyazonosító okmány",
+        "selfie": "Szelfi egyeztetés",
+        "phone": "Telefon ellenőrzés",
+        "certificate": "Bizonyítvány",
+        "insurance": "Biztosítás",
+        "background": "Háttérellenőrzés"
+      }
+    }
+  },
   "proLanding": {
     "hero": {
       "eyebrow": "Szakembereknek",

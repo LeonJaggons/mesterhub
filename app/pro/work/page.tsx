@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { authenticatedFetch } from '@/firebase/apiClient'
-import { approximateLocationLabel } from '@/app/requests/shared'
 import type { JobLocation } from '@/firebase/serviceRequests'
 import type { InquiryTimestamp } from '@/lib/inquiryAccess'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
+type Translator = ReturnType<typeof useTranslations>
 
 type RequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled'
 
@@ -46,10 +48,10 @@ function appointmentDate(req: ServiceRequest): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-function formatAppointmentDateTime(date: string, time: string): string {
+function formatAppointmentDateTime(t: Translator, locale: string, date: string, time: string): string {
   const parsed = new Date(`${date}T${time}`)
-  if (Number.isNaN(parsed.getTime())) return `${date} at ${time}`
-  return parsed.toLocaleString(undefined, {
+  if (Number.isNaN(parsed.getTime())) return t('proWork.appointments.dateAtTime', { date, time })
+  return parsed.toLocaleString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -58,13 +60,25 @@ function formatAppointmentDateTime(date: string, time: string): string {
   })
 }
 
-function districtCopy(req: ServiceRequest): string {
-  if (req.jobLocation) return approximateLocationLabel(req.jobLocation)
-  return req.customerDistrict ? `District ${req.customerDistrict}` : 'District not shared'
+function districtCopy(t: Translator, req: ServiceRequest): string {
+  if (req.jobLocation) {
+    const accuracy = req.jobLocation.accuracy
+    if (!accuracy) return t('proWork.location.approximate')
+    const meters = Math.max(Math.ceil(accuracy), 500)
+    if (meters >= 1000) {
+      return t('proWork.location.approximateKm', { distance: (meters / 1000).toFixed(1) })
+    }
+    return t('proWork.location.approximateM', { distance: meters })
+  }
+  return req.customerDistrict
+    ? t('proWork.location.district', { district: req.customerDistrict })
+    : t('proWork.location.notShared')
 }
 
 export default function WorkPage() {
   const router = useRouter()
+  const t = useTranslations()
+  const locale = useLocale()
   const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -109,15 +123,15 @@ export default function WorkPage() {
     <main className="bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="mb-8">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Pro dashboard</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proWork.header.kicker')}</p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.02em' }}
           >
-            My Work
+            {t('proWork.header.title')}
           </h1>
           <p className="text-gray-500 text-base mt-2">
-            Confirmed appointments and accepted jobs ready to schedule.
+            {t('proWork.header.subtitle')}
           </p>
         </div>
 
@@ -132,10 +146,10 @@ export default function WorkPage() {
             <section className="lg:col-span-2 flex flex-col gap-4">
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
                 <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">
-                  Confirmed appointments
+                  {t('proWork.appointments.kicker')}
                 </p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
-                  Upcoming work
+                  {t('proWork.appointments.title')}
                 </h2>
                 {confirmedAppointments.length > 0 ? (
                   <div className="flex flex-col gap-3">
@@ -149,19 +163,19 @@ export default function WorkPage() {
                         >
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                             <div>
-                              <p className="text-base font-bold text-gray-900">{req.categoryName}</p>
+                              <p className="text-base font-bold text-gray-900">{translateCategory(t, req.categoryName)}</p>
                               <p className="text-sm text-slate-700 font-semibold mt-1">
-                                {formatAppointmentDateTime(appointment.date, appointment.time)}
+                                {formatAppointmentDateTime(t, locale, appointment.date, appointment.time)}
                               </p>
                               <p className="text-sm text-gray-500 mt-1">
-                                {req.customerName || 'Customer'} · {appointment.duration}
+                                {req.customerName || t('proWork.customerFallback')} · {appointment.duration}
                               </p>
                               <p className="text-xs text-gray-400 mt-1">
-                                {appointment.location || districtCopy(req)}
+                                {appointment.location || districtCopy(t, req)}
                               </p>
                             </div>
                             <span className="w-fit text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-full px-2.5 py-1">
-                              Confirmed
+                              {t('proWork.appointments.confirmed')}
                             </span>
                           </div>
                         </Link>
@@ -170,7 +184,7 @@ export default function WorkPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-gray-400">
-                    Confirmed customer appointments will appear here.
+                    {t('proWork.appointments.empty')}
                   </p>
                 )}
               </div>
@@ -178,24 +192,24 @@ export default function WorkPage() {
 
             <aside className="lg:sticky lg:top-6 flex flex-col gap-4">
               <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Work summary</p>
-                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Today&apos;s view</h2>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proWork.summary.kicker')}</p>
+                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proWork.summary.title')}</h2>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
                     <p className="text-2xl font-black text-slate-800" style={dg}>{confirmedAppointments.length}</p>
-                    <p className="text-xs text-slate-500">Confirmed</p>
+                    <p className="text-xs text-slate-500">{t('proWork.summary.confirmed')}</p>
                   </div>
                   <div className="rounded-xl bg-orange-50 border border-orange-100 p-3">
                     <p className="text-2xl font-black text-orange-700" style={dg}>{acceptedWithoutAppointment.length}</p>
-                    <p className="text-xs text-orange-700">Need scheduling</p>
+                    <p className="text-xs text-orange-700">{t('proWork.summary.needScheduling')}</p>
                   </div>
                 </div>
               </div>
 
               {acceptedWithoutAppointment.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                  <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">Needs attention</p>
-                  <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Schedule next</h2>
+                  <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">{t('proWork.schedule.kicker')}</p>
+                  <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proWork.schedule.title')}</h2>
                   <div className="flex flex-col gap-2">
                     {acceptedWithoutAppointment.slice(0, 3).map(req => (
                       <Link
@@ -203,8 +217,8 @@ export default function WorkPage() {
                         href={`/pro/jobs/${req.id}`}
                         className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2 hover:bg-gray-100 transition-colors"
                       >
-                        <p className="text-sm font-semibold text-gray-900">{req.categoryName}</p>
-                        <p className="text-xs text-gray-400">{req.customerName || 'Customer'} · {districtCopy(req)}</p>
+                        <p className="text-sm font-semibold text-gray-900">{translateCategory(t, req.categoryName)}</p>
+                        <p className="text-xs text-gray-400">{req.customerName || t('proWork.customerFallback')} · {districtCopy(t, req)}</p>
                       </Link>
                     ))}
                   </div>
