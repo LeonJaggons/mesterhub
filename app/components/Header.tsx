@@ -103,7 +103,6 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, onClose: () =
 
 function LanguageChooser({ compact = false }: { compact?: boolean }) {
   const t = useTranslations()
-  const router = useRouter()
   const rawPathname = usePathname()
   const locale = getPathLocale(rawPathname) ?? defaultLocale
   const pathname = getPathnameWithoutLocale(rawPathname)
@@ -128,7 +127,7 @@ function LanguageChooser({ compact = false }: { compact?: boolean }) {
     } catch {
       // Signed-out visitors still get the locale cookie from the localized route.
     } finally {
-      router.push(nextHref)
+      window.location.assign(nextHref)
     }
   }
 
@@ -656,7 +655,6 @@ function MobileMenu({
 
 export default function Header() {
   const t = useTranslations()
-  const router = useRouter()
   const rawPathname = usePathname()
   const currentLocale = getPathLocale(rawPathname) ?? defaultLocale
   const pathname = getPathnameWithoutLocale(rawPathname)
@@ -699,7 +697,7 @@ export default function Header() {
           if (data.preferredLocale && data.preferredLocale !== currentLocale) {
             const queryString = searchParams.toString()
             const href = queryString ? `${pathname}?${queryString}` : pathname
-            router.replace(localizeHref(href, data.preferredLocale))
+            window.location.replace(localizeHref(href, data.preferredLocale))
           }
           if (!profile) {
             setPendingJobs(0)
@@ -716,7 +714,7 @@ export default function Header() {
       cancelled = true
       unsub()
     }
-  }, [currentLocale, isSignupPath, pathname, router, searchParams])
+  }, [currentLocale, isSignupPath, pathname, searchParams])
 
   // Fetch pending job count for the badge
   useEffect(() => {
