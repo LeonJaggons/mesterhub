@@ -10,6 +10,7 @@ import {
   requireCron,
   toDate,
 } from '../utils'
+import { huCategory } from '@/lib/i18n/email'
 
 type ServiceRequest = {
   proUid?: string
@@ -50,6 +51,7 @@ export async function GET(request: Request) {
     const requestUrl = appUrl(`/pro/jobs/${doc.id}`)
     const customerName = cleanString(data.customerName, 'A customer')
     const categoryName = cleanString(data.categoryName, 'service')
+    const categoryNameHu = huCategory(categoryName)
 
     await sendLifecycleEmail({
       to: await proEmail(data.proUid),
@@ -77,9 +79,9 @@ export async function GET(request: Request) {
       localized: {
         hu: {
           subject: `Emlékeztető: ${customerName} várja az ajánlatod`,
-          previewText: `Nézd át a(z) ${categoryName} kérést, és válaszolj a Mestermindben.`,
+          previewText: `Nézd át a(z) ${categoryNameHu} kérést, és válaszolj a Mestermindben.`,
           text: [
-            `${customerName} továbbra is várja a(z) ${categoryName} ajánlatod.`,
+            `${customerName} továbbra is várja a(z) ${categoryNameHu} ajánlatod.`,
             data.customerDistrict ? `Kerület: ${data.customerDistrict}` : '',
             `Nyisd meg a Mestermindet az ajánlat elküldéséhez vagy a kérés elutasításához: ${requestUrl}`,
           ].filter(Boolean).join('\n\n'),
@@ -88,7 +90,7 @@ export async function GET(request: Request) {
             title: `${customerName} várja az ajánlatod`,
             intro: 'A gyors válasz segít az ügyfeleknek továbblépni.',
             rows: [
-              ['Szolgáltatás', categoryName],
+              ['Szolgáltatás', categoryNameHu],
               ['Kerület', data.customerDistrict],
             ],
             ctaLabel: 'Kérés megtekintése',

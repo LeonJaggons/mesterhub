@@ -5,6 +5,7 @@ import { createInAppNotification } from '@/firebase/inAppNotifications'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { AppointmentRequestInput } from '@/firebase/conversations'
 import type { QuoteInput } from '@/firebase/serviceRequests'
+import { huCategory, huRole } from '@/lib/i18n/email'
 
 type RequestDoc = {
   projectId?: string
@@ -270,10 +271,6 @@ function detailRow(label: string, value: string): string {
       </td>
     </tr>
   `
-}
-
-function huActorRole(role: 'customer' | 'pro'): string {
-  return role === 'pro' ? 'szakember' : 'ügyfél'
 }
 
 function emailCardHtml(input: {
@@ -836,6 +833,7 @@ export async function PATCH(
         statusHistory: FieldValue.arrayUnion(historyEntry('quoted', user.uid, 'pro')),
       })
       const requestUrl = appUrl(`/requests/${requestId}`)
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: req.customerEmail,
         event: 'quote.sent',
@@ -847,9 +845,9 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.proName} ajánlatot küldött`,
-            previewText: `Nézd át ${req.proName} ${req.categoryName} ajánlatát a Mestermindben.`,
+            previewText: `Nézd át ${req.proName} ${categoryNameHu} ajánlatát a Mestermindben.`,
             text: [
-              `${req.proName} ajánlatot küldött a(z) ${req.categoryName} kérésedre.`,
+              `${req.proName} ajánlatot küldött a(z) ${categoryNameHu} kérésedre.`,
               `Ár: ${price}`,
               `Időzítés: ${timeline}`,
               notes ? `${req.proName} üzenete:\n${notes}` : '',
@@ -857,7 +855,7 @@ export async function PATCH(
             ].filter(Boolean).join('\n\n'),
             bodyHtml: emailCardHtml({
               eyebrow: 'Új ajánlat érkezett',
-              title: `${req.proName} ajánlatot küldött a(z) ${req.categoryName} munkára`,
+              title: `${req.proName} ajánlatot küldött a(z) ${categoryNameHu} munkára`,
               intro: 'Nézd át az árat, az időzítést és a szakember üzenetét.',
               rows: [
                 ['Ár', price],
@@ -900,6 +898,7 @@ export async function PATCH(
         statusHistory: FieldValue.arrayUnion(historyEntry('declined', user.uid, 'pro')),
       })
       const requestUrl = appUrl(`/requests/${requestId}`)
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: req.customerEmail,
         event: 'request.declined_by_pro',
@@ -911,11 +910,11 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.proName} elutasította a kérésed`,
-            previewText: `${req.proName} nem tudja vállalni ezt a(z) ${req.categoryName} kérést.`,
-            text: `${req.proName} nem tudja vállalni ezt a(z) ${req.categoryName} kérést. Nyisd meg a Mestermindet a kérés áttekintéséhez és másik szakember kereséséhez: ${requestUrl}`,
+            previewText: `${req.proName} nem tudja vállalni ezt a(z) ${categoryNameHu} kérést.`,
+            text: `${req.proName} nem tudja vállalni ezt a(z) ${categoryNameHu} kérést. Nyisd meg a Mestermindet a kérés áttekintéséhez és másik szakember kereséséhez: ${requestUrl}`,
             bodyHtml: emailCardHtml({
               eyebrow: 'Kérés frissítése',
-              title: `${req.proName} elutasította a(z) ${req.categoryName} kérésed`,
+              title: `${req.proName} elutasította a(z) ${categoryNameHu} kérésed`,
               intro: 'Ez a szakember most nem elérhető erre a munkára.',
               rows: [
                 ['Mi történik most?', 'A kérésed továbbra is mentve van. Áttekintheted a részleteket, és másik szakembert hívhatsz meg a Mestermindben.'],
@@ -983,6 +982,7 @@ export async function PATCH(
         createdAt: FieldValue.serverTimestamp(),
       })
       await batch.commit()
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: await proEmail(req.proUid),
         event: 'quote.accepted',
@@ -1004,9 +1004,9 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.customerName} elfogadta az ajánlatod`,
-            previewText: `${req.customerName} elfogadta a(z) ${req.categoryName} ajánlatod.`,
+            previewText: `${req.customerName} elfogadta a(z) ${categoryNameHu} ajánlatod.`,
             text: [
-              `${req.customerName} elfogadta a(z) ${req.categoryName} ajánlatod.`,
+              `${req.customerName} elfogadta a(z) ${categoryNameHu} ajánlatod.`,
               `Üzenet:\n${acceptanceDetails.message}`,
               acceptanceDetails.phone ? `Telefon: ${acceptanceDetails.phone}` : '',
               acceptanceDetails.customerEmail ? `E-mail: ${acceptanceDetails.customerEmail}` : '',
@@ -1016,7 +1016,7 @@ export async function PATCH(
             ].filter(Boolean).join('\n\n'),
             bodyHtml: emailCardHtml({
               eyebrow: 'Ajánlat elfogadva',
-              title: `${req.customerName} elfogadta a(z) ${req.categoryName} ajánlatod`,
+              title: `${req.customerName} elfogadta a(z) ${categoryNameHu} ajánlatod`,
               intro: 'Az ügyfél téged választott. Használd az adatait a következő lépések egyeztetéséhez.',
               rows: [
                 ['Ügyfél üzenete', acceptanceDetails.message],
@@ -1062,6 +1062,7 @@ export async function PATCH(
         declinedAt: FieldValue.serverTimestamp(),
         statusHistory: FieldValue.arrayUnion(historyEntry('declined', user.uid, 'customer')),
       })
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: await proEmail(req.proUid),
         event: 'quote.declined',
@@ -1083,15 +1084,15 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.customerName} elutasította az ajánlatod`,
-            previewText: `${req.customerName} elutasította a(z) ${req.categoryName} ajánlatod.`,
+            previewText: `${req.customerName} elutasította a(z) ${categoryNameHu} ajánlatod.`,
             text: [
-              `${req.customerName} elutasította a(z) ${req.categoryName} ajánlatod.`,
+              `${req.customerName} elutasította a(z) ${categoryNameHu} ajánlatod.`,
               reason ? `Indok:\n${reason}` : '',
               `Nyisd meg a Mestermindet a kérés áttekintéséhez: ${appUrl(`/pro/jobs/${requestId}`)}`,
             ].filter(Boolean).join('\n\n'),
             bodyHtml: emailCardHtml({
               eyebrow: 'Ajánlat elutasítva',
-              title: `${req.customerName} elutasította a(z) ${req.categoryName} ajánlatod`,
+              title: `${req.customerName} elutasította a(z) ${categoryNameHu} ajánlatod`,
               intro: 'Az ügyfél nem ezt az ajánlatot választotta.',
               rows: [
                 ['Indok', reason || 'Nem adott meg indokot.'],
@@ -1174,6 +1175,7 @@ export async function PATCH(
         createdAt: FieldValue.serverTimestamp(),
       })
       await batch.commit()
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: req.customerEmail,
         event: 'appointment.proposed',
@@ -1195,9 +1197,9 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.proName} időpontot javasolt`,
-            previewText: `${req.proName} időpontot javasolt a(z) ${req.categoryName} kérésedhez.`,
+            previewText: `${req.proName} időpontot javasolt a(z) ${categoryNameHu} kérésedhez.`,
             text: [
-              `${req.proName} időpontot javasolt a(z) ${req.categoryName} kérésedhez.`,
+              `${req.proName} időpontot javasolt a(z) ${categoryNameHu} kérésedhez.`,
               `Dátum: ${appointmentForEmail.date}`,
               `Idő: ${appointmentForEmail.time}`,
               appointmentForEmail.duration ? `Időtartam: ${appointmentForEmail.duration}` : '',
@@ -1210,7 +1212,7 @@ export async function PATCH(
               title: `${req.proName} időpontot javasolt`,
               intro: 'Nézd át a szakember által javasolt dátumot és időpontot.',
               rows: [
-                ['Szolgáltatás', req.categoryName],
+                ['Szolgáltatás', categoryNameHu],
                 ['Dátum', appointmentForEmail.date],
                 ['Idő', appointmentForEmail.time],
                 ['Időtartam', appointmentForEmail.duration],
@@ -1267,6 +1269,7 @@ export async function PATCH(
           statusHistory: FieldValue.arrayUnion(historyEntry('appointment_confirmed', user.uid, 'customer')),
         })
       }
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: await proEmail(req.proUid),
         event: 'appointment.confirmed',
@@ -1288,9 +1291,9 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.customerName} megerősítette az időpontot`,
-            previewText: `${req.customerName} megerősítette a(z) ${req.categoryName} időpontját.`,
+            previewText: `${req.customerName} megerősítette a(z) ${categoryNameHu} időpontját.`,
             text: [
-              `${req.customerName} megerősítette a(z) ${req.categoryName} időpontját.`,
+              `${req.customerName} megerősítette a(z) ${categoryNameHu} időpontját.`,
               confirmedAppointment?.date ? `Dátum: ${confirmedAppointment.date}` : '',
               confirmedAppointment?.time ? `Idő: ${confirmedAppointment.time}` : '',
               confirmedAppointment?.duration ? `Időtartam: ${confirmedAppointment.duration}` : '',
@@ -1303,7 +1306,7 @@ export async function PATCH(
               title: `${req.customerName} megerősítette az időpontot`,
               intro: 'Az ügyfél elfogadta a javasolt időpontot.',
               rows: [
-                ['Szolgáltatás', req.categoryName],
+                ['Szolgáltatás', categoryNameHu],
                 ['Dátum', confirmedAppointment?.date],
                 ['Idő', confirmedAppointment?.time],
                 ['Időtartam', confirmedAppointment?.duration],
@@ -1417,6 +1420,7 @@ export async function PATCH(
         },
         statusHistory: FieldValue.arrayUnion(historyEntry('completion_requested', user.uid, 'pro')),
       })
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: req.customerEmail,
         event: 'completion.requested',
@@ -1436,11 +1440,11 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.proName} késznek jelölte a munkát`,
-            previewText: `${req.proName} késznek jelölte a(z) ${req.categoryName} munkát.`,
-            text: `${req.proName} késznek jelölte a(z) ${req.categoryName} munkát. Nyisd meg a Mestermindet, és erősítsd meg, ha a munka befejeződött: ${appUrl(`/requests/${requestId}`)}`,
+            previewText: `${req.proName} késznek jelölte a(z) ${categoryNameHu} munkát.`,
+            text: `${req.proName} késznek jelölte a(z) ${categoryNameHu} munkát. Nyisd meg a Mestermindet, és erősítsd meg, ha a munka befejeződött: ${appUrl(`/requests/${requestId}`)}`,
             bodyHtml: emailCardHtml({
               eyebrow: 'Munka késznek jelölve',
-              title: `${req.proName} késznek jelölte a(z) ${req.categoryName} munkád`,
+              title: `${req.proName} késznek jelölte a(z) ${categoryNameHu} munkád`,
               intro: 'Erősítsd meg, hogy a munka elkészült, amikor készen állsz.',
               rows: [
                 ['Következő lépés', 'Nézd át a munkát, és erősítsd meg a befejezést, ha minden rendben van.'],
@@ -1498,6 +1502,7 @@ export async function PATCH(
       }
 
       await batch.commit()
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: await proEmail(req.proUid),
         event: 'request.completed',
@@ -1517,11 +1522,11 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `${req.customerName} megerősítette, hogy a munka kész`,
-            previewText: `${req.customerName} megerősítette, hogy a(z) ${req.categoryName} munka befejeződött.`,
-            text: `${req.customerName} megerősítette, hogy a(z) ${req.categoryName} munka befejeződött. Nézd meg a lezárt munkát a Mestermindben: ${appUrl(`/pro/jobs/${requestId}`)}`,
+            previewText: `${req.customerName} megerősítette, hogy a(z) ${categoryNameHu} munka befejeződött.`,
+            text: `${req.customerName} megerősítette, hogy a(z) ${categoryNameHu} munka befejeződött. Nézd meg a lezárt munkát a Mestermindben: ${appUrl(`/pro/jobs/${requestId}`)}`,
             bodyHtml: emailCardHtml({
               eyebrow: 'Munka befejezve',
-              title: `${req.customerName} megerősítette, hogy a(z) ${req.categoryName} munka kész`,
+              title: `${req.customerName} megerősítette, hogy a(z) ${categoryNameHu} munka kész`,
               intro: 'Az ügyfél megerősítette, hogy a munka befejeződött.',
               ctaLabel: 'Lezárt munka megtekintése',
               ctaUrl: appUrl(`/pro/jobs/${requestId}`),
@@ -1551,14 +1556,14 @@ export async function PATCH(
         localized: {
           hu: {
             subject: `Értékeld ${req.proName} szakembert a Mestermindben`,
-            previewText: `Mondd el más ügyfeleknek, hogyan sikerült a(z) ${req.categoryName} munka.`,
-            text: `A(z) ${req.categoryName} munka befejeződött. Kérjük, írj értékelést ${req.proName} szakemberről, hogy más ügyfelek magabiztosabban választhassanak: ${appUrl(`/requests/${requestId}#review`)}`,
+            previewText: `Mondd el más ügyfeleknek, hogyan sikerült a(z) ${categoryNameHu} munka.`,
+            text: `A(z) ${categoryNameHu} munka befejeződött. Kérjük, írj értékelést ${req.proName} szakemberről, hogy más ügyfelek magabiztosabban választhassanak: ${appUrl(`/requests/${requestId}#review`)}`,
             bodyHtml: emailCardHtml({
               eyebrow: 'Hogy sikerült?',
               title: `Értékeld ${req.proName} szakembert`,
               intro: 'Az értékelésed segít más ügyfeleknek magabiztosabban választani.',
               rows: [
-                ['Befejezett munka', req.categoryName],
+                ['Befejezett munka', categoryNameHu],
                 ['Miért fontos az értékelés?', 'Egy rövid értékelés segít a jó szakembereknek bizalmat építeni, és a jövőbeli ügyfeleknek tudni, mire számíthatnak.'],
               ],
               ctaLabel: 'Értékelés írása',
@@ -1599,6 +1604,7 @@ export async function PATCH(
         cancelledAt: FieldValue.serverTimestamp(),
         statusHistory: FieldValue.arrayUnion(historyEntry('cancelled', user.uid, actorRole)),
       })
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: actorRole === 'pro' ? req.customerEmail : await proEmail(req.proUid),
         event: 'request.cancelled',
@@ -1619,17 +1625,17 @@ export async function PATCH(
         }),
         localized: {
           hu: {
-            subject: `${req.categoryName} kérés törölve`,
-            previewText: `A(z) ${req.categoryName} kérést a(z) ${huActorRole(actorRole)} törölte.`,
+            subject: `${categoryNameHu} kérés törölve`,
+            previewText: `A(z) ${categoryNameHu} kérést a(z) ${huRole(actorRole)} törölte.`,
             text: [
-              `A(z) ${req.categoryName} kérést a(z) ${huActorRole(actorRole)} törölte.`,
+              `A(z) ${categoryNameHu} kérést a(z) ${huRole(actorRole)} törölte.`,
               reason ? `Indok:\n${reason}` : '',
               `Nyisd meg a Mestermindet a kérés áttekintéséhez: ${appUrl(actorRole === 'pro' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`)}`,
             ].filter(Boolean).join('\n\n'),
             bodyHtml: emailCardHtml({
               eyebrow: 'Kérés törölve',
-              title: `${req.categoryName} kérés törölve`,
-              intro: `Törölte: ${huActorRole(actorRole)}.`,
+              title: `${categoryNameHu} kérés törölve`,
+              intro: `Törölte: ${huRole(actorRole)}.`,
               rows: [
                 ['Indok', reason || 'Nem adott meg indokot.'],
               ],
@@ -1739,6 +1745,7 @@ export async function DELETE(
     await batch.commit()
 
     if (shouldCancel) {
+      const categoryNameHu = huCategory(req.categoryName)
       await sendLifecycleEmail({
         to: await proEmail(req.proUid),
         event: 'request.cancelled',
@@ -1759,16 +1766,16 @@ export async function DELETE(
         }),
         localized: {
           hu: {
-            subject: `${req.categoryName} kérés törölve`,
-            previewText: `A(z) ${req.categoryName} kérést az ügyfél törölte.`,
+            subject: `${categoryNameHu} kérés törölve`,
+            previewText: `A(z) ${categoryNameHu} kérést az ügyfél törölte.`,
             text: [
-              `A(z) ${req.categoryName} kérést az ügyfél törölte.`,
+              `A(z) ${categoryNameHu} kérést az ügyfél törölte.`,
               reason ? `Indok:\n${reason}` : '',
               `Nyisd meg a Mestermindet a kérés áttekintéséhez: ${appUrl(`/pro/jobs/${requestId}`)}`,
             ].filter(Boolean).join('\n\n'),
             bodyHtml: emailCardHtml({
               eyebrow: 'Kérés törölve',
-              title: `${req.categoryName} kérés törölve`,
+              title: `${categoryNameHu} kérés törölve`,
               intro: 'Az ügyfél törölte ezt a kérést.',
               rows: [
                 ['Indok', reason || 'Nem adott meg indokot.'],

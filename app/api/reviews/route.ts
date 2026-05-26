@@ -4,6 +4,7 @@ import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { sendAdminNotification } from '@/firebase/adminNotifications'
 import { sendLifecycleEmail } from '@/firebase/notifications'
+import { huCategory } from '@/lib/i18n/email'
 
 type ServiceRequestDoc = {
   proUid?: string
@@ -230,6 +231,7 @@ export async function POST(request: NextRequest) {
     })
 
     const profileUrl = appUrl(`/pro/${review.proUid}#reviews`)
+    const categoryNameHu = huCategory(review.categoryName || 'your completed job')
     await sendLifecycleEmail({
       to: await proEmail(review.proUid),
       event: 'review.posted',
@@ -253,9 +255,9 @@ export async function POST(request: NextRequest) {
       localized: {
         hu: {
           subject: `${review.customerName} értékelést írt rólad`,
-          previewText: `${review.rating}/5 értékelés ehhez: ${review.categoryName || 'a befejezett munkád'}.`,
+          previewText: `${review.rating}/5 értékelés ehhez: ${categoryNameHu}.`,
           text: [
-            `${review.customerName} ${review.rating}/5 értékelést írt a(z) ${review.categoryName || 'befejezett munkád'} kapcsán.`,
+            `${review.customerName} ${review.rating}/5 értékelést írt a(z) ${categoryNameHu} kapcsán.`,
             review.comment,
             `Nézd meg a nyilvános értékeléseidet a Mestermindben: ${profileUrl}`,
           ].join('\n\n'),
@@ -274,7 +276,7 @@ export async function POST(request: NextRequest) {
                 <td style="padding:0 0 18px;">
                   <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${escapeEmailHtml(review.customerName)} értékelést írt rólad</h1>
                   <div style="margin-top:10px;color:#f97316;font-size:24px;line-height:28px;letter-spacing:1px;">${stars(review.rating)}</div>
-                  <div style="margin-top:4px;color:#676d73;font-size:14px;line-height:20px;">${review.rating}/5 ehhez: ${escapeEmailHtml(review.categoryName || 'a befejezett munkád')}</div>
+                  <div style="margin-top:4px;color:#676d73;font-size:14px;line-height:20px;">${review.rating}/5 ehhez: ${escapeEmailHtml(categoryNameHu)}</div>
                 </td>
               </tr>
             </table>

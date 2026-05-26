@@ -9,6 +9,7 @@ import {
   requireCron,
   toDate,
 } from '../utils'
+import { huCategory } from '@/lib/i18n/email'
 
 const MESSAGE_DIGEST_COOLDOWN_MS = 30 * 60 * 1000
 
@@ -63,12 +64,13 @@ export async function GET(request: Request) {
     if (lastSentAt && Date.now() - lastSentAt.getTime() < MESSAGE_DIGEST_COOLDOWN_MS) continue
 
     const categoryName = cleanString(data.categoryName, 'your request')
+    const categoryNameHu = huCategory(categoryName)
     const senderName = cleanString(data.senderName, 'Someone')
     const requestUrl = appUrl(data.recipientRole === 'pro'
       ? `/pro/messages/${data.requestId}`
       : `/messages/${data.requestId}`)
     const subject = digestSubject({ count, categoryName })
-    const subjectHu = digestSubjectHu({ count, categoryName })
+    const subjectHu = digestSubjectHu({ count, categoryName: categoryNameHu })
     const latestMessage = cleanString(data.lastMessage)
 
     await sendLifecycleEmail({
@@ -106,8 +108,8 @@ export async function GET(request: Request) {
             : `${senderName}: ${latestMessage.slice(0, 120)}`,
           text: [
             count > 1
-              ? `${count} új üzeneted van ezzel kapcsolatban: ${categoryName}.`
-              : `Új üzeneted van ezzel kapcsolatban: ${categoryName}.`,
+              ? `${count} új üzeneted van ezzel kapcsolatban: ${categoryNameHu}.`
+              : `Új üzeneted van ezzel kapcsolatban: ${categoryNameHu}.`,
             `${senderName}: ${latestMessage}`,
             `Nyisd meg a Mestermindet a válaszhoz: ${requestUrl}`,
           ].join('\n\n'),

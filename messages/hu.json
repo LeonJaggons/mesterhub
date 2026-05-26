@@ -2321,6 +2321,7 @@
     },
     "answers": {
       "keys": {
+        "project_details": "Projekt részletei",
         "urgency": "Sürgősség",
         "preferred_timing": "Előnyben részesített időzítés",
         "frequency": "Gyakoriság",

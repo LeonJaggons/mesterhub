@@ -9,6 +9,7 @@ import {
   requireCron,
   toDate,
 } from '../utils'
+import { huCategory } from '@/lib/i18n/email'
 
 type Quote = {
   price?: string
@@ -64,6 +65,7 @@ export async function GET(request: Request) {
     const requestUrl = appUrl(`/requests/${doc.id}`)
     const proName = cleanString(data.proName, 'Your pro')
     const categoryName = cleanString(data.categoryName, 'service')
+    const categoryNameHu = huCategory(categoryName)
     const price = cleanString(quote?.price, 'Quote sent')
     const timeline = cleanString(quote?.timeline)
 
@@ -96,9 +98,9 @@ export async function GET(request: Request) {
       localized: {
         hu: {
           subject: `Emlékeztető: ${proName} ajánlatot küldött`,
-          previewText: `Nézd át a(z) ${categoryName} ajánlatod a Mestermindben.`,
+          previewText: `Nézd át a(z) ${categoryNameHu} ajánlatod a Mestermindben.`,
           text: [
-            `${proName} ajánlatot küldött a(z) ${categoryName} kérésedre.`,
+            `${proName} ajánlatot küldött a(z) ${categoryNameHu} kérésedre.`,
             `Ár: ${price}`,
             timeline ? `Időzítés: ${timeline}` : '',
             `Nyisd meg a Mestermindet az ajánlat elfogadásához, elutasításához vagy további kérdésekhez: ${requestUrl}`,
@@ -108,7 +110,7 @@ export async function GET(request: Request) {
             title: `${proName} ajánlatot küldött`,
             intro: 'Nézd át, amikor készen állsz.',
             rows: [
-              ['Szolgáltatás', categoryName],
+              ['Szolgáltatás', categoryNameHu],
               ['Ár', price],
               ['Időzítés', timeline],
               ['Üzenet', quote?.notes],

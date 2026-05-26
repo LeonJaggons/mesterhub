@@ -6,6 +6,7 @@ import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { JobLocation, NewServiceRequest } from '@/firebase/serviceRequests'
 import { hasPaidProFeatures } from '@/lib/billing'
 import { FREE_CLEAR_INQUIRY_LIMIT, clearInquiryIdsByMonth } from '@/lib/inquiryAccess'
+import { huAnswerLabel, huAnswerValue, huCategory } from '@/lib/i18n/email'
 
 type ProjectDoc = {
   customerUid: string
@@ -284,8 +285,8 @@ function estimateRequestEmailHtmlHu(input: {
     .map(([key, value]) => `
       <tr>
         <td style="padding:16px 0;border-top:1px solid #e9eced;">
-          <div style="font-size:14px;line-height:20px;color:#2f3033;font-weight:700;">${escapeEmailHtml(answerLabel(key))}</div>
-          <div style="margin-top:4px;font-size:15px;line-height:23px;color:#676d73;white-space:pre-line;">${escapeEmailHtml(value)}</div>
+          <div style="font-size:14px;line-height:20px;color:#2f3033;font-weight:700;">${escapeEmailHtml(huAnswerLabel(key))}</div>
+          <div style="margin-top:4px;font-size:15px;line-height:23px;color:#676d73;white-space:pre-line;">${escapeEmailHtml(huAnswerValue(value))}</div>
         </td>
       </tr>
     `)
@@ -455,6 +456,7 @@ export async function POST(request: NextRequest) {
     const emailCustomerName = detailsHidden ? 'A customer' : customerDisplayName
     const resetLabel = monthlyResetLabel()
     const resetLabelHu = monthlyResetLabel(new Date(), 'hu-HU')
+    const categoryLabelHu = huCategory(categoryName)
     await sendLifecycleEmail({
       to: proEmail,
       event: 'request.created',
@@ -470,13 +472,13 @@ export async function POST(request: NextRequest) {
       localized: {
         hu: {
           subject: detailsHidden
-            ? `Új ${categoryName} érdeklődés érkezett`
-            : `${customerDisplayName} ${categoryName} árajánlatot kért`,
+            ? `Új ${categoryLabelHu} érdeklődés érkezett`
+            : `${customerDisplayName} árajánlatot kért: ${categoryLabelHu}`,
           previewText: detailsHidden
             ? 'Válts Mestermind Pro csomagra a teljes kérés részleteinek megtekintéséhez.'
-            : `Nézd át a(z) ${categoryName} kérést, és küldd el az ajánlatod a Mestermindben.`,
-          text: estimateRequestEmailTextHu({ customerName: detailsHidden ? 'Egy ügyfél' : customerDisplayName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel: resetLabelHu }),
-          bodyHtml: estimateRequestEmailHtmlHu({ customerName: detailsHidden ? 'Egy ügyfél' : customerDisplayName, categoryName, answers, customerDistrict, requestUrl, detailsHidden, resetLabel: resetLabelHu }),
+            : `Nézd át a(z) ${categoryLabelHu} kérést, és küldd el az ajánlatod a Mestermindben.`,
+          text: estimateRequestEmailTextHu({ customerName: detailsHidden ? 'Egy ügyfél' : customerDisplayName, categoryName: categoryLabelHu, answers, customerDistrict, requestUrl, detailsHidden, resetLabel: resetLabelHu }),
+          bodyHtml: estimateRequestEmailHtmlHu({ customerName: detailsHidden ? 'Egy ügyfél' : customerDisplayName, categoryName: categoryLabelHu, answers, customerDistrict, requestUrl, detailsHidden, resetLabel: resetLabelHu }),
         },
       },
       hideSubjectHeading: true,

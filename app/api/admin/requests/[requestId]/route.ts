@@ -4,6 +4,7 @@ import { adminDb } from '@/firebase/admin'
 import { requireAdmin } from '@/firebase/adminAccess'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import { cleanString } from '../../utils'
+import { huCategory } from '@/lib/i18n/email'
 
 type RequestDoc = {
   proUid?: string
@@ -71,6 +72,7 @@ export async function PATCH(
         at: new Date(),
       }),
     })
+    const categoryNameHu = huCategory(serviceRequest.categoryName ?? 'Service')
 
     await Promise.all([
       sendLifecycleEmail({
@@ -81,7 +83,7 @@ export async function PATCH(
         text: `Mestermind cancelled this request.${reason ? ` Reason: ${reason}` : ''}`,
         localized: {
           hu: {
-            subject: `${serviceRequest.categoryName ?? 'Szolgáltatás'} kérés törölve`,
+            subject: `${categoryNameHu} kérés törölve`,
             text: `A Mestermind törölte ezt a kérést.${reason ? ` Indok: ${reason}` : ''}`,
           },
         },
@@ -95,7 +97,7 @@ export async function PATCH(
         text: `Mestermind cancelled this request.${reason ? ` Reason: ${reason}` : ''}`,
         localized: {
           hu: {
-            subject: `${serviceRequest.categoryName ?? 'Szolgáltatás'} kérés törölve`,
+            subject: `${categoryNameHu} kérés törölve`,
             text: `A Mestermind törölte ezt a kérést.${reason ? ` Indok: ${reason}` : ''}`,
           },
         },

@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { sendLifecycleEmail } from '@/firebase/notifications'
+import { huCategory } from '@/lib/i18n/email'
 
 type ProjectDoc = {
   customerUid: string
@@ -77,15 +78,17 @@ function cancellationHtml(categoryName: string, requestUrl: string): string {
 }
 
 function cancellationTextHu(categoryName: string, requestUrl: string): string {
+  const categoryNameHu = huCategory(categoryName)
   return [
-    `A(z) ${categoryName} kérés törölve lett, mert az ügyfél törölte a projektet.`,
+    `A(z) ${categoryNameHu} kérés törölve lett, mert az ügyfél törölte a projektet.`,
     `Nyisd meg a Mestermindet a törölt kérés áttekintéséhez: ${requestUrl}`,
   ].join('\n\n')
 }
 
 function cancellationHtmlHu(categoryName: string, requestUrl: string): string {
+  const categoryNameHu = huCategory(categoryName)
   return `
-    <p>A(z) ${escapeEmailHtml(categoryName)} kérés törölve lett, mert az ügyfél törölte a projektet.</p>
+    <p>A(z) ${escapeEmailHtml(categoryNameHu)} kérés törölve lett, mert az ügyfél törölte a projektet.</p>
     <p><a href="${escapeEmailHtml(requestUrl)}">Törölt kérés áttekintése</a></p>
   `
 }
@@ -168,6 +171,7 @@ export async function DELETE(
         .filter(req => canCancel(req.status))
         .map(async req => {
           const requestUrl = appUrl(`/pro/jobs/${req.id}`)
+          const categoryNameHu = huCategory(req.categoryName)
           await sendLifecycleEmail({
             to: await proEmail(req.proUid),
             event: 'request.cancelled',
@@ -178,8 +182,8 @@ export async function DELETE(
             bodyHtml: cancellationHtml(req.categoryName, requestUrl),
             localized: {
               hu: {
-                subject: `${req.categoryName} kérés törölve`,
-                previewText: `A(z) ${req.categoryName} kérés törölve lett, mert az ügyfél törölte a projektet.`,
+                subject: `${categoryNameHu} kérés törölve`,
+                previewText: `A(z) ${categoryNameHu} kérés törölve lett, mert az ügyfél törölte a projektet.`,
                 text: cancellationTextHu(req.categoryName, requestUrl),
                 bodyHtml: cancellationHtmlHu(req.categoryName, requestUrl),
               },

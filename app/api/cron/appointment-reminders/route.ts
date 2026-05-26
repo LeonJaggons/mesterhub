@@ -9,6 +9,7 @@ import {
   proEmail,
   requireCron,
 } from '../utils'
+import { huCategory } from '@/lib/i18n/email'
 
 type Appointment = {
   date?: string
@@ -93,6 +94,7 @@ async function sendReminder(input: {
   const requestUrl = appUrl(input.recipientRole === 'pro'
     ? `/pro/appointments/${input.requestId}`
     : `/requests/${input.requestId}`)
+  const categoryNameHu = huCategory(input.categoryName)
   await sendLifecycleEmail({
     to: input.to,
     event: 'appointment.reminder_24h',
@@ -117,12 +119,12 @@ async function sendReminder(input: {
     }),
     localized: {
       hu: {
-        subject: `Emlékeztető: ${input.categoryName} időpont holnap`,
+        subject: `Emlékeztető: ${categoryNameHu} időpont holnap`,
         previewText: `Az időpontod ${input.otherParty} partnerrel holnap lesz.`,
-        text: reminderTextHu({ ...input, requestUrl }),
+        text: reminderTextHu({ ...input, categoryName: categoryNameHu, requestUrl }),
         bodyHtml: emailCardHtml({
           eyebrow: 'Időpont emlékeztető',
-          title: `${input.categoryName} időpont holnap`,
+          title: `${categoryNameHu} időpont holnap`,
           intro: `Közeledik az időpontod ${input.otherParty} partnerrel.`,
           rows: [
             ['Dátum', input.appointment.date],

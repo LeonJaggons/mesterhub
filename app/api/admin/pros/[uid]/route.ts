@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireAdmin } from '@/firebase/adminAccess'
 import { sendLifecycleEmail } from '@/firebase/notifications'
+import { huStatus } from '@/lib/i18n/email'
 import {
   deleteAuthUser,
   deleteDocumentTree,
@@ -83,7 +84,7 @@ export async function PATCH(
           subject: status === 'active' ? 'A Mestermind profilod élő' : 'Megváltozott a Mestermind ellenőrzési státuszod',
           text: status === 'active'
             ? 'A szakember profilodat jóváhagytuk, és mostantól látható az ügyfelek számára.'
-            : `A szakember profilod státusza most: ${status}.${reason ? ` Indok: ${reason}` : ''}`,
+            : `A szakember profilod státusza most: ${huStatus(status)}.${reason ? ` Indok: ${reason}` : ''}`,
         },
       },
       metadata: { proUid: uid, status },
