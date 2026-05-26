@@ -256,6 +256,30 @@
 
 .inputGroup .input { flex: 1; }
 
+.inlineBtn {
+  flex-shrink: 0;
+  padding: 0 1rem;
+  background: #f97316;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.inlineBtn:hover:not(:disabled) {
+  background: #ea580c;
+}
+
+.inlineBtn:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
 /* ── OTP ── */
 
 .otpRow {

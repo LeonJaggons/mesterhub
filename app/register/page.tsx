@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Field } from '@base-ui/react/field'
 import { Input } from '@base-ui/react/input'
 import { Checkbox } from '@base-ui/react/checkbox'
 import { Button } from '@base-ui/react/button'
-import { signUp } from '@/firebase/auth'
+import { normalizeHungarianPhone, sendPhoneVerificationCode, signUp, signUpWithVerifiedPhone } from '@/firebase/auth'
+import { authenticatedFetch } from '@/firebase/apiClient'
 import styles from './page.module.css'
 
 function CheckIcon() {
@@ -26,22 +27,87 @@ export default function RegisterPage() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     password: '',
   })
+  const [verificationId, setVerificationId] = useState('')
+  const [phoneCode, setPhoneCode] = useState('')
+  const [sendingCode, setSendingCode] = useState(false)
+  const [codeSentTo, setCodeSentTo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
+  const [flagsLoaded, setFlagsLoaded] = useState(false)
+  const [requirePhoneVerification, setRequirePhoneVerification] = useState(false)
+  const phoneNumber = normalizeHungarianPhone(form.phone)
+  const phoneCodeReady = !requirePhoneVerification || (Boolean(verificationId) && phoneCode.trim().length === 6)
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/feature-flags', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return
+        setRequirePhoneVerification(Boolean(data.phoneNumberVerification))
+      })
+      .catch(() => {
+        if (active) setRequirePhoneVerification(false)
+      })
+      .finally(() => {
+        if (active) setFlagsLoaded(true)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
+  async function handleSendPhoneCode() {
+    setError(null)
+    setSendingCode(true)
+    try {
+      const id = await sendPhoneVerificationCode(form.phone, 'customer-phone-recaptcha')
+      setVerificationId(id)
+      setCodeSentTo(phoneNumber)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Could not send verification code.')
+    } finally {
+      setSendingCode(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    if (requirePhoneVerification && !phoneCodeReady) {
+      setError('Verify your phone number before creating your account.')
+      return
+    }
     setLoading(true)
     try {
-      await signUp(form.email, form.password, form.firstName, form.lastName, rememberMe)
+      const user = requirePhoneVerification
+        ? await signUpWithVerifiedPhone(
+            form.email,
+            form.password,
+            form.firstName,
+            form.lastName,
+            { verificationId, code: phoneCode },
+            rememberMe,
+          )
+        : await signUp(form.email, form.password, form.firstName, form.lastName, rememberMe)
+      await authenticatedFetch('/api/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          displayName: `${form.firstName} ${form.lastName}`.trim(),
+          firstName: form.firstName,
+          lastName: form.lastName,
+          phone: user.phoneNumber ?? phoneNumber,
+        }),
+      })
       router.push('/')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
@@ -106,6 +172,58 @@ export default function RegisterPage() {
               </Field.Root>
             </li>
 
+            {requirePhoneVerification && (
+              <li className={styles.fieldItem}>
+                <Field.Root>
+                  <Field.Label className={styles.label}>Phone number</Field.Label>
+                  <div className={styles.phoneRow}>
+                    <Field.Control
+                      render={<Input className={styles.input} />}
+                      name="phone"
+                      type="tel"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="+36 30 123 4567"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendPhoneCode}
+                      className={styles.codeBtn}
+                      disabled={sendingCode || phoneNumber.length < 11}
+                    >
+                      {sendingCode ? 'Sending...' : verificationId ? 'Resend code' : 'Send code'}
+                    </button>
+                  </div>
+                </Field.Root>
+                <p className={styles.helperText}>
+                  We use Firebase SMS verification to keep customer accounts trustworthy.
+                </p>
+                <div id="customer-phone-recaptcha" />
+              </li>
+            )}
+
+            {requirePhoneVerification && verificationId && (
+              <li className={styles.fieldItem}>
+                <Field.Root>
+                  <Field.Label className={styles.label}>Verification code</Field.Label>
+                  <Field.Control
+                    render={<Input className={styles.input} />}
+                    name="phoneCode"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={phoneCode}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    required
+                  />
+                </Field.Root>
+                <p className={styles.helperText}>
+                  Enter the 6-digit code sent to {codeSentTo || phoneNumber}. Your phone is linked when you create the account.
+                </p>
+              </li>
+            )}
+
             <li className={styles.fieldItem}>
               <Field.Root>
                 <Field.Label className={styles.label}>Password</Field.Label>
@@ -161,8 +279,8 @@ export default function RegisterPage() {
             </li>
 
             <li>
-              <Button type="submit" className={styles.submitBtn} disabled={loading}>
-                {loading ? 'Creating account…' : 'Create Account'}
+              <Button type="submit" className={styles.submitBtn} disabled={loading || !flagsLoaded}>
+                {!flagsLoaded ? 'Checking settings...' : loading ? 'Creating account…' : 'Create Account'}
               </Button>
             </li>
           </ol>

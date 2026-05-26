@@ -43,7 +43,8 @@ export async function PATCH(request: NextRequest) {
     const firstName = cleanString(body.firstName, requestedParts.firstName)
     const lastName = cleanString(body.lastName, requestedParts.lastName)
     const displayName = cleanString(body.displayName, [firstName, lastName].filter(Boolean).join(' '))
-    const phone = cleanString(body.phone)
+    const verifiedPhone = typeof user.phone_number === 'string' ? user.phone_number : ''
+    const phone = verifiedPhone || cleanString(body.phone)
     const preferredDistrict = cleanString(body.preferredDistrict)
     const address = cleanString(body.address)
 
@@ -61,6 +62,7 @@ export async function PATCH(request: NextRequest) {
         firstName,
         lastName,
         phone,
+        phoneVerified: Boolean(verifiedPhone),
         preferredDistrict,
         address,
         updatedAt: FieldValue.serverTimestamp(),

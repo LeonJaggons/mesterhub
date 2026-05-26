@@ -4,6 +4,7 @@ import { adminAuth, adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { sendAdminNotification } from '@/firebase/adminNotifications'
 import type { SignupData } from '@/app/pro/signup/store'
+import { phoneVerificationEnabled } from '@/lib/featureFlags'
 
 type ProStatus = 'pending_verification' | 'active' | 'suspended' | 'rejected'
 
@@ -31,9 +32,15 @@ export async function POST(request: NextRequest) {
     const trialEndsAt = Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
     const fullName = cleanString(data.fullName, user.name ?? '')
     const email = cleanString(data.email, user.email ?? '')
+    const verifiedPhone = typeof user.phone_number === 'string' ? user.phone_number : ''
+    const requirePhoneVerification = await phoneVerificationEnabled()
+    const phone = verifiedPhone || cleanString(data.phone)
 
     if (!fullName || !email || !cleanString(data.categoryName)) {
       return Response.json({ error: 'Name, email, and category are required.' }, { status: 400 })
+    }
+    if (requirePhoneVerification && !verifiedPhone) {
+      return Response.json({ error: 'Verify your phone number before submitting your pro profile.' }, { status: 400 })
     }
 
     await adminAuth.updateUser(user.uid, {
@@ -47,7 +54,7 @@ export async function POST(request: NextRequest) {
     batch.set(proRef, {
       uid: user.uid,
       fullName,
-      phoneVerified: data.phoneVerified ?? false,
+      phoneVerified: Boolean(verifiedPhone),
       categoryId: cleanString(data.categoryId),
       categoryName: cleanString(data.categoryName),
       regulated: data.regulated ?? false,
@@ -78,8 +85,8 @@ export async function POST(request: NextRequest) {
 
     batch.set(proRef.collection('private').doc('account'), {
       email,
-      phone: cleanString(data.phone),
-      phoneVerified: data.phoneVerified ?? false,
+      phone,
+      phoneVerified: Boolean(verifiedPhone),
       notificationPreferences: {
         newLeads: true,
         messages: true,
@@ -122,7 +129,7 @@ export async function POST(request: NextRequest) {
         'A new pro profile was submitted and is pending verification.',
         `Name: ${fullName}`,
         `Email: ${email}`,
-        `Phone: ${cleanString(data.phone) || 'Not provided'}`,
+        `Phone: ${phone || 'Not provided'}`,
         `Category: ${cleanString(data.categoryName)}`,
         `Services: ${cleanStringArray(data.services).join(', ') || 'None listed'}`,
         `Districts: ${cleanNumberArray(data.districts).join(', ') || 'None listed'}`,
@@ -136,6 +143,7 @@ export async function POST(request: NextRequest) {
         proUid: user.uid,
         categoryName: cleanString(data.categoryName),
         status,
+        phoneVerified: Boolean(verifiedPhone),
       },
     })
 

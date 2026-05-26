@@ -1,14 +1,13 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User } from 'firebase/auth'
-import { onAuthChange } from '@/firebase/auth'
+import { normalizeHungarianPhone, onAuthChange, sendPhoneVerificationCode, signUp, signUpWithVerifiedPhone, verifyCurrentUserPhone } from '@/firebase/auth'
 import { save } from '../store'
 import styles from '../signup.module.css'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
-const DEMO_PHONE_VERIFICATION = process.env.NEXT_PUBLIC_ENABLE_DEMO_PHONE_VERIFICATION === 'true'
 
 export default function AccountPage() {
   const router = useRouter()
@@ -17,10 +16,12 @@ export default function AccountPage() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [showOtp, setShowOtp] = useState(false)
-  const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [otpSent, setOtpSent] = useState(false)
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [verificationId, setVerificationId] = useState('')
+  const [phoneCode, setPhoneCode] = useState('')
+  const [codeSentTo, setCodeSentTo] = useState('')
+  const [sendingCode, setSendingCode] = useState(false)
+  const [flagsLoaded, setFlagsLoaded] = useState(false)
+  const [requirePhoneVerification, setRequirePhoneVerification] = useState(false)
 
   useEffect(() => {
     return onAuthChange(user => {
@@ -28,51 +29,89 @@ export default function AccountPage() {
       if (!user) return
       setFullName(user.displayName ?? '')
       setEmail(user.email ?? '')
+      setPhone(user.phoneNumber ?? '')
       setPassword('')
     })
   }, [])
 
+  useEffect(() => {
+    let active = true
+    fetch('/api/feature-flags', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (!active) return
+        setRequirePhoneVerification(Boolean(data.phoneNumberVerification))
+      })
+      .catch(() => {
+        if (active) setRequirePhoneVerification(false)
+      })
+      .finally(() => {
+        if (active) setFlagsLoaded(true)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
   const usingExistingAccount = Boolean(currentUser)
-  const otpComplete = otp.every(d => d !== '')
-  const canSend = phone.length >= 9 && fullName && email && (usingExistingAccount || password.length >= 8)
-  const canContinue = fullName && email && phone.length >= 9 && (usingExistingAccount || password.length >= 8)
-    && (!DEMO_PHONE_VERIFICATION || otpComplete)
-
-  function sendOtp() {
-    if (!DEMO_PHONE_VERIFICATION) return
-    setOtpSent(true)
-    setShowOtp(true)
-  }
-
-  function handleOtpChange(i: number, v: string) {
-    if (!/^\d?$/.test(v)) return
-    const next = [...otp]
-    next[i] = v
-    setOtp(next)
-    if (v && i < 5) otpRefs.current[i + 1]?.focus()
-  }
-
-  function handleOtpKeyDown(i: number, e: React.KeyboardEvent) {
-    if (e.key === 'Backspace' && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus()
-  }
+  const normalizedPhone = normalizeHungarianPhone(phone)
+  const hasVerifiedPhone = Boolean(currentUser?.phoneNumber)
+  const phoneCodeReady = !requirePhoneVerification || hasVerifiedPhone || (Boolean(verificationId) && phoneCode.trim().length === 6)
+  const canSend = normalizedPhone.length >= 11 && fullName && email && (usingExistingAccount || password.length >= 8)
+  const canContinue = fullName && email && normalizedPhone.length >= 11 && (usingExistingAccount || password.length >= 8) && phoneCodeReady
 
   const [submitting, setSubmitting] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
+
+  async function sendOtp() {
+    setAuthError(null)
+    setSendingCode(true)
+    try {
+      const id = await sendPhoneVerificationCode(normalizedPhone, 'pro-phone-recaptcha')
+      setVerificationId(id)
+      setCodeSentTo(normalizedPhone)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Could not send verification code.'
+      setAuthError(msg.replace('Firebase: ', '').replace(/ \(auth\/.*\)\.?/, ''))
+    } finally {
+      setSendingCode(false)
+    }
+  }
 
   async function handleContinue() {
     setSubmitting(true)
     setAuthError(null)
     try {
       if (currentUser) {
+        if (requirePhoneVerification && !hasVerifiedPhone) {
+          await verifyCurrentUserPhone({ verificationId, code: phoneCode })
+        }
         save({
           fullName: fullName.trim(),
           email: currentUser.email ?? email.trim(),
-          phone,
+          phone: normalizeHungarianPhone(phone),
           password: '',
-          phoneVerified: DEMO_PHONE_VERIFICATION && otpComplete,
+          phoneVerified: requirePhoneVerification || hasVerifiedPhone,
         })
       } else {
-        save({ fullName: fullName.trim(), email: email.trim(), phone, password, phoneVerified: DEMO_PHONE_VERIFICATION && otpComplete })
+        const user = requirePhoneVerification
+          ? await signUpWithVerifiedPhone(
+              email.trim(),
+              password,
+              fullName.trim(),
+              '',
+              { verificationId, code: phoneCode },
+            )
+          : await signUp(email.trim(), password, fullName.trim(), '')
+        setCurrentUser(user)
+        save({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          phone: user.phoneNumber ?? normalizeHungarianPhone(phone),
+          password: '',
+          phoneVerified: requirePhoneVerification,
+        })
       }
       router.push('/pro/signup/trade')
     } catch (err: unknown) {
@@ -139,57 +178,49 @@ export default function AccountPage() {
         <div className={styles.inputGroup}>
           <input
             className={styles.input}
-            style={{ maxWidth: 64 }}
-            value="+36"
-            readOnly
-          />
-          <input
-            className={styles.input}
             type="tel"
-            placeholder="30 123 4567"
+            placeholder="+36 30 123 4567"
             value={phone}
-            onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+            onChange={e => {
+              setPhone(e.target.value)
+              setVerificationId('')
+              setPhoneCode('')
+            }}
+            readOnly={hasVerifiedPhone}
+            style={hasVerifiedPhone ? { background: '#f9fafb', color: '#6b7280' } : undefined}
           />
           <button
             type="button"
             onClick={sendOtp}
-            disabled={!DEMO_PHONE_VERIFICATION || !canSend}
-            style={{
-              flexShrink: 0, padding: '0 1rem', background: DEMO_PHONE_VERIFICATION && canSend ? '#f97316' : '#e5e7eb',
-              color: DEMO_PHONE_VERIFICATION && canSend ? 'white' : '#9ca3af', border: 'none', borderRadius: '0.5rem',
-              fontWeight: 700, fontSize: '0.875rem', cursor: DEMO_PHONE_VERIFICATION && canSend ? 'pointer' : 'not-allowed',
-              whiteSpace: 'nowrap', transition: 'background 0.15s',
-            }}
+            disabled={!requirePhoneVerification || hasVerifiedPhone || sendingCode || !canSend}
+            className={styles.inlineBtn}
           >
-            {DEMO_PHONE_VERIFICATION ? (otpSent ? 'Resend' : 'Send code') : 'Verified later'}
+            {!requirePhoneVerification ? 'Flag off' : hasVerifiedPhone ? 'Verified' : sendingCode ? 'Sending...' : verificationId ? 'Resend code' : 'Send code'}
           </button>
         </div>
-        {!DEMO_PHONE_VERIFICATION && (
-          <p style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.5rem' }}>
-            Phone verification is completed during profile review. Demo OTP is disabled for launch builds.
-          </p>
-        )}
+        <p style={{ fontSize: '0.8125rem', color: hasVerifiedPhone ? '#15803d' : '#9ca3af', marginTop: '0.5rem' }}>
+          {!requirePhoneVerification
+            ? 'Phone verification is currently disabled by feature flag. We will save this phone number unverified.'
+            : hasVerifiedPhone
+            ? 'This phone number is verified on your Firebase account.'
+            : 'We send a Firebase SMS code and link this number to your account before you continue.'}
+        </p>
+        {requirePhoneVerification && <div id="pro-phone-recaptcha" />}
       </div>
 
-      {DEMO_PHONE_VERIFICATION && showOtp && (
+      {requirePhoneVerification && !hasVerifiedPhone && verificationId && (
         <div className={styles.field}>
-          <label className={styles.label}>Enter the 6-digit code sent to +36 {phone}</label>
-          <div className={styles.otpRow}>
-            {otp.map((digit, i) => (
-              <input
-                key={i}
-                ref={el => { otpRefs.current[i] = el }}
-                className={styles.otpInput}
-                maxLength={1}
-                value={digit}
-                onChange={e => handleOtpChange(i, e.target.value)}
-                onKeyDown={e => handleOtpKeyDown(i, e)}
-                inputMode="numeric"
-              />
-            ))}
-          </div>
+          <label className={styles.label}>Enter the 6-digit code sent to {codeSentTo || normalizedPhone}</label>
+          <input
+            className={styles.input}
+            inputMode="numeric"
+            maxLength={6}
+            value={phoneCode}
+            onChange={e => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="123456"
+          />
           <p style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.5rem' }}>
-            Demo: any 6 digits will work.
+            We verify the code and attach the number to your Firebase account when you continue.
           </p>
         </div>
       )}
@@ -201,10 +232,10 @@ export default function AccountPage() {
       <button
         className={styles.continueBtn}
         style={dg}
-        disabled={!canContinue || submitting}
+        disabled={!flagsLoaded || !canContinue || submitting}
         onClick={handleContinue}
       >
-        {submitting ? 'Saving…' : 'Continue'}
+        {!flagsLoaded ? 'Checking settings...' : submitting ? 'Saving…' : 'Continue'}
       </button>
     </div>
   )

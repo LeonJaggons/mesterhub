@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { updateProfile } from 'firebase/auth'
 import { load, clear, getStagedFile, getStagedFiles, type SignupData } from '../store'
 import { auth } from '@/firebase/index'
 import { authenticatedFetch } from '@/firebase/apiClient'
@@ -34,14 +34,18 @@ export default function CompletePage() {
 
     async function submitProfile(): Promise<string> {
       const draft: SignupData = { ...data }
-      let user = auth.currentUser
+      const user = auth.currentUser
+      const flags = await fetch('/api/feature-flags', { cache: 'no-store' })
+        .then(res => res.json() as Promise<{ phoneNumberVerification?: boolean }>)
+        .catch(() => ({ phoneNumberVerification: false }))
+      const requirePhoneVerification = Boolean(flags.phoneNumberVerification)
 
       if (!user) {
-        if (!draft.email || !draft.password) {
-          throw new Error('Account email and password are required. Please return to the account step.')
-        }
-        const credential = await createUserWithEmailAndPassword(auth, draft.email, draft.password)
-        user = credential.user
+        throw new Error('Please return to the account step and verify your phone number before submitting your profile.')
+      }
+
+      if (requirePhoneVerification && !user.phoneNumber) {
+        throw new Error('Please return to the account step and verify your phone number before submitting your profile.')
       }
 
       if (draft.fullName?.trim() && user.displayName !== draft.fullName.trim()) {
