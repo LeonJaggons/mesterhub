@@ -61,7 +61,11 @@ function isPaidPro(pro: ProDoc): boolean {
 
 export async function GET(request: NextRequest) {
   const rawQ = request.nextUrl.searchParams.get('q')?.trim() ?? ''
+  const rawCategory = request.nextUrl.searchParams.get('category')?.trim() ?? ''
   const districtRoman = request.nextUrl.searchParams.get('district') ?? ''
+  const categoryMatch = rawCategory
+    ? servicesData.categories.find(c => c.name.toLowerCase() === rawCategory.toLowerCase())
+    : undefined
 
   const districtId = districtRoman
     ? (districtsData.districts.find(d => d.roman === districtRoman)?.id ?? null)
@@ -71,7 +75,10 @@ export async function GET(request: NextRequest) {
     const prosCol = adminDb.collection('pros')
     let docs: ProDoc[] = []
 
-    if (rawQ) {
+    if (categoryMatch) {
+      const snap = await prosCol.where('categoryName', '==', categoryMatch.name).limit(RESULT_LIMIT * 3).get()
+      docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as ProDoc))
+    } else if (rawQ) {
       const svcMatches = matchingServices(rawQ)
 
       if (svcMatches.length > 0) {

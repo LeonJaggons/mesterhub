@@ -8,10 +8,11 @@ import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
 import servicesData from '@/public/services.json'
 
-async function queryPros(searchQ: string, districtRoman: string | undefined): Promise<unknown[]> {
+async function queryPros(searchQ: string, districtRoman: string | undefined, categoryName: string): Promise<unknown[]> {
   const params = new URLSearchParams()
   if (searchQ) params.set('q', searchQ)
   if (districtRoman) params.set('district', districtRoman)
+  if (categoryName) params.set('category', categoryName)
 
   const response = await fetch(`/api/pros?${params.toString()}`)
   if (!response.ok) throw new Error('Could not load professionals.')
@@ -93,8 +94,15 @@ function parseNumberParam(value: string | null): number | null {
   return Number.isFinite(number) ? number : null
 }
 
-function filtersFromSearchParams(searchParams: { get(name: string): string | null }): ResultsFilters {
+function categoryNameFromQuery(value: string): string {
+  const normalizedValue = value.trim().toLowerCase()
+  if (!normalizedValue) return ''
+  return servicesData.categories.find(category => category.name.toLowerCase() === normalizedValue)?.name ?? ''
+}
+
+function filtersFromSearchParams(searchParams: { get(name: string): string | null }, fallbackCategoryName = ''): ResultsFilters {
   const sort = searchParams.get('sort')
+  const categoryName = searchParams.get('category') ?? fallbackCategoryName
   return {
     minRating: parseNumberParam(searchParams.get('minRating')) ?? DEFAULT_FILTERS.minRating,
     maxPrice: parseNumberParam(searchParams.get('maxPrice')),
@@ -103,7 +111,7 @@ function filtersFromSearchParams(searchParams: { get(name: string): string | nul
     hasProof: searchParams.get('hasProof') === '1',
     backgroundCheck: searchParams.get('backgroundCheck') === '1',
     experienced: searchParams.get('experienced') === '1',
-    categoryName: searchParams.get('category') ?? '',
+    categoryName,
     serviceName: searchParams.get('service') ?? '',
     sort: sort === 'rating' || sort === 'price' || sort === 'reviews' ? sort : 'recommended',
   }
@@ -693,7 +701,9 @@ export default function InstantResults({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchParams])
+  const legacyCategoryName = useMemo(() => categoryNameFromQuery(q), [q])
+  const filters = useMemo(() => filtersFromSearchParams(searchParams, legacyCategoryName), [searchParams, legacyCategoryName])
+  const searchQ = legacyCategoryName ? '' : q
   const [pros, setPros] = useState<Pro[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -702,6 +712,7 @@ export default function InstantResults({
 
   function updateFilters(nextFilters: ResultsFilters) {
     const params = writeFilterParams(new URLSearchParams(searchParams.toString()), nextFilters)
+    if (nextFilters.categoryName || legacyCategoryName) params.delete('q')
     const queryString = params.toString()
     setVisibleCount(RESULTS_PER_PAGE)
     router.push(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
@@ -716,7 +727,7 @@ export default function InstantResults({
       setLoading(true)
       setError(null)
       try {
-        const docs = await queryPros(q, district)
+        const docs = await queryPros(searchQ, district, filters.categoryName)
         if (!active) return
         setPros(docs.map(doc => mapApiPro(doc, t)))
         setVisibleCount(RESULTS_PER_PAGE)
@@ -733,7 +744,7 @@ export default function InstantResults({
     return () => {
       active = false
     }
-  }, [q, district, t])
+  }, [searchQ, district, filters.categoryName, t])
 
   const filteredPros = useMemo(() => {
     const next = pros.filter(pro => {
@@ -794,7 +805,7 @@ export default function InstantResults({
   return (
     <div className="flex bg-white min-h-screen">
       <Sidebar
-        q={q}
+        q={filters.categoryName || q}
         filters={filters}
         onChange={updateFilters}
         resultCount={filteredPros.length}
@@ -804,8 +815,8 @@ export default function InstantResults({
         <div className="px-3 py-4 max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-lg font-bold">
-              {q
-                ? t('instantResults.header.matchingQuery', { query: q })
+              {q || filters.categoryName
+                ? t('instantResults.header.matchingQuery', { query: filters.categoryName || q })
                 : t('instantResults.header.matchingProfessionals')}
             </h2>
           </div>
