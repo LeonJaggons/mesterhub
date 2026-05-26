@@ -120,8 +120,8 @@ service cloud.firestore {
 
       match /messages/{messageId} {
         allow read: if signedIn()
-          && (get(/databases/$(database)/documents/conversations/$(conversationId)).data.proUid == request.auth.uid
-              || get(/databases/$(database)/documents/conversations/$(conversationId)).data.customerUid == request.auth.uid);
+          && (get(/databases/mesterhub/documents/conversations/$(conversationId)).data.proUid == request.auth.uid
+              || get(/databases/mesterhub/documents/conversations/$(conversationId)).data.customerUid == request.auth.uid);
         allow create, update, delete: if false;
       }
     }
