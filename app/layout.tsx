@@ -7,6 +7,7 @@ import ConditionalFooter from "./components/ConditionalFooter";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getMessages } from "@/lib/i18n/messages";
 import { getRequestLocale } from "@/lib/i18n/server";
+import { Analytics } from "@vercel/analytics/next";
 
 const googleSansFlex = localFont({
   src: "../public/GoogleSansFlex.ttf",
@@ -41,6 +42,7 @@ export default async function RootLayout({
           <ConditionalFooter />
           <FeedbackFab />
         </I18nProvider>
+        <Analytics />
       </body>
     </html>
   );
