@@ -212,6 +212,27 @@
   margin: 0;
 }
 
+.helpSection p + p {
+  margin-top: 0.75rem;
+}
+
+.helpSection ul {
+  list-style: disc outside;
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--color-gray-600);
+}
+
+.helpSection li {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.helpSection li:last-child {
+  margin-bottom: 0;
+}
+
 .helpSection a {
   color: #ea580c;
   text-decoration: none;
