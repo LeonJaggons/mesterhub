@@ -1,9 +1,49 @@
 import Stripe from 'stripe'
+import { FieldValue } from 'firebase-admin/firestore'
+import { adminDb } from '@/firebase/admin'
 import { sendAdminNotification } from '@/firebase/adminNotifications'
 import { stripe } from '@/lib/stripe'
 import { invoiceSubscriptionId, syncStripeSubscription } from '@/lib/stripeSubscription'
 
 export const runtime = 'nodejs'
+
+const STRIPE_EVENT_LEASE_MS = 10 * 60 * 1000
+
+async function acquireStripeEvent(event: Stripe.Event): Promise<boolean> {
+  const eventRef = adminDb.collection('stripeWebhookEvents').doc(event.id)
+  const now = Date.now()
+  const leaseExpiresAt = now + STRIPE_EVENT_LEASE_MS
+
+  return adminDb.runTransaction(async transaction => {
+    const snap = await transaction.get(eventRef)
+    const data = snap.data()
+
+    if (snap.exists && data?.status === 'processed') return false
+    if (snap.exists && data?.status === 'processing' && Number(data.leaseExpiresAt) > now) return false
+
+    transaction.set(eventRef, {
+      stripeEventId: event.id,
+      type: event.type,
+      status: 'processing',
+      leaseExpiresAt,
+      receivedAt: FieldValue.serverTimestamp(),
+    }, { merge: true })
+
+    return true
+  })
+}
+
+async function markStripeEventProcessed(event: Stripe.Event): Promise<void> {
+  await adminDb.collection('stripeWebhookEvents').doc(event.id).set({
+    status: 'processed',
+    processedAt: FieldValue.serverTimestamp(),
+    leaseExpiresAt: FieldValue.delete(),
+  }, { merge: true })
+}
+
+async function releaseStripeEvent(event: Stripe.Event): Promise<void> {
+  await adminDb.collection('stripeWebhookEvents').doc(event.id).delete()
+}
 
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -23,6 +63,11 @@ export async function POST(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Invalid webhook payload.'
     return Response.json({ error: message }, { status: 400 })
+  }
+
+  const shouldProcess = await acquireStripeEvent(event)
+  if (!shouldProcess) {
+    return Response.json({ received: true, duplicate: true })
   }
 
   try {
@@ -73,7 +118,9 @@ export async function POST(request: Request) {
       default:
         break
     }
+    await markStripeEventProcessed(event)
   } catch (err) {
+    await releaseStripeEvent(event)
     console.error('[stripe webhook]', err)
     return Response.json({ error: 'Could not process Stripe webhook.' }, { status: 500 })
   }
