@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, type CSSProperties, type MouseEvent as Rea
 import { useRouter } from 'next/navigation'
 import { Autocomplete } from '@base-ui/react/autocomplete'
 import { Button } from '@base-ui/react/button'
-import { useTranslations } from '@/lib/i18n/client'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
 import styles from './Hero.module.css'
 
 const CAROUSEL_KEYS = ['cleaning', 'repairs', 'painting', 'moving'] as const
@@ -103,6 +103,7 @@ function DistrictSelect({
 
 function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
   const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [district, setDistrict] = useState<District | null>(null)
@@ -148,7 +149,8 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
       const controller = new AbortController()
       abortRef.current = controller
       setLoading(true)
-      fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+      const params = new URLSearchParams({ q, locale })
+      fetch(`/api/search?${params.toString()}`, { signal: controller.signal })
         .then((r) => r.json())
         .then((data: { results: string[] }) => {
           setItems(data.results)

@@ -8,11 +8,12 @@ import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
 import servicesData from '@/public/services.json'
 
-async function queryPros(searchQ: string, districtRoman: string | undefined, categoryName: string): Promise<unknown[]> {
+async function queryPros(searchQ: string, districtRoman: string | undefined, categoryName: string, locale: string): Promise<unknown[]> {
   const params = new URLSearchParams()
   if (searchQ) params.set('q', searchQ)
   if (districtRoman) params.set('district', districtRoman)
   if (categoryName) params.set('category', categoryName)
+  params.set('locale', locale)
 
   const response = await fetch(`/api/pros?${params.toString()}`)
   if (!response.ok) throw new Error('Could not load professionals.')
@@ -698,6 +699,7 @@ export default function InstantResults({
   district?: string
 }) {
   const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -727,7 +729,7 @@ export default function InstantResults({
       setLoading(true)
       setError(null)
       try {
-        const docs = await queryPros(searchQ, district, filters.categoryName)
+        const docs = await queryPros(searchQ, district, filters.categoryName, locale)
         if (!active) return
         setPros(docs.map(doc => mapApiPro(doc, t)))
         setVisibleCount(RESULTS_PER_PAGE)
@@ -744,7 +746,7 @@ export default function InstantResults({
     return () => {
       active = false
     }
-  }, [searchQ, district, filters.categoryName, t])
+  }, [searchQ, district, filters.categoryName, locale, t])
 
   const filteredPros = useMemo(() => {
     const next = pros.filter(pro => {

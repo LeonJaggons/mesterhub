@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { hasPaidProFeatures } from '@/lib/billing'
+import { getSupportedLocale, localeCookieName } from '@/lib/i18n/config'
+import { matchingCanonicalServices } from '@/lib/i18n/serviceSearch'
 import { enforceIpRateLimit } from '@/lib/rateLimit'
 import servicesData from '@/public/services.json'
 import districtsData from '@/public/districts.json'
@@ -36,26 +38,6 @@ type ProDoc = {
   createdAt?: { toMillis?: () => number }
 }
 
-/** Find service names that match the query string. */
-function matchingServices(q: string): string[] {
-  const lq = q.toLowerCase()
-  const results: string[] = []
-
-  for (const cat of servicesData.categories) {
-    // Whole-category match → include all its services (capped)
-    if (cat.name.toLowerCase().includes(lq)) {
-      results.push(...cat.services.slice(0, 6))
-    } else {
-      for (const svc of cat.services) {
-        if (svc.toLowerCase().includes(lq)) results.push(svc)
-      }
-    }
-    if (results.length >= 10) break
-  }
-
-  return [...new Set(results)].slice(0, 10) // Firestore array-contains-any max 10
-}
-
 function isPaidPro(pro: ProDoc): boolean {
   return hasPaidProFeatures(pro.subscriptionStatus, pro.subscriptionCurrentPeriodEnd)
 }
@@ -67,6 +49,10 @@ export async function GET(request: NextRequest) {
   const rawQ = request.nextUrl.searchParams.get('q')?.trim() ?? ''
   const rawCategory = request.nextUrl.searchParams.get('category')?.trim() ?? ''
   const districtRoman = request.nextUrl.searchParams.get('district') ?? ''
+  const locale = getSupportedLocale(
+    request.nextUrl.searchParams.get('locale') ??
+      request.cookies.get(localeCookieName)?.value,
+  )
   const categoryMatch = rawCategory
     ? servicesData.categories.find(c => c.name.toLowerCase() === rawCategory.toLowerCase())
     : undefined
@@ -83,7 +69,7 @@ export async function GET(request: NextRequest) {
       const snap = await prosCol.where('categoryName', '==', categoryMatch.name).limit(RESULT_LIMIT * 3).get()
       docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as ProDoc))
     } else if (rawQ) {
-      const svcMatches = matchingServices(rawQ)
+      const svcMatches = matchingCanonicalServices(rawQ, locale, 10)
 
       if (svcMatches.length > 0) {
         const snap = await prosCol.where('services', 'array-contains-any', svcMatches).limit(RESULT_LIMIT * 3).get()
