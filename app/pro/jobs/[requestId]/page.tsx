@@ -198,7 +198,7 @@ function AppointmentModal({
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [duration, setDuration] = useState('60 minutes')
-  const [location, setLocation] = useState(req.acceptance?.address ?? '')
+  const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -320,12 +320,12 @@ function AppointmentModal({
           </div>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Location or meeting note
+            Meeting note
             <input
               type="text"
               value={location}
               onChange={e => setLocation(e.target.value)}
-              placeholder="Customer address, district, or video call"
+              placeholder="Gate code, entrance note, or video call link"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             />
           </label>

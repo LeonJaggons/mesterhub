@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { AcceptQuoteInput } from '@/firebase/conversations'
+import AddressAutocompleteInput from '@/app/components/AddressAutocompleteInput'
 import { useTranslations } from '@/lib/i18n/client'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
@@ -161,11 +162,10 @@ export function AcceptQuoteModal({
           <label htmlFor="accept-address" className="text-sm font-bold text-gray-700">
             {t('customerRequests.detail.acceptModal.addressLabel')} <span className="text-orange-500">*</span>
           </label>
-          <input
+          <AddressAutocompleteInput
             id="accept-address"
-            type="text"
             value={address}
-            onChange={e => setAddress(e.target.value)}
+            onChange={setAddress}
             placeholder={t('customerRequests.detail.acceptModal.addressPlaceholder')}
             required
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"

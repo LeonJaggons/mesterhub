@@ -47,6 +47,11 @@ const sections: TermsSection[] = [
     items: ['features', 'trial', 'authorization', 'promotions', 'billingPortal', 'pastDue', 'nonRefundable'],
   },
   {
+    id: 'referralProgram',
+    hasIntro: true,
+    items: ['notGuaranteed', 'qualifyingReferral', 'manualReview', 'noAbuse', 'noSelfReferral', 'payoutMethod', 'taxes', 'changes'],
+  },
+  {
     id: 'verification',
     hasIntro: true,
     items: ['trustMeasure', 'badges', 'customerChecks', 'reviewProfile'],

@@ -4,6 +4,7 @@ import { adminDb } from '@/firebase/admin'
 import { requireAdmin } from '@/firebase/adminAccess'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import { huStatus } from '@/lib/i18n/email'
+import { markProReferralApproved } from '@/lib/referrals'
 import {
   deleteAuthUser,
   deleteDocumentTree,
@@ -70,6 +71,9 @@ export async function PATCH(
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true })
     await batch.commit()
+    if (status === 'active') {
+      await markProReferralApproved(uid)
+    }
 
     const email = accountSnap.exists ? cleanString(accountSnap.data()?.email) : ''
     await sendLifecycleEmail({

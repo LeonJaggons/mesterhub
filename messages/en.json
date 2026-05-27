@@ -893,9 +893,10 @@
     },
     "details": {
       "customer": "Customer",
-      "location": "Location",
+      "location": "Address",
       "openMaps": "Open in Google Maps",
       "openGoogleMaps": "Open Google Maps",
+      "meetingNote": "Meeting note",
       "note": "Appointment note"
     },
     "progress": {
@@ -949,8 +950,8 @@
       "time": "Time",
       "duration": "Duration",
       "type": "Appointment type",
-      "location": "Location or meeting note",
-      "locationPlaceholder": "Customer address, district, or video call",
+      "location": "Meeting note",
+      "locationPlaceholder": "Gate code, entrance note, or video call link",
       "message": "Message to customer",
       "messagePlaceholder": "Explain why you are proposing this change and what the customer should prepare.",
       "keep": "Keep current time",
@@ -1434,6 +1435,19 @@
         "messages": "Direct customer messages"
       }
     },
+    "referrals": {
+      "title": "Invite another pro",
+      "body": "Invite reliable professionals to Mestermind. You earn {amount} Ft after a referred pro is approved.",
+      "pendingCash": "Pending cash",
+      "invited": "Invited",
+      "approved": "Approved pros",
+      "rewarded": "Paid rewards",
+      "code": "Referral code",
+      "link": "Pro invite link",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "unlock": "Rewards are marked for manual payout after admin approval."
+    },
     "visibility": {
       "title": "Profile visibility",
       "visibleBody": "Your approved profile can appear in customer search and receive estimate requests.",
@@ -1553,6 +1567,19 @@
       "addressPlaceholder": "Street, building, access notes",
       "addressHelper": "Shared with a pro only when you accept their quote and include it in the acceptance details."
     },
+    "referrals": {
+      "title": "Invite pros",
+      "body": "Know a reliable professional? Invite them to join Mestermind. You earn {amount} Ft after their pro profile is approved.",
+      "pendingCash": "Pending cash",
+      "invited": "Invited",
+      "approved": "Approved pros",
+      "rewarded": "Paid rewards",
+      "code": "Referral code",
+      "link": "Pro invite link",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "unlock": "Rewards are marked for manual payout after the referred pro is approved by Mestermind."
+    },
     "signin": {
       "title": "Sign-in details",
       "body": "These fields come from your sign-in account and cannot be edited here.",
@@ -1580,6 +1607,385 @@
     "emptyLoading": "Loading...",
     "emptyTitle": "No notifications yet",
     "emptyBody": "Updates about quotes, messages, appointments, and jobs will appear here."
+  },
+  "termsPage": {
+    "title": "Terms of Use",
+    "subtitle": "The rules for using Mestermind as a customer, professional, or referral participant.",
+    "lastUpdated": { "label": "Last updated", "date": "May 27, 2026" },
+    "sections": {
+      "agreement": {
+        "title": "Agreement to these terms",
+        "intro": "These Terms of Use govern your access to and use of Mestermind.",
+        "items": {
+          "acceptance": "By using Mestermind, creating an account, submitting a request, registering as a professional, or participating in a referral program, you agree to these terms.",
+          "organizationAuthority": "If you use Mestermind for a company or organization, you confirm that you have authority to bind that organization.",
+          "doNotUse": "If you do not agree to these terms, do not use Mestermind."
+        }
+      },
+      "whatItIs": {
+        "title": "What Mestermind is",
+        "intro": "Mestermind is a marketplace that helps customers discover and contact independent local professionals.",
+        "items": {
+          "customers": "Customers can describe projects, browse professionals, request quotes, send messages, and review completed work.",
+          "pros": "Professionals can create profiles, receive inquiries, send quotes, coordinate appointments, and manage customer communications.",
+          "independentPros": "Professionals are independent providers, not employees, agents, partners, or representatives of Mestermind.",
+          "noHomeServices": "Mestermind does not perform home services, guarantee professional work, or control how work is performed."
+        }
+      },
+      "eligibility": {
+        "title": "Eligibility and accounts",
+        "items": {
+          "legalCapacity": "You must have legal capacity to use Mestermind and enter into agreements.",
+          "accurateInfo": "You must provide accurate, current, and complete account information.",
+          "accountSecurity": "You are responsible for keeping your account credentials secure.",
+          "notifyMisuse": "Tell us promptly if you believe your account has been misused.",
+          "accessLimits": "We may limit, suspend, or refuse access where needed for safety, legal, fraud, or operational reasons."
+        }
+      },
+      "customerResponsibilities": {
+        "title": "Customer responsibilities",
+        "items": {
+          "describeProjects": "Describe your project honestly and include relevant details, limitations, risks, access needs, and timing.",
+          "rightToRequest": "Only request work for property, services, or projects you are allowed to manage.",
+          "choosePro": "You are responsible for choosing whether to hire a professional and for agreeing final scope, price, timing, and terms with them.",
+          "noHarmfulWork": "Do not request illegal, unsafe, discriminatory, or harmful work.",
+          "keepRecords": "Keep records of quotes, messages, appointments, and agreements.",
+          "acceptedQuoteInfo": "When you accept a quote, provide accurate contact, address, and scheduling details."
+        }
+      },
+      "proResponsibilities": {
+        "title": "Professional responsibilities",
+        "items": {
+          "accurateInfo": "Your profile, credentials, prices, availability, photos, and claims must be truthful and up to date.",
+          "qualifiedWork": "Only offer work you are qualified, licensed, insured, and legally allowed to perform.",
+          "legalCompliance": "You are responsible for permits, tax, employment, safety, consumer protection, and trade-specific legal obligations.",
+          "clearQuotes": "Quotes should clearly describe price, scope, timing, exclusions, materials, call-out fees, and conditions.",
+          "professionalCommunication": "Communicate professionally and respond to customers in good faith.",
+          "noMisrepresentation": "Do not misrepresent identity, qualifications, reviews, availability, insurance, certificates, or business details.",
+          "customerInfo": "Use customer information only to respond to or perform the requested service."
+        }
+      },
+      "requestsQuotes": {
+        "title": "Requests, quotes, and appointments",
+        "items": {
+          "requestInvitation": "A customer request is an invitation to discuss work, not a binding contract.",
+          "quoteSubmitted": "A quote is submitted by the professional, not by Mestermind.",
+          "acceptDecline": "Customers may accept or decline quotes. Professionals may decline requests they cannot perform.",
+          "appointments": "Appointments are proposed and confirmed between customers and professionals.",
+          "completion": "Completion status in Mestermind is a record-keeping tool and does not waive any rights or obligations between customer and professional.",
+          "cancellations": "Cancellations should be communicated promptly and professionally."
+        }
+      },
+      "customerProPayments": {
+        "title": "Payments between customers and professionals",
+        "intro": "Mestermind currently does not process customer payments for jobs performed by professionals.",
+        "items": {
+          "proResponsibility": "Professionals are responsible for collecting payment directly from customers and issuing any required receipts or invoices.",
+          "customerResponsibility": "Customers are responsible for paying professionals as agreed directly with them.",
+          "notResponsible": "Mestermind is not responsible for cash payments, bank transfers, on-site payments, refunds, charge disputes, or unpaid invoices between customers and professionals.",
+          "futurePayments": "If Mestermind later introduces payment processing, additional payment terms may apply."
+        }
+      },
+      "proSubscriptions": {
+        "title": "Professional subscriptions and promotions",
+        "intro": "Some professional features may require a paid subscription or trial.",
+        "items": {
+          "features": "Subscription features, visibility, badges, limits, and marketplace access may change over time.",
+          "trial": "Trials are promotional and may be changed, limited, or ended.",
+          "authorization": "By starting a paid subscription, you authorize applicable recurring charges through our payment provider.",
+          "promotions": "Promotions, discounts, and referral rewards are discretionary and may have extra conditions.",
+          "billingPortal": "Billing changes and cancellations should be managed through the billing portal when available.",
+          "pastDue": "Past-due or failed payments may reduce or disable paid features.",
+          "nonRefundable": "Subscription fees are non-refundable unless required by law or expressly stated otherwise."
+        }
+      },
+      "referralProgram": {
+        "title": "Referral program",
+        "intro": "Mestermind may offer referral rewards when customers or professionals invite qualified professionals to join the marketplace.",
+        "items": {
+          "notGuaranteed": "Referral rewards are promotional and are not guaranteed. A displayed pending reward does not create a payment obligation until Mestermind approves the referral and confirms payout eligibility.",
+          "qualifyingReferral": "A qualifying referral requires a new professional to sign up through a valid referral link or code, submit a truthful pro profile, and be approved by Mestermind. The referred professional must be new to Mestermind and must not be a duplicate, replacement, or related account created to obtain a reward.",
+          "manualReview": "All referral rewards are subject to manual review. Mestermind may delay, reject, reverse, or cancel a reward if the referral appears low quality, incomplete, fraudulent, abusive, ineligible, or inconsistent with the purpose of the program.",
+          "noAbuse": "You may not spam, buy traffic, mislead invitees, post deceptive claims, use automated signups, create fake or duplicate accounts, or otherwise manipulate the referral program.",
+          "noSelfReferral": "Self-referrals are not allowed. You may not refer yourself, your own duplicate account, your own business under another account, or an account controlled primarily by you.",
+          "payoutMethod": "Approved rewards are paid manually using a payout method accepted by Mestermind. We may require identity, contact, bank, invoice, or other reasonable payout information before paying a reward.",
+          "taxes": "You are responsible for any taxes, reporting obligations, bank fees, currency conversion costs, or other charges connected to a referral reward.",
+          "changes": "Mestermind may change, pause, limit, or end the referral program at any time, including reward amounts, eligibility rules, payout timing, and fraud checks. Changes may apply to unpaid or pending rewards where permitted by law."
+        }
+      },
+      "verification": {
+        "title": "Verification and trust signals",
+        "intro": "Mestermind may review professional profiles and documents during onboarding or later.",
+        "items": {
+          "trustMeasure": "Verification is a trust and safety measure, not a guarantee of quality, legality, availability, or identity in every circumstance.",
+          "badges": "Badges and profile labels may be added, removed, or changed at our discretion.",
+          "customerChecks": "Customers should still make their own checks before hiring a professional.",
+          "reviewProfile": "We may reject, suspend, or remove profiles that appear inaccurate, unsafe, incomplete, or misleading."
+        }
+      },
+      "reviews": {
+        "title": "Reviews",
+        "items": {
+          "honestReviews": "Reviews must be honest, based on real interactions, and not misleading.",
+          "publishedReviews": "Reviews may be displayed publicly on professional profiles.",
+          "noManipulation": "Do not buy, sell, fake, pressure, or manipulate reviews.",
+          "moderation": "We may moderate, remove, or refuse reviews that violate these terms or appear abusive, fake, irrelevant, or unlawful.",
+          "contentLicense": "By submitting review content, you allow Mestermind to display and use it in connection with the marketplace.",
+          "rights": "You must have the rights needed to post any content you submit."
+        }
+      },
+      "communications": {
+        "title": "Communications",
+        "items": {
+          "transactionalMessages": "We may send transactional messages about accounts, requests, quotes, appointments, subscriptions, referrals, and safety.",
+          "visibility": "Messages and request records may be visible to relevant customers, professionals, admins, and support staff.",
+          "noMisuse": "Do not use Mestermind communications for spam, harassment, scams, off-topic marketing, or unlawful activity.",
+          "controls": "Some notification preferences may be adjustable, but essential service or safety messages may still be sent."
+        }
+      },
+      "files": {
+        "title": "Uploads and files",
+        "items": {
+          "uploads": "You may upload photos, documents, and other materials where the product allows it.",
+          "noUnsafeFiles": "Do not upload malware, illegal content, or files that violate another person's rights.",
+          "noUnnecessarySensitiveInfo": "Do not upload unnecessary sensitive personal information.",
+          "removeFiles": "We may remove files that violate these terms or create risk."
+        }
+      },
+      "prohibitedConduct": {
+        "title": "Prohibited conduct",
+        "items": {
+          "noLegalViolations": "Do not use Mestermind to violate the law or another person's rights.",
+          "noImpersonation": "Do not impersonate another person or business.",
+          "noHarassment": "Do not harass, threaten, discriminate, or abuse others.",
+          "noScraping": "Do not scrape, copy, or harvest marketplace data without permission.",
+          "noSystemAbuse": "Do not interfere with, overload, reverse engineer, or bypass Mestermind systems.",
+          "noMalware": "Do not upload or transmit malicious code.",
+          "noIllegalWork": "Do not request, offer, or perform illegal or unsafe work through Mestermind."
+        }
+      },
+      "marketplaceChanges": {
+        "title": "Marketplace changes",
+        "items": {
+          "featureChanges": "We may add, remove, test, or change features.",
+          "availability": "Mestermind may be unavailable from time to time for maintenance, updates, or operational reasons.",
+          "rankingUpdates": "Search rankings and visibility may change and are not guaranteed.",
+          "evolving": "The marketplace is evolving, and some features may be experimental."
+        }
+      },
+      "disputes": {
+        "title": "Disputes between customers and professionals",
+        "intro": "Mestermind may help review marketplace records, but we are not a party to the service contract between customer and professional.",
+        "items": {
+          "supportRole": "Support may help with communication, safety review, and account actions, but does not guarantee a particular outcome.",
+          "documentAgreements": "Keep quotes, scope changes, appointment details, and payment agreements documented.",
+          "cooperation": "You agree to cooperate with reasonable support, safety, and fraud reviews."
+        }
+      },
+      "intellectualProperty": {
+        "title": "Intellectual property",
+        "items": {
+          "ownership": "Mestermind and its software, branding, design, and content are owned by Mestermind or its licensors.",
+          "allowedUse": "You may use Mestermind only as allowed by these terms.",
+          "userContent": "You keep ownership of content you submit, but grant us permission to host, display, process, and use it to operate and promote the marketplace."
+        }
+      },
+      "privacy": {
+        "title": "Privacy",
+        "intro": "Our Privacy Policy explains how we collect, use, and share personal information."
+      },
+      "termination": {
+        "title": "Termination and suspension",
+        "items": {
+          "stopUsing": "You may stop using Mestermind at any time.",
+          "suspension": "We may suspend, restrict, or terminate access for violations, risk, fraud, non-payment, legal reasons, or operational needs.",
+          "retainedRecords": "We may retain records as needed for legal, safety, fraud prevention, support, accounting, and legitimate business purposes."
+        }
+      },
+      "disclaimers": {
+        "title": "Disclaimers",
+        "items": {
+          "asIs": "Mestermind is provided on an as-is and as-available basis.",
+          "noGuarantees": "We do not guarantee uninterrupted access, specific results, job volume, earnings, rankings, reviews, or successful hires.",
+          "noUserGuarantees": "We do not guarantee the identity, quality, reliability, legality, pricing, or conduct of any customer or professional.",
+          "mandatoryRights": "Nothing in these terms excludes rights that cannot be excluded under applicable law."
+        }
+      },
+      "liability": {
+        "title": "Limitation of liability",
+        "intro": "To the maximum extent permitted by law, Mestermind is not liable for indirect, incidental, special, consequential, exemplary, or punitive damages, lost profits, lost business, lost data, reputational harm, or disputes between customers and professionals.",
+        "closing": "Our total liability for claims related to Mestermind is limited to the amount you paid to Mestermind in the three months before the claim, or 10,000 Ft if you paid nothing, except where a different limit is required by law."
+      },
+      "indemnity": {
+        "title": "Indemnity",
+        "intro": "You agree to defend and indemnify Mestermind from claims, losses, liabilities, damages, costs, and expenses arising from your content, your services, your use of Mestermind, your violation of these terms, or your dispute with another user."
+      },
+      "changes": {
+        "title": "Changes to these terms",
+        "intro": "We may update these terms from time to time. Continued use of Mestermind after changes means you accept the updated terms."
+      }
+    },
+    "support": { "title": "Support", "bodyBefore": "Questions about these terms? Email" },
+    "privacyLink": "Read our Privacy Policy"
+  },
+  "privacyPage": {
+    "title": "Privacy Policy",
+    "subtitle": "How Mestermind collects, uses, shares, and protects personal information.",
+    "lastUpdated": { "label": "Last updated", "date": "May 27, 2026" },
+    "sections": {
+      "coverage": {
+        "title": "Who this policy covers",
+        "intro": "This policy applies when you use Mestermind, visit our website, create an account, submit a request, register as a professional, communicate through the marketplace, or participate in referrals.",
+        "items": {
+          "customers": "Customers who search for professionals, submit projects, request quotes, send messages, confirm appointments, or leave reviews.",
+          "pros": "Professionals who create profiles, complete onboarding, receive leads, send quotes, manage jobs, or subscribe to paid features.",
+          "visitors": "Visitors who browse public pages, landing pages, help pages, terms, privacy information, or other non-account areas."
+        }
+      },
+      "account": {
+        "title": "Account information",
+        "intro": "We collect information needed to create, secure, and operate accounts.",
+        "items": {
+          "customerAccounts": "For customer accounts, this may include name, email address, phone number, preferred district, default address, account ID, email verification status, and account settings.",
+          "proAccounts": "For professional accounts, this may include full name, email, phone, category, services, districts served, bio, years of experience, pricing details, availability, payment methods accepted, social links, and profile photos.",
+          "authProviders": "Authentication may be handled through Firebase or other sign-in providers. They may process login identifiers, verification tokens, and authentication metadata.",
+          "noRawCredentials": "We do not intentionally store raw passwords in our application database."
+        }
+      },
+      "customerRequests": {
+        "title": "Customer requests and job records",
+        "intro": "When customers use Mestermind to request quotes or manage work, we collect marketplace records needed to support that workflow.",
+        "items": {
+          "requestDetails": "Project details may include category, answers to project questions, district, approximate location, attachments, invited professionals, quotes, status history, and timestamps.",
+          "acceptedQuote": "When a quote is accepted, we may store the acceptance message, phone number, address, preferred start time, quoted price, and related conversation records.",
+          "appointments": "Appointment records may include proposed dates, times, duration, location, notes, confirmations, changes, and cancellation reasons.",
+          "retention": "We keep request, quote, appointment, message, and completion records so users can review history and support can investigate safety, quality, or marketplace issues."
+        }
+      },
+      "proOnboarding": {
+        "title": "Professional onboarding and verification",
+        "intro": "Professionals may provide additional information to create and verify their marketplace profile.",
+        "items": {
+          "publicProfile": "Public profile information may include name, category, services, service area, bio, years of experience, pricing type, availability, payment methods accepted, photos, past projects, reviews, and trust badges.",
+          "privateAccount": "Private professional account records may include email, phone, notification preferences, subscription status, and billing identifiers.",
+          "verification": "Verification records may include identity document URLs, selfie URLs, certificate URLs, insurance URLs, license numbers, background-check selections, regulated-trade status, admin review status, and related notes.",
+          "payout": "If payout or referral rewards are supported, we may collect payout details such as IBAN, invoice, tax, contact, or other payment information.",
+          "localStorage": "During pro signup, draft information may be stored locally in your browser so you can move between steps before submitting."
+        }
+      },
+      "communications": {
+        "title": "Messages, notifications, and feedback",
+        "intro": "We process communications needed to operate the marketplace and provide support.",
+        "items": {
+          "messages": "Messages between customers and professionals may include text, sender role, sender ID, request ID, timestamps, and conversation metadata.",
+          "notifications": "In-app notifications may include the recipient, actor, role, type, title, body, link, request ID, read status, and metadata.",
+          "emails": "We may send transactional emails about requests, quotes, appointments, messages, subscriptions, verification, referrals, reports, and support.",
+          "feedback": "Feedback and reports may include your message, type, page, browser information, user ID, email for follow-up, and details about the reported user or request."
+        }
+      },
+      "payments": {
+        "title": "Payments and billing",
+        "intro": "Mestermind currently uses payment providers for professional subscriptions and may record limited billing metadata.",
+        "items": {
+          "stripeReceives": "Stripe or another payment provider may receive payment card, billing, tax, customer, subscription, invoice, and payment method information.",
+          "stripeMetadata": "We may store payment provider customer IDs, subscription IDs, price IDs, subscription status, current period end, and related billing metadata.",
+          "stripeProcesses": "Payment providers process billing information under their own terms and privacy policies.",
+          "customerPayments": "Mestermind currently does not process customer payments for jobs. Payments between customers and professionals are handled directly between those parties."
+        }
+      },
+      "files": {
+        "title": "Files and uploads",
+        "intro": "Users may upload photos, documents, and attachments as part of requests, profiles, or verification.",
+        "items": {
+          "uploadData": "Uploads may include filenames, file types, storage paths, download URLs, user IDs, and timestamps.",
+          "sharingRights": "Request attachments may be shared with relevant professionals. Profile photos and work photos may be shown publicly if included in a professional profile.",
+          "downloadUrls": "Stored download URLs may allow access to uploaded files by users, admins, or systems that need them for marketplace operation."
+        }
+      },
+      "technicalData": {
+        "title": "Technical and usage data",
+        "intro": "We may collect technical information to secure, debug, improve, and operate Mestermind.",
+        "items": {
+          "collectedData": "This may include IP address, device information, browser information, timestamps, page paths, logs, feature flags, request metadata, and error details.",
+          "usage": "We use technical data for authentication, rate limiting, security, abuse prevention, analytics, debugging, and product improvement.",
+          "providers": "Hosting, database, authentication, storage, email, payment, analytics, and infrastructure providers may process technical data for us."
+        }
+      },
+      "useInformation": {
+        "title": "How we use information",
+        "items": {
+          "accounts": "To create, authenticate, secure, and maintain accounts.",
+          "profiles": "To create, display, verify, rank, and manage professional profiles.",
+          "workflows": "To support projects, requests, quotes, appointments, messages, completion records, reviews, and reports.",
+          "communications": "To send transactional messages, notifications, support replies, and service updates.",
+          "trust": "To prevent fraud, spam, duplicate accounts, unsafe behavior, abuse, and violations of our terms.",
+          "billing": "To manage subscriptions, trials, billing status, promotions, and referral reward records.",
+          "support": "To investigate reports, disputes, technical issues, safety concerns, and user requests.",
+          "improve": "To improve features, reliability, search, onboarding, marketplace quality, and user experience."
+        }
+      },
+      "visibility": {
+        "title": "Who can see what",
+        "items": {
+          "publicProfiles": "Professional profile information may be visible publicly or to customers browsing Mestermind.",
+          "selectedPro": "When a customer sends or accepts a request, the selected professional may see relevant project, contact, quote, appointment, and message details.",
+          "participants": "Conversation participants can see messages and related request context.",
+          "privateRecords": "Private account, billing, verification, admin, and support records are limited to authorized systems, providers, and Mestermind personnel who need access.",
+          "publishedReviews": "Reviews may be displayed publicly with relevant profile and job context."
+        }
+      },
+      "sharing": {
+        "title": "How we share information",
+        "intro": "We share information as needed to operate Mestermind and comply with legal and safety obligations.",
+        "items": {
+          "firebase": "Firebase and Google services may process authentication, database, storage, hosting, and related technical data.",
+          "stripe": "Stripe may process professional subscription billing information.",
+          "resend": "Email providers such as Resend may process email addresses, message content, and delivery metadata.",
+          "otherProviders": "We may use other service providers for hosting, analytics, support, security, monitoring, or communication.",
+          "legalDisclosure": "We may disclose information if required by law, legal process, safety obligations, fraud prevention, or enforcement of our terms.",
+          "noSale": "We do not sell personal information in the ordinary sense of selling user data for money."
+        }
+      },
+      "retention": {
+        "title": "Retention",
+        "intro": "We keep information for as long as needed for marketplace operation, legal, safety, accounting, support, and legitimate business purposes.",
+        "items": {
+          "accountProfile": "Account and profile records are generally kept while the account exists and for a reasonable period afterward.",
+          "marketplaceRecords": "Requests, quotes, messages, appointments, reviews, reports, and completion history may be retained to support trust, safety, dispute review, and marketplace records.",
+          "verificationRecords": "Professional verification records may be retained to document review decisions and protect marketplace safety.",
+          "localDrafts": "Local browser drafts can usually be cleared by clearing browser storage or completing the signup flow."
+        }
+      },
+      "security": {
+        "title": "Security",
+        "intro": "We use technical and organizational measures intended to protect personal information, including authentication, access controls, rate limits, and provider security features.",
+        "closing": "No system is perfectly secure. You are responsible for protecting your account credentials and telling us if you suspect unauthorized access."
+      },
+      "choices": {
+        "title": "Your choices and rights",
+        "items": {
+          "accountSettings": "Customers can update certain profile and contact details in account settings.",
+          "proSettings": "Professionals can update certain profile, visibility, notification, and billing settings.",
+          "email": "You may contact support about transactional email issues or data requests.",
+          "dataRequests": "Depending on your location, you may have rights to access, correct, delete, restrict, or object to certain processing of your personal information.",
+          "browserControls": "You can use browser controls to manage cookies, local storage, and some device-level permissions."
+        }
+      },
+      "children": {
+        "title": "Children",
+        "intro": "Mestermind is not intended for children. Do not use Mestermind if you are not old enough to enter into legally binding agreements."
+      },
+      "internationalUse": {
+        "title": "International processing",
+        "intro": "Your information may be processed in countries other than where you live, including by service providers that support Mestermind."
+      },
+      "changes": {
+        "title": "Changes to this policy",
+        "intro": "We may update this Privacy Policy from time to time. The updated version will be posted on this page with a new last-updated date."
+      }
+    },
+    "contact": { "title": "Contact", "bodyBefore": "Questions about privacy? Email" },
+    "termsLink": "Read our Terms of Use"
   },
   "helpPage": {
     "title": "Help",
@@ -1768,6 +2174,7 @@
         "quotedPrice": "Quoted price",
         "phone": "Phone",
         "address": "Address",
+        "meetingNote": "Meeting note",
         "preferredStart": "Preferred start",
         "yourMessage": "Your message",
         "confirmButton": "Confirm appointment",
@@ -2600,8 +3007,8 @@
       "date": "Date",
       "time": "Time",
       "duration": "Duration",
-      "location": "Location or meeting note",
-      "locationPlaceholder": "Customer address, district, or video call",
+      "location": "Meeting note",
+      "locationPlaceholder": "Gate code, entrance note, or video call link",
       "message": "Message to customer",
       "messagePlaceholder": "Mention what you will inspect, what the customer should prepare, and whether this is for the quote or service.",
       "sending": "Sending...",

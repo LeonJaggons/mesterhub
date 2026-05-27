@@ -893,9 +893,10 @@
     },
     "details": {
       "customer": "Ügyfél",
-      "location": "Helyszín",
+      "location": "Cím",
       "openMaps": "Megnyitás Google Térképen",
       "openGoogleMaps": "Google Térkép megnyitása",
+      "meetingNote": "Találkozási megjegyzés",
       "note": "Időpont megjegyzés"
     },
     "progress": {
@@ -949,8 +950,8 @@
       "time": "Idő",
       "duration": "Időtartam",
       "type": "Időpont típusa",
-      "location": "Helyszín vagy találkozási megjegyzés",
-      "locationPlaceholder": "Ügyfél címe, kerület vagy videóhívás",
+      "location": "Találkozási megjegyzés",
+      "locationPlaceholder": "Kapukód, bejárati megjegyzés vagy videóhívás link",
       "message": "Üzenet az ügyfélnek",
       "messagePlaceholder": "Írd le, miért javasolsz módosítást, és mit készítsen elő az ügyfél.",
       "keep": "Jelenlegi időpont megtartása",
@@ -1434,6 +1435,19 @@
         "messages": "Közvetlen ügyfélüzenetek"
       }
     },
+    "referrals": {
+      "title": "Hívj meg másik szakembert",
+      "body": "Hívj meg megbízható szakembereket a Mestermindre. {amount} Ft jutalmat kapsz, miután a meghívott szakembert jóváhagytuk.",
+      "pendingCash": "Függő kifizetés",
+      "invited": "Meghívottak",
+      "approved": "Jóváhagyott szakemberek",
+      "rewarded": "Kifizetett jutalmak",
+      "code": "Ajánlókód",
+      "link": "Szakember meghívólink",
+      "copy": "Link másolása",
+      "copied": "Másolva",
+      "unlock": "A jutalmat admin jóváhagyás után manuális kifizetésre jelöljük."
+    },
     "visibility": {
       "title": "Profil láthatósága",
       "visibleBody": "A jóváhagyott profilod megjelenhet az ügyfélkeresésekben és fogadhat ajánlatkéréseket.",
@@ -1553,6 +1567,19 @@
       "addressPlaceholder": "Utca, házszám, bejutási megjegyzések",
       "addressHelper": "Csak akkor osztjuk meg a szakemberrel, amikor elfogadod az ajánlatát, és megadod az elfogadási részletekben."
     },
+    "referrals": {
+      "title": "Hívj meg szakembereket",
+      "body": "Ismersz megbízható szakembert? Hívd meg a Mestermindre. {amount} Ft jutalmat kapsz, miután a szakember profilját jóváhagytuk.",
+      "pendingCash": "Függő kifizetés",
+      "invited": "Meghívottak",
+      "approved": "Jóváhagyott szakemberek",
+      "rewarded": "Kifizetett jutalmak",
+      "code": "Ajánlókód",
+      "link": "Szakember meghívólink",
+      "copy": "Link másolása",
+      "copied": "Másolva",
+      "unlock": "A jutalmat manuális kifizetésre jelöljük, miután a meghívott szakembert a Mestermind jóváhagyta."
+    },
     "signin": {
       "title": "Bejelentkezési adatok",
       "body": "Ezek a mezők a bejelentkezési fiókodból származnak, és itt nem szerkeszthetők.",
@@ -1580,6 +1607,35 @@
     "emptyLoading": "Betöltés...",
     "emptyTitle": "Még nincsenek értesítések",
     "emptyBody": "Az ajánlatokról, üzenetekről, időpontokról és munkákról szóló frissítések itt jelennek meg."
+  },
+  "termsPage": {
+    "title": "Felhasználási feltételek",
+    "subtitle": "A Mestermind használatának szabályai ügyfelek, szakemberek és ajánlási programban részt vevők számára.",
+    "lastUpdated": {
+      "label": "Utolsó frissítés",
+      "date": "2026. május 27."
+    },
+    "sections": {
+      "referralProgram": {
+        "title": "Ajánlási program",
+        "intro": "A Mestermind ajánlási jutalmat kínálhat, amikor ügyfelek vagy szakemberek alkalmas szakembereket hívnak meg a piactérre.",
+        "items": {
+          "notGuaranteed": "Az ajánlási jutalom promóciós jellegű, és nem garantált. A függőben lévő jutalom megjelenítése nem jelent fizetési kötelezettséget, amíg a Mestermind nem hagyja jóvá az ajánlást és a kifizetési jogosultságot.",
+          "qualifyingReferral": "Érvényes ajánláshoz az szükséges, hogy egy új szakember érvényes ajánlólinken vagy kódon keresztül regisztráljon, valós szakemberprofilt küldjön be, és a Mestermind jóváhagyja. A meghívott szakembernek újnak kell lennie a Mesterminden, és nem lehet duplikált, helyettesítő vagy jutalomszerzés céljából létrehozott kapcsolt fiók.",
+          "manualReview": "Minden ajánlási jutalom manuális ellenőrzéshez kötött. A Mestermind késleltetheti, elutasíthatja, visszavonhatja vagy törölheti a jutalmat, ha az ajánlás alacsony minőségűnek, hiányosnak, csalárdnak, visszaélésszerűnek, jogosulatlannak vagy a program céljával ellentétesnek tűnik.",
+          "noAbuse": "Tilos spamet küldeni, forgalmat vásárolni, félrevezetni a meghívottakat, megtévesztő állításokat közzétenni, automatizált regisztrációt használni, hamis vagy duplikált fiókokat létrehozni, vagy más módon manipulálni az ajánlási programot.",
+          "noSelfReferral": "Saját magad ajánlása tilos. Nem ajánlhatod saját magadat, saját duplikált fiókodat, másik fiók alatt működő saját vállalkozásodat, vagy olyan fiókot, amelyet elsősorban te irányítasz.",
+          "payoutMethod": "A jóváhagyott jutalmakat a Mestermind által elfogadott kifizetési módon, manuálisan fizetjük ki. Kifizetés előtt kérhetünk személyazonossági, kapcsolattartási, banki, számlázási vagy más ésszerű kifizetési adatot.",
+          "taxes": "Te felelsz az ajánlási jutalommal kapcsolatos adókért, bejelentési kötelezettségekért, banki díjakért, devizaváltási költségekért és egyéb terhekért.",
+          "changes": "A Mestermind bármikor módosíthatja, szüneteltetheti, korlátozhatja vagy megszüntetheti az ajánlási programot, beleértve a jutalom összegét, jogosultsági szabályokat, kifizetési időzítést és csalásellenőrzéseket. A változások a jog által megengedett mértékben a ki nem fizetett vagy függőben lévő jutalmakra is vonatkozhatnak."
+        }
+      }
+    },
+    "support": {
+      "title": "Támogatás",
+      "bodyBefore": "Kérdésed van a feltételekkel kapcsolatban? Írj ide:"
+    },
+    "privacyLink": "Adatvédelmi irányelvek megnyitása"
   },
   "helpPage": {
     "title": "Segítség",
@@ -1768,6 +1824,7 @@
         "quotedPrice": "Ajánlati ár",
         "phone": "Telefon",
         "address": "Cím",
+        "meetingNote": "Találkozási megjegyzés",
         "preferredStart": "Előnyben részesített kezdés",
         "yourMessage": "Üzeneted",
         "confirmButton": "Időpont megerősítése",
@@ -2600,8 +2657,8 @@
       "date": "Dátum",
       "time": "Idő",
       "duration": "Időtartam",
-      "location": "Helyszín vagy találkozási megjegyzés",
-      "locationPlaceholder": "Ügyfél címe, kerület vagy videóhívás",
+      "location": "Találkozási megjegyzés",
+      "locationPlaceholder": "Kapukód, bejárati megjegyzés vagy videóhívás link",
       "message": "Üzenet az ügyfélnek",
       "messagePlaceholder": "Írd le, mit fogsz megnézni, mit készítsen elő az ügyfél, és hogy ez felméréshez vagy szolgáltatáshoz kapcsolódik-e.",
       "sending": "Küldés...",

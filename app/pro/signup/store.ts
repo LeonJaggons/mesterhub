@@ -4,6 +4,7 @@ export type SignupData = {
   phone?: string
   phoneVerified?: boolean
   password?: string
+  referralCode?: string
   categoryId?: string
   categoryName?: string
   regulated?: boolean

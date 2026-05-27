@@ -59,7 +59,7 @@ function reminderText(input: {
     `Date: ${input.appointment.date}`,
     `Time: ${input.appointment.time}`,
     input.appointment.duration ? `Duration: ${input.appointment.duration}` : '',
-    input.appointment.location ? `Location: ${input.appointment.location}` : '',
+    input.appointment.location ? `Meeting note: ${input.appointment.location}` : '',
     `Open Mestermind to review the appointment: ${input.requestUrl}`,
   ].filter(Boolean).join('\n\n')
 }
@@ -76,7 +76,7 @@ function reminderTextHu(input: {
     `Dátum: ${input.appointment.date}`,
     `Idő: ${input.appointment.time}`,
     input.appointment.duration ? `Időtartam: ${input.appointment.duration}` : '',
-    input.appointment.location ? `Helyszín: ${input.appointment.location}` : '',
+    input.appointment.location ? `Találkozási megjegyzés: ${input.appointment.location}` : '',
     `Nyisd meg a Mestermindet az időpont áttekintéséhez: ${input.requestUrl}`,
   ].filter(Boolean).join('\n\n')
 }
@@ -110,7 +110,7 @@ async function sendReminder(input: {
         ['Date', input.appointment.date],
         ['Time', input.appointment.time],
         ['Duration', input.appointment.duration],
-        ['Location', input.appointment.location],
+        ['Meeting note', input.appointment.location],
         ['Notes', input.appointment.notes],
       ],
       ctaLabel: 'View appointment',
@@ -130,7 +130,7 @@ async function sendReminder(input: {
             ['Dátum', input.appointment.date],
             ['Idő', input.appointment.time],
             ['Időtartam', input.appointment.duration],
-            ['Helyszín', input.appointment.location],
+            ['Találkozási megjegyzés', input.appointment.location],
             ['Megjegyzések', input.appointment.notes],
           ],
           ctaLabel: 'Időpont megtekintése',

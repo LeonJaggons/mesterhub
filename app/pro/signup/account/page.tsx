@@ -26,6 +26,15 @@ export default function AccountPage() {
   const [requirePhoneVerification, setRequirePhoneVerification] = useState(false)
 
   useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get('ref')?.trim() ?? ''
+    if (ref) {
+      window.localStorage.setItem('mesterhub_pro_referral_code', ref)
+      save({ referralCode: ref })
+    } else {
+      const storedRef = window.localStorage.getItem('mesterhub_pro_referral_code')
+      if (storedRef) save({ referralCode: storedRef })
+    }
+
     return onAuthChange(user => {
       setCurrentUser(user)
       if (!user) return

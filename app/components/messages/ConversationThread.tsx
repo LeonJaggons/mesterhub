@@ -149,7 +149,7 @@ function AppointmentModal({
   const [date, setDate] = useState(existingAppointment?.date ?? '')
   const [time, setTime] = useState(existingAppointment?.time ?? '')
   const [duration, setDuration] = useState(existingAppointment?.duration ?? '60 minutes')
-  const [location, setLocation] = useState(existingAppointment?.location ?? request?.acceptance?.address ?? '')
+  const [location, setLocation] = useState(existingAppointment?.location ?? '')
   const [notes, setNotes] = useState(existingAppointment?.notes ?? '')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -666,7 +666,7 @@ export default function ConversationThread({ role, basePath }: Props) {
                 </strong>
                 <small>{request.appointmentRequest.duration}</small>
                 {request.appointmentRequest.location && (
-                  <small>{request.appointmentRequest.location}</small>
+                  <small>{t('messages.appointmentModal.location')}: {request.appointmentRequest.location}</small>
                 )}
               </div>
               {request.appointmentRequest.notes && (

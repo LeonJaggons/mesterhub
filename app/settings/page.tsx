@@ -7,6 +7,7 @@ import { authenticatedFetch } from '@/firebase/apiClient'
 import { useTranslations } from '@/lib/i18n/client'
 import type { User } from 'firebase/auth'
 import districtsData from '@/public/districts.json'
+import AddressAutocompleteInput from '../components/AddressAutocompleteInput'
 import styles from '../account/account.module.css'
 
 type CustomerProfile = {
@@ -19,6 +20,18 @@ type CustomerProfile = {
   phone?: string
   preferredDistrict?: string
   address?: string
+}
+
+type ReferralSummary = {
+  code: string
+  inviteUrl: string
+  rewardAmountFt: number
+  referralCount: number
+  approvedCount: number
+  pendingRewardCount: number
+  rewardedCount: number
+  pendingRewardFt: number
+  paidRewardFt: number
 }
 
 type ProfileForm = {
@@ -54,6 +67,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [referral, setReferral] = useState<ReferralSummary | null>(null)
+  const [referralCopied, setReferralCopied] = useState(false)
 
   useEffect(() => {
     return onAuthChange(async u => {
@@ -72,10 +87,13 @@ export default function SettingsPage() {
       try {
         const res = await authenticatedFetch('/api/profile')
         const data = (await res.json()) as { profile?: CustomerProfile }
+        const referralRes = await authenticatedFetch('/api/referrals')
+        const referralData = (await referralRes.json()) as { referral?: ReferralSummary }
         const nextProfile = data.profile
         const displayName = nextProfile?.displayName ?? authName
         const nameParts = splitDisplayName(displayName)
         setProfile(nextProfile ?? null)
+        setReferral(referralData.referral ?? null)
         setForm({
           firstName: nextProfile?.firstName ?? nameParts.firstName,
           lastName: nextProfile?.lastName ?? nameParts.lastName,
@@ -91,6 +109,13 @@ export default function SettingsPage() {
       }
     })
   }, [router])
+
+  async function copyReferralLink() {
+    if (!referral?.inviteUrl) return
+    await navigator.clipboard.writeText(referral.inviteUrl)
+    setReferralCopied(true)
+    window.setTimeout(() => setReferralCopied(false), 2000)
+  }
 
   function updateField(field: keyof ProfileForm, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -219,16 +244,62 @@ export default function SettingsPage() {
 
             <div className={styles.field}>
               <label className={styles.label} htmlFor="address">{t('settings.contact.address')}</label>
-              <textarea
+              <AddressAutocompleteInput
                 id="address"
-                className={styles.textarea}
+                className={styles.input}
                 value={form.address}
-                onChange={e => updateField('address', e.target.value)}
+                onChange={value => updateField('address', value)}
                 placeholder={t('settings.contact.addressPlaceholder')}
-                rows={4}
               />
               <p className={styles.helperText}>{t('settings.contact.addressHelper')}</p>
             </div>
+          </section>
+
+          <section className={styles.card}>
+            <h2 className={styles.sectionTitle}>{t('settings.referrals.title')}</h2>
+            <p className={styles.helperText}>{t('settings.referrals.body', { amount: referral?.rewardAmountFt ?? 3000 })}</p>
+
+            <div className={styles.referralStats}>
+              <div>
+                <span className={styles.statLabel}>{t('settings.referrals.pendingCash')}</span>
+                <strong className={styles.statValue}>{referral?.pendingRewardFt ?? 0} Ft</strong>
+              </div>
+              <div>
+                <span className={styles.statLabel}>{t('settings.referrals.invited')}</span>
+                <strong className={styles.statValue}>{referral?.referralCount ?? 0}</strong>
+              </div>
+              <div>
+                <span className={styles.statLabel}>{t('settings.referrals.approved')}</span>
+                <strong className={styles.statValue}>{referral?.approvedCount ?? 0}</strong>
+              </div>
+              <div>
+                <span className={styles.statLabel}>{t('settings.referrals.rewarded')}</span>
+                <strong className={styles.statValue}>{referral?.rewardedCount ?? 0}</strong>
+              </div>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="referralCode">{t('settings.referrals.code')}</label>
+              <input id="referralCode" className={styles.input} value={referral?.code ?? ''} readOnly />
+            </div>
+
+            <div className={styles.copyRow}>
+              <input
+                className={styles.input}
+                value={referral?.inviteUrl ?? ''}
+                readOnly
+                aria-label={t('settings.referrals.link')}
+              />
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={copyReferralLink}
+                disabled={!referral?.inviteUrl}
+              >
+                {referralCopied ? t('settings.referrals.copied') : t('settings.referrals.copy')}
+              </button>
+            </div>
+            <p className={styles.helperText}>{t('settings.referrals.unlock')}</p>
           </section>
 
           <section className={styles.card}>

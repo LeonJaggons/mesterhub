@@ -34,6 +34,7 @@ type ServiceRequest = {
   customerName?: string
   customerEmail?: string
   customerDistrict?: string
+  acceptance?: { address?: string }
   jobLocation?: JobLocation
   status: RequestStatus
   appointmentRequest?: AppointmentRequest
@@ -171,7 +172,7 @@ export default function WorkPage() {
                                 {req.customerName || t('proWork.customerFallback')} · {appointment.duration}
                               </p>
                               <p className="text-xs text-gray-400 mt-1">
-                                {appointment.location || districtCopy(t, req)}
+                                {req.acceptance?.address || districtCopy(t, req)}
                               </p>
                             </div>
                             <span className="w-fit text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-full px-2.5 py-1">

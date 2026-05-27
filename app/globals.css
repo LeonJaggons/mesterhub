@@ -12,3 +12,13 @@
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-google-sans-flex), Arial, Helvetica, sans-serif;
 }
+
+.pac-container {
+  z-index: 10000;
+  font-family: var(--font-google-sans-flex), Arial, Helvetica, sans-serif;
+}
+
+gmp-place-autocomplete {
+  display: block;
+  width: 100%;
+}

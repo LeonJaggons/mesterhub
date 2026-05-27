@@ -114,10 +114,68 @@
   margin: -0.125rem 0 1rem;
 }
 
+.referralStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.referralStats > div {
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.625rem;
+  padding: 0.875rem;
+  background: var(--color-gray-50);
+}
+
+.statLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  display: block;
+  font-family: var(--font-darker-grotesque);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-gray-900);
+}
+
+.copyRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.secondaryBtn {
+  height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 0.5rem;
+  background: white;
+  color: var(--color-gray-700);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
   .fieldGrid {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .referralStats,
+  .copyRow {
+    grid-template-columns: 1fr;
   }
 }
 

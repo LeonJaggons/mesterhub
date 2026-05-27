@@ -672,7 +672,10 @@ export default function RequestDetailPage() {
                   </p>
                   <p className="text-sm text-gray-600">{req.appointmentRequest.duration}</p>
                   {req.appointmentRequest.location && (
-                    <p className="text-sm text-gray-600 mt-2">{req.appointmentRequest.location}</p>
+                    <p className="text-sm text-gray-600 mt-2">
+                      <span className="font-semibold">{t('customerRequests.detail.appointment.meetingNote')}:</span>{' '}
+                      {req.appointmentRequest.location}
+                    </p>
                   )}
                   {req.appointmentRequest.notes && (
                     <p className="text-sm text-gray-700 mt-3 whitespace-pre-wrap">{req.appointmentRequest.notes}</p>

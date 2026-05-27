@@ -41,6 +41,18 @@ type AccountData = {
   stripeSubscriptionId?: string
 }
 
+type ReferralSummary = {
+  code: string
+  inviteUrl: string
+  rewardAmountFt: number
+  referralCount: number
+  approvedCount: number
+  pendingRewardCount: number
+  rewardedCount: number
+  pendingRewardFt: number
+  paidRewardFt: number
+}
+
 type SubscriptionPeriodEnd = Date | string | number | null | undefined | {
   toDate?: () => Date
   toMillis?: () => number
@@ -167,6 +179,8 @@ export default function ProSettingsPage() {
   const [billingLoading, setBillingLoading] = useState(false)
   const [saved, setSaved] = useState('')
   const [error, setError] = useState('')
+  const [referral, setReferral] = useState<ReferralSummary | null>(null)
+  const [referralCopied, setReferralCopied] = useState(false)
 
   async function saveSettings(patch: {
     profileVisibility?: 'visible' | 'paused'
@@ -215,6 +229,13 @@ export default function ProSettingsPage() {
     }
   }
 
+  async function copyReferralLink() {
+    if (!referral?.inviteUrl) return
+    await navigator.clipboard.writeText(referral.inviteUrl)
+    setReferralCopied(true)
+    window.setTimeout(() => setReferralCopied(false), 2000)
+  }
+
   useEffect(() => {
     return onAuthChange(async user => {
       if (!user) {
@@ -227,9 +248,12 @@ export default function ProSettingsPage() {
         }
         const res = await authenticatedFetch('/api/pro/profile')
         const data = await res.json()
+        const referralRes = await authenticatedFetch('/api/referrals?role=pro')
+        const referralData = (await referralRes.json()) as { referral?: ReferralSummary }
         setProfile(data.profile ?? {})
         setAccount(data.account ?? {})
         setVerification(data.verification ?? {})
+        setReferral(referralData.referral ?? null)
         setNotifications({
           ...DEFAULT_NOTIFICATIONS,
           ...(data.account?.notificationPreferences ?? {}),
@@ -320,6 +344,52 @@ export default function ProSettingsPage() {
               {t('proSettings.profile.viewPublic')}
             </Link>
           )}
+        </div>
+
+        <div className={styles.card} style={{ marginBottom: '1rem' }}>
+          <section className={styles.helpSection} style={{ marginBottom: 0 }}>
+            <h2>{t('proSettings.referrals.title')}</h2>
+            <p style={{ marginBottom: '1rem' }}>{t('proSettings.referrals.body', { amount: referral?.rewardAmountFt ?? 3000 })}</p>
+            <div className={styles.referralStats}>
+              <div>
+                <span className={styles.statLabel}>{t('proSettings.referrals.pendingCash')}</span>
+                <strong className={styles.statValue}>{referral?.pendingRewardFt ?? 0} Ft</strong>
+              </div>
+              <div>
+                <span className={styles.statLabel}>{t('proSettings.referrals.invited')}</span>
+                <strong className={styles.statValue}>{referral?.referralCount ?? 0}</strong>
+              </div>
+              <div>
+                <span className={styles.statLabel}>{t('proSettings.referrals.approved')}</span>
+                <strong className={styles.statValue}>{referral?.approvedCount ?? 0}</strong>
+              </div>
+              <div>
+                <span className={styles.statLabel}>{t('proSettings.referrals.rewarded')}</span>
+                <strong className={styles.statValue}>{referral?.rewardedCount ?? 0}</strong>
+              </div>
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="proReferralCode">{t('proSettings.referrals.code')}</label>
+              <input id="proReferralCode" className={styles.input} value={referral?.code ?? ''} readOnly />
+            </div>
+            <div className={styles.copyRow}>
+              <input
+                className={styles.input}
+                value={referral?.inviteUrl ?? ''}
+                readOnly
+                aria-label={t('proSettings.referrals.link')}
+              />
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={copyReferralLink}
+                disabled={!referral?.inviteUrl}
+              >
+                {referralCopied ? t('proSettings.referrals.copied') : t('proSettings.referrals.copy')}
+              </button>
+            </div>
+            <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>{t('proSettings.referrals.unlock')}</p>
+          </section>
         </div>
 
         <div

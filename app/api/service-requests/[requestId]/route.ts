@@ -17,6 +17,7 @@ type RequestDoc = {
   customerEmail?: string
   categoryName: string
   status: 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled'
+  acceptance?: { address?: string }
   completion?: { status?: string }
   appointmentRequest?: (AppointmentRequestInput & { status?: 'proposed' | 'confirmed' })
   appointmentChangeRequest?: (AppointmentRequestInput & { status?: 'proposed' | 'confirmed' })
@@ -435,6 +436,7 @@ function appointmentEmailText(input: {
   proName: string
   categoryName: string
   appointment: AppointmentRequestInput
+  address?: string
   requestUrl: string
 }): string {
   return [
@@ -442,7 +444,8 @@ function appointmentEmailText(input: {
     `Date: ${input.appointment.date}`,
     `Time: ${input.appointment.time}`,
     input.appointment.duration ? `Duration: ${input.appointment.duration}` : '',
-    input.appointment.location ? `Location: ${input.appointment.location}` : '',
+    input.address ? `Address: ${input.address}` : '',
+    input.appointment.location ? `Meeting note: ${input.appointment.location}` : '',
     input.appointment.notes ? `Notes:\n${input.appointment.notes}` : '',
     `Open Mestermind to confirm it: ${input.requestUrl}`,
   ].filter(Boolean).join('\n\n')
@@ -452,6 +455,7 @@ function appointmentEmailHtml(input: {
   proName: string
   categoryName: string
   appointment: AppointmentRequestInput
+  address?: string
   requestUrl: string
 }): string {
   return `
@@ -480,7 +484,8 @@ function appointmentEmailHtml(input: {
       ${detailRow('Date', input.appointment.date)}
       ${detailRow('Time', input.appointment.time)}
       ${detailRow('Duration', input.appointment.duration ?? '')}
-      ${detailRow('Location', input.appointment.location ?? '')}
+      ${detailRow('Address', input.address ?? '')}
+      ${detailRow('Meeting note', input.appointment.location ?? '')}
       ${detailRow('Notes', input.appointment.notes ?? '')}
     </table>
 
@@ -498,6 +503,7 @@ function appointmentConfirmedEmailText(input: {
   customerName: string
   categoryName: string
   appointment?: AppointmentRequestInput
+  address?: string
   requestUrl: string
 }): string {
   return [
@@ -505,7 +511,8 @@ function appointmentConfirmedEmailText(input: {
     input.appointment?.date ? `Date: ${input.appointment.date}` : '',
     input.appointment?.time ? `Time: ${input.appointment.time}` : '',
     input.appointment?.duration ? `Duration: ${input.appointment.duration}` : '',
-    input.appointment?.location ? `Location: ${input.appointment.location}` : '',
+    input.address ? `Address: ${input.address}` : '',
+    input.appointment?.location ? `Meeting note: ${input.appointment.location}` : '',
     input.appointment?.notes ? `Notes:\n${input.appointment.notes}` : '',
     `Open Mestermind to view the job: ${input.requestUrl}`,
   ].filter(Boolean).join('\n\n')
@@ -515,6 +522,7 @@ function appointmentConfirmedEmailHtml(input: {
   customerName: string
   categoryName: string
   appointment?: AppointmentRequestInput
+  address?: string
   requestUrl: string
 }): string {
   return `
@@ -543,7 +551,8 @@ function appointmentConfirmedEmailHtml(input: {
       ${detailRow('Date', input.appointment?.date ?? '')}
       ${detailRow('Time', input.appointment?.time ?? '')}
       ${detailRow('Duration', input.appointment?.duration ?? '')}
-      ${detailRow('Location', input.appointment?.location ?? '')}
+      ${detailRow('Address', input.address ?? '')}
+      ${detailRow('Meeting note', input.appointment?.location ?? '')}
       ${detailRow('Notes', input.appointment?.notes ?? '')}
     </table>
 
@@ -1193,12 +1202,14 @@ export async function PATCH(
           proName: req.proName,
           categoryName: req.categoryName,
           appointment: appointmentForEmail,
+          address: req.acceptance?.address,
           requestUrl: appUrl(`/requests/${requestId}`),
         }),
         bodyHtml: appointmentEmailHtml({
           proName: req.proName,
           categoryName: req.categoryName,
           appointment: appointmentForEmail,
+          address: req.acceptance?.address,
           requestUrl: appUrl(`/requests/${requestId}`),
         }),
         localized: {
@@ -1210,7 +1221,8 @@ export async function PATCH(
               `Dátum: ${appointmentForEmail.date}`,
               `Idő: ${appointmentForEmail.time}`,
               appointmentForEmail.duration ? `Időtartam: ${appointmentForEmail.duration}` : '',
-              appointmentForEmail.location ? `Helyszín: ${appointmentForEmail.location}` : '',
+              req.acceptance?.address ? `Cím: ${req.acceptance.address}` : '',
+              appointmentForEmail.location ? `Találkozási megjegyzés: ${appointmentForEmail.location}` : '',
               appointmentForEmail.notes ? `Megjegyzések:\n${appointmentForEmail.notes}` : '',
               `Nyisd meg a Mestermindet az időpont megerősítéséhez: ${appUrl(`/requests/${requestId}`)}`,
             ].filter(Boolean).join('\n\n'),
@@ -1223,7 +1235,8 @@ export async function PATCH(
                 ['Dátum', appointmentForEmail.date],
                 ['Idő', appointmentForEmail.time],
                 ['Időtartam', appointmentForEmail.duration],
-                ['Helyszín', appointmentForEmail.location],
+                ['Cím', req.acceptance?.address],
+                ['Találkozási megjegyzés', appointmentForEmail.location],
                 ['Megjegyzések', appointmentForEmail.notes],
               ],
               ctaLabel: 'Időpont megerősítése',
@@ -1287,12 +1300,14 @@ export async function PATCH(
           customerName: req.customerName,
           categoryName: req.categoryName,
           appointment: confirmedAppointment,
+          address: req.acceptance?.address,
           requestUrl: appUrl(`/pro/appointments/${requestId}`),
         }),
         bodyHtml: appointmentConfirmedEmailHtml({
           customerName: req.customerName,
           categoryName: req.categoryName,
           appointment: confirmedAppointment,
+          address: req.acceptance?.address,
           requestUrl: appUrl(`/pro/appointments/${requestId}`),
         }),
         localized: {
@@ -1304,7 +1319,8 @@ export async function PATCH(
               confirmedAppointment?.date ? `Dátum: ${confirmedAppointment.date}` : '',
               confirmedAppointment?.time ? `Idő: ${confirmedAppointment.time}` : '',
               confirmedAppointment?.duration ? `Időtartam: ${confirmedAppointment.duration}` : '',
-              confirmedAppointment?.location ? `Helyszín: ${confirmedAppointment.location}` : '',
+              req.acceptance?.address ? `Cím: ${req.acceptance.address}` : '',
+              confirmedAppointment?.location ? `Találkozási megjegyzés: ${confirmedAppointment.location}` : '',
               confirmedAppointment?.notes ? `Megjegyzések:\n${confirmedAppointment.notes}` : '',
               `Nyisd meg a Mestermindet a munka megtekintéséhez: ${appUrl(`/pro/appointments/${requestId}`)}`,
             ].filter(Boolean).join('\n\n'),
@@ -1317,7 +1333,8 @@ export async function PATCH(
                 ['Dátum', confirmedAppointment?.date],
                 ['Idő', confirmedAppointment?.time],
                 ['Időtartam', confirmedAppointment?.duration],
-                ['Helyszín', confirmedAppointment?.location],
+                ['Cím', req.acceptance?.address],
+                ['Találkozási megjegyzés', confirmedAppointment?.location],
                 ['Megjegyzések', confirmedAppointment?.notes],
               ],
               ctaLabel: 'Munka megnyitása',

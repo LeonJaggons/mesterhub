@@ -6,6 +6,7 @@ import { sendAdminNotification } from '@/firebase/adminNotifications'
 import type { SignupData } from '@/app/pro/signup/store'
 import { phoneVerificationEnabled } from '@/lib/featureFlags'
 import { enforceUserRateLimit } from '@/lib/rateLimit'
+import { claimProReferral } from '@/lib/referrals'
 
 type ProStatus = 'pending_verification' | 'active' | 'suspended' | 'rejected'
 
@@ -124,6 +125,12 @@ export async function POST(request: NextRequest) {
     })
 
     await batch.commit()
+    await claimProReferral({
+      referredProUid: user.uid,
+      rawCode: data.referralCode,
+      proName: fullName,
+      proEmail: email,
+    })
 
     await sendAdminNotification({
       event: 'admin.pro.signup_submitted',

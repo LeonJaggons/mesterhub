@@ -84,6 +84,7 @@ export default function CompletePage() {
         method: 'POST',
         body: JSON.stringify({ ...draft, password: '' }),
       })
+      window.localStorage.removeItem('mesterhub_pro_referral_code')
 
       return `${window.location.origin}/pro/${user.uid}`
     }

@@ -128,10 +128,13 @@ function appointmentStage(appointment: AppointmentRequest): number {
 
 function mapsUrl(t: Translator, req: ServiceRequest, appointment: AppointmentRequest): string {
   const location = appointment.jobLocation ?? req.jobLocation
-  if (!appointment.location && location) {
+  if (req.acceptance?.address) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(req.acceptance.address)}`
+  }
+  if (location) {
     return `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`
   }
-  const query = appointment.location || districtCopy(t, req) || 'Budapest'
+  const query = districtCopy(t, req) || 'Budapest'
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
 
@@ -148,12 +151,10 @@ function actionStatusCopy(t: Translator, req: ServiceRequest): string {
 }
 
 function RescheduleModal({
-  req,
   appointment,
   onClose,
   onSubmit,
 }: {
-  req: ServiceRequest
   appointment: AppointmentRequest
   onClose: () => void
   onSubmit: (input: AppointmentRequestInput) => Promise<void>
@@ -163,7 +164,7 @@ function RescheduleModal({
   const [date, setDate] = useState(appointment.date)
   const [time, setTime] = useState(appointment.time)
   const [duration, setDuration] = useState(appointment.duration || '60 minutes')
-  const [location, setLocation] = useState(appointment.location || req.acceptance?.address || '')
+  const [location, setLocation] = useState(appointment.location || '')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -444,7 +445,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
   const isConfirmed = appointment.status === 'confirmed'
   const [lat, lng] = appointmentCoords(req, appointment)
   const approximateLocation = appointment.jobLocation ?? req.jobLocation ?? null
-  const locationLabel = appointment.location || (approximateLocation ? approximateLocationLabel(approximateLocation) : districtCopy(t, req))
+  const locationLabel = req.acceptance?.address || (approximateLocation ? approximateLocationLabel(approximateLocation) : districtCopy(t, req))
   const mapLabel = req.customerDistrict ? districtLabel(req.customerDistrict) : 'Budapest'
   const stageIndex = appointmentStage(appointment)
   const isActiveJob = req.status === 'accepted'
@@ -522,6 +523,12 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                 <div className="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4">
                   <p className="text-xs text-gray-400 mb-1">{t('proAppointment.details.note')}</p>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.notes}</p>
+                </div>
+              )}
+              {appointment.location && (
+                <div className="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <p className="text-xs text-gray-400 mb-1">{t('proAppointment.details.meetingNote')}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.location}</p>
                 </div>
               )}
             </div>
@@ -681,7 +688,6 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
       </div>
       {showReschedule && (
         <RescheduleModal
-          req={req}
           appointment={appointment}
           onClose={() => setShowReschedule(false)}
           onSubmit={handleReschedule}

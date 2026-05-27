@@ -60,7 +60,7 @@ function approximateLocationLabel(t: Translator, location?: ServiceRequest['jobL
 }
 
 function locationLabel(t: Translator, req: ServiceRequest, appointment: AppointmentRequest): string {
-  if (appointment.location) return appointment.location
+  if (req.acceptance?.address) return req.acceptance.address
   const appointmentLocation = approximateLocationLabel(t, appointment.jobLocation)
   if (appointmentLocation) return appointmentLocation
   const requestLocation = approximateLocationLabel(t, req.jobLocation)
