@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 function timestampMillis(value: unknown): number {
   if (!value || typeof value !== 'object') return 0
@@ -11,6 +12,9 @@ function timestampMillis(value: unknown): number {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const role = request.nextUrl.searchParams.get('role') === 'pro' ? 'pro' : 'customer'
     const filterField = role === 'pro' ? 'proUid' : 'customerUid'
     const snap = await adminDb.collection('conversations').where(filterField, '==', user.uid).get()

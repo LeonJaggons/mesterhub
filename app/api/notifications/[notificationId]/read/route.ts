@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { requireUser } from '@/firebase/adminAccess'
 import { notificationItemsRef } from '@/firebase/inAppNotifications'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function PATCH(
   request: NextRequest,
@@ -9,6 +10,9 @@ export async function PATCH(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const { notificationId } = await params
     await notificationItemsRef(user.uid).doc(notificationId).update({
       readAt: FieldValue.serverTimestamp(),

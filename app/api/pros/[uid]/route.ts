@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { hasPaidProFeatures } from '@/lib/billing'
+import { enforceIpRateLimit } from '@/lib/rateLimit'
 
 type ProDoc = {
   uid?: string
@@ -45,10 +46,13 @@ type ProDoc = {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ uid: string }> },
 ) {
   try {
+    const limited = await enforceIpRateLimit('publicRead', request)
+    if (limited) return limited
+
     const { uid } = await params
     const snap = await adminDb.collection('pros').doc(uid).get()
 

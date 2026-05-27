@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 const PUBLIC_FIELDS = [
   'fullName',
@@ -84,6 +85,9 @@ function cleanNotificationPreferences(value: unknown) {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const [profileSnap, accountSnap, verificationSnap] = await Promise.all([
       adminDb.collection('pros').doc(user.uid).get(),
       adminDb.collection('pros').doc(user.uid).collection('private').doc('account').get(),
@@ -111,6 +115,9 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const body = await request.json()
     const profileRef = adminDb.collection('pros').doc(user.uid)
     const profileSnap = await profileRef.get()

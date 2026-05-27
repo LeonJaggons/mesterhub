@@ -1,10 +1,14 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/firebase/adminAccess'
 import { listMarketplaceProjects } from '@/lib/marketplaceQuotes'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const payload = await listMarketplaceProjects(user.uid)
     return Response.json(payload)
   } catch (err) {

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { getProServiceRequest } from '@/lib/proServiceRequests'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function GET(
   request: NextRequest,
@@ -9,6 +10,9 @@ export async function GET(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const role = request.nextUrl.searchParams.get('role') === 'pro' ? 'pro' : 'customer'
     const { requestId } = await params
     const convSnap = await adminDb.collection('conversations').doc(requestId).get()

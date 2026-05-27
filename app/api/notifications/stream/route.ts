@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/firebase/adminAccess'
 import { notificationItemsRef, serializeNotification } from '@/firebase/inAppNotifications'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -8,6 +9,9 @@ export const runtime = 'nodejs'
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const encoder = new TextEncoder()
 
     const stream = new ReadableStream({

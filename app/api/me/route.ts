@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { isLocale, type Locale } from '@/lib/i18n/config'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export type ProProfileSummary = {
   uid: string
@@ -64,6 +65,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const decoded = await adminAuth.verifyIdToken(header.slice(7))
+    const limited = await enforceUserRateLimit('authRead', decoded.uid)
+    if (limited) return limited
+
     try {
       const [pro, preferredLocale] = await Promise.all([
         resolvePro(decoded.uid, decoded.email),

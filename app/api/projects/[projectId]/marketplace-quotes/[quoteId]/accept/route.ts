@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/firebase/adminAccess'
 import { acceptMarketplaceQuote } from '@/lib/marketplaceQuotes'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function POST(
   request: NextRequest,
@@ -8,6 +9,9 @@ export async function POST(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const { projectId, quoteId } = await params
     const body = await request.json()
     const result = await acceptMarketplaceQuote(user.uid, projectId, quoteId, body.input ?? body)

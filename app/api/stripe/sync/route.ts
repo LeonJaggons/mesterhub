@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 import { stripe } from '@/lib/stripe'
 import { syncStripeSubscription } from '@/lib/stripeSubscription'
 
@@ -9,6 +10,9 @@ export const runtime = 'nodejs'
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('expensive', user.uid)
+    if (limited) return limited
+
     const accountSnap = await adminDb
       .collection('pros')
       .doc(user.uid)

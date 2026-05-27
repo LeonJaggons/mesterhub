@@ -3,10 +3,14 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { isLocale } from '@/lib/i18n/config'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function PATCH(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const body = await request.json().catch(() => null)
     const preferredLocale = typeof body?.preferredLocale === 'string' ? body.preferredLocale.trim() : ''
 

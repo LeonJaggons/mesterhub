@@ -7,6 +7,7 @@ import type { JobLocation, NewServiceRequest } from '@/firebase/serviceRequests'
 import { hasPaidProFeatures } from '@/lib/billing'
 import { FREE_CLEAR_INQUIRY_LIMIT, clearInquiryIdsByMonth } from '@/lib/inquiryAccess'
 import { huAnswerLabel, huAnswerValue, huCategory } from '@/lib/i18n/email'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 type ProjectDoc = {
   customerUid: string
@@ -343,6 +344,9 @@ function estimateRequestEmailHtmlHu(input: {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('expensive', user.uid)
+    if (limited) return limited
+
     const body = (await request.json()) as NewServiceRequest
 
     if (body.customerUid !== user.uid) {
@@ -510,6 +514,9 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const snap = await adminDb
       .collection('serviceRequests')
       .where('customerUid', '==', user.uid)

@@ -4,6 +4,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { appUrl, periodEndMillis, stripeProPriceId, type SubscriptionPeriodEnd } from '@/lib/billing'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 import { stripe } from '@/lib/stripe'
 
 export const runtime = 'nodejs'
@@ -33,6 +34,9 @@ function checkoutSubscriptionData(
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('expensive', user.uid)
+    if (limited) return limited
+
     const profileRef = adminDb.collection('pros').doc(user.uid)
     const accountRef = profileRef.collection('private').doc('account')
     const [profileSnap, accountSnap] = await Promise.all([profileRef.get(), accountRef.get()])

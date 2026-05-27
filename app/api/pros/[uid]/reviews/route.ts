@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { serializeDoc } from '@/app/api/admin/utils'
 import { hasPaidProFeatures } from '@/lib/billing'
+import { enforceIpRateLimit } from '@/lib/rateLimit'
 
 type SerializedReview = ReturnType<typeof serializeReview>
 
@@ -24,10 +25,13 @@ function reviewTime(review: SerializedReview): number {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ uid: string }> },
 ) {
   try {
+    const limited = await enforceIpRateLimit('publicRead', request)
+    if (limited) return limited
+
     const { uid } = await params
     const proSnap = await adminDb.collection('pros').doc(uid).get()
     if (!proSnap.exists) {

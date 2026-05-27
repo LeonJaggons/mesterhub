@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { adminDb } from '@/firebase/admin'
 import { hasPaidProFeatures } from '@/lib/billing'
+import { enforceIpRateLimit } from '@/lib/rateLimit'
 import servicesData from '@/public/services.json'
 import districtsData from '@/public/districts.json'
 
@@ -60,6 +61,9 @@ function isPaidPro(pro: ProDoc): boolean {
 }
 
 export async function GET(request: NextRequest) {
+  const limited = await enforceIpRateLimit('publicRead', request)
+  if (limited) return limited
+
   const rawQ = request.nextUrl.searchParams.get('q')?.trim() ?? ''
   const rawCategory = request.nextUrl.searchParams.get('category')?.trim() ?? ''
   const districtRoman = request.nextUrl.searchParams.get('district') ?? ''

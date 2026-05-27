@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { emailConfigured, sendEmail } from '@/firebase/email'
 import { defaultLocale, getSupportedLocale, type Locale } from '@/lib/i18n/config'
+import { emailRateLimit, enforceRateLimits, ipRateLimit } from '@/lib/rateLimit'
 
 type MailStatus = 'sent' | 'skipped' | 'error'
 
@@ -131,6 +132,12 @@ export async function POST(request: NextRequest) {
   if (!email) {
     return Response.json({ error: 'Enter a valid email address.' }, { status: 400 })
   }
+
+  const limited = await enforceRateLimits([
+    emailRateLimit('passwordResetEmail', email),
+    ipRateLimit('passwordResetIp', request),
+  ])
+  if (limited) return limited
 
   if (!emailConfigured()) {
     return Response.json({ error: 'Password reset email is not configured.' }, { status: 503 })

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { sendAdminNotification } from '@/firebase/adminNotifications'
+import { enforceRateLimit, ipRateLimit, userRateLimit } from '@/lib/rateLimit'
 
 type FeedbackType = 'problem' | 'feature' | 'general'
 
@@ -34,6 +35,11 @@ async function getOptionalUser(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getOptionalUser(request)
+    const limited = await enforceRateLimit(
+      user ? userRateLimit('authWrite', user.uid) : ipRateLimit('expensive', request),
+    )
+    if (limited) return limited
+
     const body = await request.json()
     const type = cleanFeedbackType(body.type)
     const message = cleanString(body.message)

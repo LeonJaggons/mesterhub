@@ -1,12 +1,16 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/firebase/adminAccess'
 import { notificationItemsRef, serializeNotification } from '@/firebase/inAppNotifications'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const snap = await notificationItemsRef(user.uid)
       .orderBy('createdAt', 'desc')
       .limit(30)

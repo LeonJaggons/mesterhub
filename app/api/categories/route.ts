@@ -1,7 +1,11 @@
 import { NextRequest } from 'next/server'
+import { enforceIpRateLimit } from '@/lib/rateLimit'
 import services from '@/public/services.json'
 
 export async function GET(request: NextRequest) {
+  const limited = await enforceIpRateLimit('publicRead', request)
+  if (limited) return limited
+
   const { searchParams } = request.nextUrl
   const name = searchParams.get('name')
 

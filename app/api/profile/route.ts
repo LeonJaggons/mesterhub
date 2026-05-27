@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminAuth, adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { isLocale } from '@/lib/i18n/config'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 function cleanString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value.trim() : fallback
@@ -16,6 +17,9 @@ function splitDisplayName(displayName: string): { firstName: string; lastName: s
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const snap = await adminDb.collection('users').doc(user.uid).get()
     return Response.json({
       profile: {
@@ -38,6 +42,9 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const body = await request.json()
     const requestedDisplayName = cleanString(body.displayName, user.name ?? '')
     const requestedParts = splitDisplayName(requestedDisplayName)

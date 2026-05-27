@@ -4,6 +4,7 @@ import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import { huCategory } from '@/lib/i18n/email'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 type ProjectDoc = {
   customerUid: string
@@ -99,6 +100,9 @@ export async function DELETE(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const { projectId } = await params
     const projectRef = adminDb.collection('projects').doc(projectId)
     const projectSnap = await projectRef.get()

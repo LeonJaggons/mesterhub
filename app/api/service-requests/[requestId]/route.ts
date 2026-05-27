@@ -6,6 +6,7 @@ import { sendLifecycleEmail } from '@/firebase/notifications'
 import type { AppointmentRequestInput } from '@/firebase/conversations'
 import type { QuoteInput } from '@/firebase/serviceRequests'
 import { huCategory, huRole } from '@/lib/i18n/email'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 type RequestDoc = {
   projectId?: string
@@ -770,6 +771,9 @@ export async function GET(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const { requestId } = await params
     const snap = await adminDb.collection('serviceRequests').doc(requestId).get()
 
@@ -804,6 +808,9 @@ export async function PATCH(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const { requestId } = await params
     const body = await request.json()
     const action = cleanString(body.action)
@@ -1687,6 +1694,9 @@ export async function DELETE(
 ) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const { requestId } = await params
     const reqRef = adminDb.collection('serviceRequests').doc(requestId)
     const reqSnap = await reqRef.get()

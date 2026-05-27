@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { NextRequest } from 'next/server'
 import { adminStorage } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 const MAX_UPLOAD_SIZE = 10 * 1024 * 1024
 
@@ -24,6 +25,9 @@ function downloadUrl(bucketName: string, objectPath: string, token: string): str
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('expensive', user.uid)
+    if (limited) return limited
+
     const form = await request.formData()
     const file = form.get('file')
     const scope = form.get('scope')

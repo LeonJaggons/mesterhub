@@ -2,10 +2,14 @@ import { NextRequest } from 'next/server'
 import { requireUser } from '@/firebase/adminAccess'
 import { listProServiceRequests } from '@/lib/proServiceRequests'
 import { FREE_CLEAR_INQUIRY_LIMIT } from '@/lib/inquiryAccess'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const { requests, hasProPlan } = await listProServiceRequests(user.uid)
     return Response.json({
       requests,

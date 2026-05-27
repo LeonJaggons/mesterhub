@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { adminDb } from '@/firebase/admin'
 import { requireUser } from '@/firebase/adminAccess'
 import { listMarketplaceQuotesForProjects } from '@/lib/marketplaceQuotes'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 function cleanString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value.trim() : fallback
@@ -34,6 +35,9 @@ function timestampMillis(value: unknown): number {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const body = await request.json()
     const categoryName = cleanString(body.categoryName)
     const answers = cleanAnswers(body.answers)
@@ -71,6 +75,9 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authRead', user.uid)
+    if (limited) return limited
+
     const snap = await adminDb
       .collection('projects')
       .where('customerUid', '==', user.uid)

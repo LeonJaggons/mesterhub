@@ -3,10 +3,14 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { requireUser } from '@/firebase/adminAccess'
 import { adminDb } from '@/firebase/admin'
 import { notificationItemsRef } from '@/firebase/inAppNotifications'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 export async function PATCH(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const unreadSnap = await notificationItemsRef(user.uid)
       .where('readAt', '==', null)
       .limit(100)

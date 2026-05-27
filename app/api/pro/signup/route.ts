@@ -5,6 +5,7 @@ import { requireUser } from '@/firebase/adminAccess'
 import { sendAdminNotification } from '@/firebase/adminNotifications'
 import type { SignupData } from '@/app/pro/signup/store'
 import { phoneVerificationEnabled } from '@/lib/featureFlags'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 type ProStatus = 'pending_verification' | 'active' | 'suspended' | 'rejected'
 
@@ -27,6 +28,9 @@ function cleanNumberArray(value: unknown): number[] {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('expensive', user.uid)
+    if (limited) return limited
+
     const data = (await request.json()) as SignupData
     const status: ProStatus = 'pending_verification'
     const trialEndsAt = Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))

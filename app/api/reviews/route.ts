@@ -5,6 +5,7 @@ import { requireUser } from '@/firebase/adminAccess'
 import { sendAdminNotification } from '@/firebase/adminNotifications'
 import { sendLifecycleEmail } from '@/firebase/notifications'
 import { huCategory } from '@/lib/i18n/email'
+import { enforceUserRateLimit } from '@/lib/rateLimit'
 
 type ServiceRequestDoc = {
   proUid?: string
@@ -128,6 +129,9 @@ function reviewPostedEmailHtml(input: {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request)
+    const limited = await enforceUserRateLimit('authWrite', user.uid)
+    if (limited) return limited
+
     const body = await request.json()
     const requestId = cleanString(body.requestId)
     const rating = cleanRating(body.rating)
