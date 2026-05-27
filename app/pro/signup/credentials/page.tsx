@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MdCheckCircle, MdOutlineUploadFile } from 'react-icons/md'
 import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { compressImageFile } from '@/lib/imageCompression'
 import { load, save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
@@ -83,19 +84,31 @@ export default function CredentialsPage() {
   async function handleCertChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setCertFileName(file.name)
-    stageFile('certificate', file)
-    save({ certificateUrl: '' })
-    setCertState('done')
+    setCertState('uploading')
+    try {
+      const uploadFile = file.type.startsWith('image/') ? await compressImageFile(file) : file
+      setCertFileName(uploadFile.name)
+      stageFile('certificate', uploadFile)
+      save({ certificateUrl: '' })
+      setCertState('done')
+    } catch {
+      setCertState('error')
+    }
   }
 
   async function handleInsuranceChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setInsuranceFileName(file.name)
-    stageFile('insurance', file)
-    save({ insuranceUrl: '' })
-    setInsuranceState('done')
+    setInsuranceState('uploading')
+    try {
+      const uploadFile = file.type.startsWith('image/') ? await compressImageFile(file) : file
+      setInsuranceFileName(uploadFile.name)
+      stageFile('insurance', uploadFile)
+      save({ insuranceUrl: '' })
+      setInsuranceState('done')
+    } catch {
+      setInsuranceState('error')
+    }
   }
 
   if (!isRegulated) {

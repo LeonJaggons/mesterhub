@@ -19,23 +19,38 @@ service firebase.storage {
     }
 
     function validProUpload() {
-      return request.resource.size < 10 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*|application/pdf');
+      return (request.resource.size < 3 * 1024 * 1024 && request.resource.contentType.matches('image/.*'))
+        || (request.resource.size < 5 * 1024 * 1024 && request.resource.contentType == 'application/pdf');
+    }
+
+    function validProImageUpload() {
+      return request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
     }
 
     function validRequestAttachment() {
-      return request.resource.size < 10 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*|application/pdf');
+      return (request.resource.size < 3 * 1024 * 1024 && request.resource.contentType.matches('image/.*'))
+        || (request.resource.size < 5 * 1024 * 1024 && request.resource.contentType == 'application/pdf');
     }
 
     match /pros/{proId}/avatar {
       allow read: if activePro(proId) || isOwner(proId) || isAdmin();
-      allow write: if isOwner(proId) && validProUpload();
+      allow write: if isOwner(proId) && validProImageUpload();
     }
 
     match /pros/{proId}/work-photos/{allPaths=**} {
       allow read: if activePro(proId) || isOwner(proId) || isAdmin();
-      allow write: if isOwner(proId) && validProUpload();
+      allow write: if isOwner(proId) && validProImageUpload();
+    }
+
+    match /pros/{proId}/selfie {
+      allow read: if isOwner(proId) || isAdmin();
+      allow write: if isOwner(proId) && validProImageUpload();
+    }
+
+    match /pros/{proId}/projects/{allPaths=**} {
+      allow read: if activePro(proId) || isOwner(proId) || isAdmin();
+      allow write: if isOwner(proId) && validProImageUpload();
     }
 
     match /pros/{proId}/{allPaths=**} {

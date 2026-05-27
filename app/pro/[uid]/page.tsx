@@ -37,6 +37,7 @@ import {
 } from '@/app/projects/projectQuestions'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
+import { compressImageFiles } from '@/lib/imageCompression'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type Translator = ReturnType<typeof useTranslations>
@@ -865,7 +866,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
     return true
   }
 
-  function handleAttachmentChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleAttachmentChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     e.target.value = ''
     setError(null)
@@ -873,11 +874,12 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
       setError(t('proProfile.request.errors.fileType'))
       return
     }
-    if (files.some(file => file.size > MAX_ATTACHMENT_SIZE)) {
+    const compressedFiles = await compressImageFiles(files)
+    if (compressedFiles.some(file => file.size > MAX_ATTACHMENT_SIZE)) {
       setError(t('proProfile.request.errors.fileSize'))
       return
     }
-    setAttachments(prev => [...prev, ...files].slice(0, MAX_PROJECT_ATTACHMENTS))
+    setAttachments(prev => [...prev, ...compressedFiles].slice(0, MAX_PROJECT_ATTACHMENTS))
   }
 
   function removeAttachment(index: number) {

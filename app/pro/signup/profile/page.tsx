@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { FaFacebookF, FaGlobe, FaInstagram, FaLinkedinIn, FaTiktok } from 'react-icons/fa'
 import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { compressImageFile } from '@/lib/imageCompression'
 import { load, save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
@@ -79,9 +80,15 @@ export default function ProfilePage() {
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setAvatarPreview(URL.createObjectURL(file))
-    stageFile('avatar', file)
-    setAvatarState('done')
+    setAvatarState('uploading')
+    try {
+      const compressed = await compressImageFile(file)
+      setAvatarPreview(URL.createObjectURL(compressed))
+      stageFile('avatar', compressed)
+      setAvatarState('done')
+    } catch {
+      setAvatarState('error')
+    }
   }
 
   function toggleAvail(a: string) {

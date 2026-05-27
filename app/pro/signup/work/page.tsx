@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdClose, MdOutlineUploadFile } from 'react-icons/md'
 import { useTranslations } from '@/lib/i18n/client'
+import { compressImageFile } from '@/lib/imageCompression'
 import { save, stageFile, type PastProject } from '../store'
 import styles from '../signup.module.css'
 
@@ -35,9 +36,15 @@ export default function WorkPhotosPage() {
   async function handleImageChange(slot: ImageSlot, e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setPreviews(prev => ({ ...prev, [slot]: URL.createObjectURL(file) }))
-    setSelectedFiles(prev => ({ ...prev, [slot]: file }))
-    setUploadState(prev => ({ ...prev, [slot]: 'done' }))
+    setUploadState(prev => ({ ...prev, [slot]: 'uploading' }))
+    try {
+      const compressed = await compressImageFile(file)
+      setPreviews(prev => ({ ...prev, [slot]: URL.createObjectURL(compressed) }))
+      setSelectedFiles(prev => ({ ...prev, [slot]: compressed }))
+      setUploadState(prev => ({ ...prev, [slot]: 'done' }))
+    } catch {
+      setUploadState(prev => ({ ...prev, [slot]: 'error' }))
+    }
   }
 
   function clearImage(slot: ImageSlot) {

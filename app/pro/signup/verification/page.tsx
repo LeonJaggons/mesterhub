@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MdOutlineUploadFile, MdOutlineCameraAlt, MdCheckCircle } from 'react-icons/md'
 import { useTranslations } from '@/lib/i18n/client'
+import { compressImageFile } from '@/lib/imageCompression'
 import { save, stageFile } from '../store'
 import styles from '../signup.module.css'
 
@@ -26,19 +27,31 @@ export default function VerificationPage() {
   async function handleIdChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setIdFileName(file.name)
-    stageFile('idDocument', file)
-    save({ idDocumentUrl: '' })
-    setIdState('done')
+    setIdState('uploading')
+    try {
+      const uploadFile = file.type.startsWith('image/') ? await compressImageFile(file) : file
+      setIdFileName(uploadFile.name)
+      stageFile('idDocument', uploadFile)
+      save({ idDocumentUrl: '' })
+      setIdState('done')
+    } catch {
+      setIdState('error')
+    }
   }
 
   async function handleSelfieChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setSelfiePreview(URL.createObjectURL(file))
-    stageFile('selfie', file)
-    save({ selfieUrl: '' })
-    setSelfieState('done')
+    setSelfieState('uploading')
+    try {
+      const compressed = await compressImageFile(file)
+      setSelfiePreview(URL.createObjectURL(compressed))
+      stageFile('selfie', compressed)
+      save({ selfieUrl: '' })
+      setSelfieState('done')
+    } catch {
+      setSelfieState('error')
+    }
   }
 
   const canContinue = idState === 'done' && selfieState === 'done'

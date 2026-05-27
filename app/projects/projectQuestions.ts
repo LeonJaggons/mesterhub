@@ -23,7 +23,7 @@ export const TIMING_OPTIONS = [
 ]
 
 export const MAX_PROJECT_ATTACHMENTS = 5
-export const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
+export const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024
 
 export const CATEGORY_QUESTIONS: Record<string, ProjectQuestion[]> = {
   Cleaning: [

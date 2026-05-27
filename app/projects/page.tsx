@@ -22,6 +22,7 @@ import {
 } from './projectQuestions'
 import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { compressImageFiles } from '@/lib/imageCompression'
 
 type Translator = ReturnType<typeof useTranslations>
 
@@ -141,7 +142,7 @@ function CreateProjectModal({
     setError(null)
   }
 
-  function handleAttachmentChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleAttachmentChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     e.target.value = ''
     setError(null)
@@ -149,11 +150,12 @@ function CreateProjectModal({
       setError(t('projects.create.errors.fileType'))
       return
     }
-    if (files.some(file => file.size > MAX_ATTACHMENT_SIZE)) {
+    const compressedFiles = await compressImageFiles(files)
+    if (compressedFiles.some(file => file.size > MAX_ATTACHMENT_SIZE)) {
       setError(t('projects.create.errors.fileSize'))
       return
     }
-    setAttachments(prev => [...prev, ...files].slice(0, MAX_PROJECT_ATTACHMENTS))
+    setAttachments(prev => [...prev, ...compressedFiles].slice(0, MAX_PROJECT_ATTACHMENTS))
   }
 
   function removeAttachment(index: number) {
