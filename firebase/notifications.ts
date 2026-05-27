@@ -1,4 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore'
+import { createHash } from 'crypto'
 import { adminDb } from './admin'
 import { emailConfigured, sendEmail } from './email'
 import { defaultLocale, getSupportedLocale, type Locale } from '@/lib/i18n/config'
@@ -25,6 +26,12 @@ type LifecycleEmail = {
 
 type DeliveryStatus = 'sent' | 'skipped' | 'error'
 
+function isAlreadyExistsError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+  const code = (err as { code?: unknown }).code
+  return code === 6 || code === 'already-exists'
+}
+
 function cleanMetadataString(metadata: Record<string, unknown> | undefined, key: string): string {
   const value = metadata?.[key]
   return typeof value === 'string' ? value.trim() : ''
@@ -48,14 +55,47 @@ async function resolveEmailLocale(input: LifecycleEmail): Promise<Locale> {
   return (await preferredLocaleForUid(uid)) ?? defaultLocale
 }
 
-async function recordEmail(input: LifecycleEmail, locale: Locale, status: DeliveryStatus, error?: string, providerId?: string) {
+function emailContentForLocale(input: LifecycleEmail, locale: Locale) {
   const localized = input.localized?.[locale]
-  await adminDb.collection('mailEvents').add({
-    to: input.to ?? null,
+  return {
     subject: localized?.subject ?? input.subject,
     text: localized?.text ?? input.text,
     bodyHtml: localized?.bodyHtml ?? input.bodyHtml ?? null,
     previewText: localized?.previewText ?? input.previewText ?? null,
+  }
+}
+
+function mailEventId(input: LifecycleEmail, locale: Locale): string {
+  const content = emailContentForLocale(input, locale)
+  const recipient = (input.to ?? '').trim().toLowerCase()
+  const digest = createHash('sha256')
+    .update(JSON.stringify({
+      to: recipient,
+      event: input.event,
+      requestId: input.requestId ?? null,
+      locale,
+      subject: content.subject,
+      text: content.text,
+    }))
+    .digest('hex')
+
+  return `mail_${digest}`
+}
+
+function mailEventPayload(
+  input: LifecycleEmail,
+  locale: Locale,
+  status: DeliveryStatus,
+  error?: string,
+  providerId?: string,
+) {
+  const content = emailContentForLocale(input, locale)
+  return {
+    to: input.to ?? null,
+    subject: content.subject,
+    text: content.text,
+    bodyHtml: content.bodyHtml,
+    previewText: content.previewText,
     locale,
     event: input.event,
     requestId: input.requestId ?? null,
@@ -64,7 +104,47 @@ async function recordEmail(input: LifecycleEmail, locale: Locale, status: Delive
     error: error ?? null,
     provider: 'resend',
     providerId: providerId ?? null,
+  }
+}
+
+async function claimEmail(input: LifecycleEmail, locale: Locale, eventId: string): Promise<boolean> {
+  try {
+    await adminDb.collection('mailEvents').doc(eventId).create({
+      ...mailEventPayload(input, locale, 'skipped'),
+      status: 'sending',
+      error: null,
+      providerId: null,
+      idempotencyKey: eventId,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    })
+    return true
+  } catch (err) {
+    if (isAlreadyExistsError(err)) return false
+    throw err
+  }
+}
+
+async function recordEmail(
+  input: LifecycleEmail,
+  locale: Locale,
+  eventId: string,
+  status: DeliveryStatus,
+  error?: string,
+  providerId?: string,
+) {
+  await adminDb.collection('mailEvents').doc(eventId).set({
+    ...mailEventPayload(input, locale, status, error, providerId),
+    idempotencyKey: eventId,
+    updatedAt: FieldValue.serverTimestamp(),
+  }, { merge: true })
+}
+
+async function recordSkippedEmail(input: LifecycleEmail, locale: Locale, error: string) {
+  await adminDb.collection('mailEvents').add({
+    ...mailEventPayload(input, locale, 'skipped', error),
     createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
   })
 }
 
@@ -72,29 +152,33 @@ export async function sendLifecycleEmail(input: LifecycleEmail): Promise<void> {
   const locale = await resolveEmailLocale(input)
 
   if (!input.to) {
-    await recordEmail(input, locale, 'skipped', 'Missing recipient')
+    await recordSkippedEmail(input, locale, 'Missing recipient')
     return
   }
 
   if (!emailConfigured()) {
-    await recordEmail(input, locale, 'skipped', 'RESEND_API_KEY is not configured')
+    await recordSkippedEmail(input, locale, 'RESEND_API_KEY is not configured')
     return
   }
 
+  const eventId = mailEventId(input, locale)
+  const claimed = await claimEmail(input, locale, eventId)
+  if (!claimed) return
+
   try {
-    const localized = input.localized?.[locale]
+    const localized = emailContentForLocale(input, locale)
     const result = await sendEmail({
       to: input.to,
-      subject: localized?.subject ?? input.subject,
-      text: localized?.text ?? input.text,
-      ...(localized?.bodyHtml || input.bodyHtml ? { bodyHtml: localized?.bodyHtml ?? input.bodyHtml } : {}),
+      subject: localized.subject,
+      text: localized.text,
+      ...(localized.bodyHtml ? { bodyHtml: localized.bodyHtml } : {}),
       ...(input.hideSubjectHeading ? { hideSubjectHeading: input.hideSubjectHeading } : {}),
-      ...(localized?.previewText || input.previewText ? { previewText: localized?.previewText ?? input.previewText } : {}),
+      ...(localized.previewText ? { previewText: localized.previewText } : {}),
       ...(input.replyTo ? { replyTo: input.replyTo } : {}),
       locale,
     })
-    await recordEmail(input, locale, 'sent', undefined, result.id)
+    await recordEmail(input, locale, eventId, 'sent', undefined, result.id)
   } catch (err) {
-    await recordEmail(input, locale, 'error', err instanceof Error ? err.message : 'Unknown delivery error')
+    await recordEmail(input, locale, eventId, 'error', err instanceof Error ? err.message : 'Unknown delivery error')
   }
 }

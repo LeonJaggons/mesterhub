@@ -791,6 +791,166 @@
       "keep": "Keep request",
       "declining": "Declining...",
       "confirm": "Yes, decline"
+    },
+    "detail": {
+      "backToJobs": "Back to Jobs",
+      "customerFallbackLower": "the customer",
+      "postedAgo": "Posted {time}",
+      "postedRecently": "Posted recently",
+      "notAccessible": {
+        "title": "Not accessible",
+        "body": "This request doesn't exist or you don't have permission to view it."
+      },
+      "hidden": {
+        "kicker": "Inquiry hidden",
+        "title": "Upgrade to view this request",
+        "body": "You can view {limit} inquiries per month for free. This inquiry is saved, but its job details, location, and customer context are hidden until you upgrade or your free views reset on {resetLabel}.",
+        "overlay": "Details hidden until Pro or {resetLabel}"
+      },
+      "labels": {
+        "category": "Category",
+        "status": "Status",
+        "received": "Received",
+        "name": "Name",
+        "email": "Email",
+        "price": "Price",
+        "start": "Start",
+        "yourMessage": "Your message",
+        "agreedPrice": "Agreed price"
+      },
+      "header": {
+        "kicker": "Job request"
+      },
+      "statusBanner": {
+        "completed": "Job completed",
+        "quoted": "Quote sent. Awaiting customer response.",
+        "accepted": "Customer accepted your quote",
+        "cancelled": "Request cancelled",
+        "declined": "You declined this request"
+      },
+      "brief": {
+        "kicker": "Job brief",
+        "urgency": "Urgency",
+        "timing": "Timing",
+        "noDetails": "No specific details provided.",
+        "approximateLocation": "Approximate location",
+        "locationPermissionNote": "Location shown is approximate from the customer permission. Exact address is shared after they accept your quote.",
+        "locationDistrictNote": "Location shown is the centre of the customer's district. Exact address is shared after they accept your quote.",
+        "attachments": "Customer attachments",
+        "attachmentAlt": "Customer attachment {index}",
+        "attachmentLabel": "Attachment {index}",
+        "moreDetails": "More details"
+      },
+      "contact": {
+        "title": "Customer contact"
+      },
+      "action": {
+        "title": {
+          "pending": "Make a decision"
+        },
+        "pendingBody": "Review the details and send a quote. The customer can then accept or decline it.",
+        "quotedBody": "Your quote has been sent. The customer will accept or decline it.",
+        "acceptedBody": "The customer accepted your quote. Contact them to arrange the job.",
+        "cancelledWithReason": "This request was cancelled: {reason}.",
+        "reportCustomer": "Report this customer"
+      },
+      "appointment": {
+        "at": "at",
+        "proposed": "Appointment proposed",
+        "update": "Update appointment request",
+        "schedule": "Schedule appointment"
+      },
+      "completion": {
+        "waiting": "Waiting for the customer to confirm completion.",
+        "markComplete": "Mark job complete"
+      },
+      "context": {
+        "kicker": "Customer context",
+        "requestAge": "Request age",
+        "location": "Location",
+        "contact": "Contact",
+        "contactAvailable": "Available after acceptance",
+        "contactHidden": "Hidden until quote is accepted",
+        "detailLevel": "Detail level",
+        "answerProvidedSingular": "{count} answer provided",
+        "answerProvidedPlural": "{count} answers provided",
+        "limitedDetail": "Limited detail"
+      },
+      "tips": {
+        "title": "Things to consider",
+        "coverage": "Is {category} work you cover?",
+        "serviceArea": "{district} - is that in your service area?",
+        "noDistrict": "Customer has not shared a district yet; ask before quoting if travel matters.",
+        "useAnswers": "Use the customer answers to decide whether this is a small job, visit, or custom quote.",
+        "limitedDetails": "The customer gave limited details; ask clarifying questions before committing.",
+        "replyWithAge": "{age} - faster replies can help win the job.",
+        "replyFresh": "Reply quickly while the request is fresh.",
+        "emailAfterAccept": "Email will be available if the customer accepts your quote."
+      },
+      "respondQuickly": {
+        "title": "Respond quickly",
+        "body": "Pros who respond within 1 hour win 3x more jobs. Even a quick \"I'll be in touch shortly\" builds trust."
+      },
+      "appointmentModal": {
+        "kicker": "Appointment request",
+        "title": "Schedule with {customer}",
+        "subtitle": "Propose a time now that the quote has been accepted.",
+        "typeLabel": "Appointment type",
+        "types": {
+          "quote": {
+            "label": "Quote visit",
+            "body": "Inspect or confirm the scope first."
+          },
+          "service": {
+            "label": "Service appointment",
+            "body": "Schedule the accepted job."
+          }
+        },
+        "date": "Date",
+        "time": "Time",
+        "duration": "Duration",
+        "durations": {
+          "thirtyMinutes": "30 minutes",
+          "sixtyMinutes": "60 minutes",
+          "ninetyMinutes": "90 minutes",
+          "twoHours": "2 hours",
+          "halfDay": "Half day",
+          "fullDay": "Full day"
+        },
+        "meetingNote": "Meeting note",
+        "meetingNotePlaceholder": "Gate code, entrance note, or video call link",
+        "message": "Message to customer",
+        "messagePlaceholder": "Mention what the customer should prepare and whether this is for a quote visit or the service.",
+        "sending": "Sending...",
+        "submit": "Send appointment request",
+        "errors": {
+          "dateTimeRequired": "Choose a date and time.",
+          "generic": "Could not send the appointment request. Please try again."
+        }
+      },
+      "cancelModal": {
+        "kicker": "Cancel request",
+        "title": "Cancel with {customer}?",
+        "subtitle": "The customer will be notified and this job will move out of your active queue.",
+        "reasonLabel": "Why are you cancelling?",
+        "detailsLabel": "Details for the customer",
+        "detailsPlaceholder": "Add context, suggest what to do next, or mention whether they can rebook later.",
+        "reasonNote": "Reason: {reason}",
+        "detailsNote": "Details: {details}",
+        "cancelling": "Cancelling...",
+        "submit": "Cancel request",
+        "reasons": {
+          "outsideServiceArea": "Outside my service area",
+          "scheduleDoesNotWork": "Schedule does not work",
+          "notRightFit": "Not the right fit for my services",
+          "needMoreInformation": "Need more information before I can commit",
+          "customerRequested": "Customer requested cancellation",
+          "other": "Other"
+        },
+        "errors": {
+          "generic": "Could not cancel this request. Please try again."
+        }
+      }
     }
   },
   "proMarketplace": {

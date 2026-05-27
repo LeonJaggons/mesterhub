@@ -9,17 +9,19 @@ import { requestAppointment, type AppointmentRequestInput } from '@/firebase/con
 import { cancelServiceRequest, declineServiceRequestAsPro, markServiceRequestComplete, quoteServiceRequest } from '@/firebase/serviceRequests'
 import ReportUserButton from '@/app/components/reports/ReportUserButton'
 import {
-  approximateLocationLabel,
   approximateRadiusMeters,
   requestCoords,
   type ServiceRequest as SharedServiceRequest,
 } from '@/app/requests/shared'
 import districtsData from '@/public/districts.json'
-import { QuoteModal, DeclineModal, type QuoteFormData } from '../JobModals'
+import { QuoteModal, DeclineModal, translateQuoteTimeline, type QuoteFormData } from '../JobModals'
 import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 import { FREE_CLEAR_INQUIRY_LIMIT, inquiryCreatedAtMillis, type InquiryTimestamp } from '@/lib/inquiryAccess'
+import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { translateCategory } from '@/lib/i18n/taxonomy'
 
 const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
+type Translator = ReturnType<typeof useTranslations>
 
 // Leaflet must be client-only (requires window)
 const MapView = dynamic(() => import('./MapView'), { ssr: false, loading: () => (
@@ -76,28 +78,43 @@ type ServiceRequest = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatKey(k: string) {
-  return k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+function answerTranslationKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
 }
 
-function formatVal(v: string) {
-  return v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+function formatKey(t: Translator, k: string) {
+  return t(`taxonomy.answers.keys.${k}`, {
+    defaultValue: k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+  })
 }
 
-function timeAgo(ts: InquiryTimestamp) {
+function formatVal(t: Translator, v: string) {
+  const key = answerTranslationKey(v)
+  return key
+    ? t(`taxonomy.answers.values.${key}`, {
+        defaultValue: v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      })
+    : v
+}
+
+function timeAgo(t: Translator, ts: InquiryTimestamp) {
   if (!ts) return ''
   const s = Math.floor((Date.now() - inquiryCreatedAtMillis(ts)) / 1000)
-  if (s < 60) return 'just now'
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`
-  return `${Math.floor(s / 86400)}d ago`
+  if (s < 60) return t('proJobs.time.justNow')
+  if (s < 3600) return t('proJobs.time.minutesAgo', { count: Math.floor(s / 60) })
+  if (s < 86400) return t('proJobs.time.hoursAgo', { count: Math.floor(s / 3600) })
+  return t('proJobs.time.daysAgo', { count: Math.floor(s / 86400) })
 }
 
-function formatAppointmentDateTime(date: string, time: string): string {
-  if (!date || !time) return [date, time].filter(Boolean).join(' at ')
+function formatAppointmentDateTime(locale: string, t: Translator, date: string, time: string): string {
+  if (!date || !time) return [date, time].filter(Boolean).join(` ${t('proJobs.detail.appointment.at')} `)
   const parsed = new Date(`${date}T${time}`)
-  if (Number.isNaN(parsed.getTime())) return `${date} at ${time}`
-  return parsed.toLocaleString(undefined, {
+  if (Number.isNaN(parsed.getTime())) return `${date} ${t('proJobs.detail.appointment.at')} ${time}`
+  return parsed.toLocaleString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -111,22 +128,22 @@ function districtLabel(roman: string) {
   return d ? `${d.roman}. ${d.name}` : roman
 }
 
-function customerDisplayName(name: string): string {
+function customerDisplayName(t: Translator, name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return 'Customer'
+  if (parts.length === 0) return t('proJobs.customerFallback')
   const [first, ...rest] = parts
   const lastInitial = rest.at(-1)?.[0]
   return lastInitial ? `${first} ${lastInitial.toUpperCase()}.` : first
 }
 
-function requestAgeLabel(ts: InquiryTimestamp): string {
-  const ago = timeAgo(ts)
-  return ago ? `Posted ${ago}` : 'Posted recently'
+function requestAgeLabel(t: Translator, ts: InquiryTimestamp): string {
+  const ago = timeAgo(t, ts)
+  return ago ? t('proJobs.detail.postedAgo', { time: ago }) : t('proJobs.detail.postedRecently')
 }
 
-function monthlyResetLabel(reference = new Date()): string {
+function monthlyResetLabel(locale: string, reference = new Date()): string {
   const resetDate = new Date(reference.getFullYear(), reference.getMonth() + 1, 1)
-  return resetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return resetDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
 function topDecisionDetails(details: Array<[string, string]>): Array<[string, string]> {
@@ -167,21 +184,42 @@ function loginUrlFor(path: string): string {
   return `/login?next=${encodeURIComponent(path)}`
 }
 
-function decisionTips(req: ServiceRequest, details: Array<[string, string]>): string[] {
+function approximateLocationCopy(t: Translator, location: ServiceRequest['jobLocation']): string {
+  const meters = approximateRadiusMeters(location)
+  if (!location?.accuracy) return t('proJobs.location.approximate')
+  if (meters >= 1000) return t('proJobs.location.approximateKm', { distance: (meters / 1000).toFixed(1) })
+  return t('proJobs.location.approximateM', { distance: meters })
+}
+
+function translateDuration(t: Translator, duration: string): string {
+  const durations: Record<string, string> = {
+    '30 minutes': 'thirtyMinutes',
+    '60 minutes': 'sixtyMinutes',
+    '90 minutes': 'ninetyMinutes',
+    '2 hours': 'twoHours',
+    'Half day': 'halfDay',
+    'Full day': 'fullDay',
+  }
+  const key = durations[duration]
+  return key ? t(`proJobs.detail.appointmentModal.durations.${key}`) : duration
+}
+
+function decisionTips(t: Translator, req: ServiceRequest, details: Array<[string, string]>): string[] {
+  const categoryLabel = translateCategory(t, req.categoryName).toLowerCase()
   const tips = [
-    `Is ${req.categoryName.toLowerCase()} work you cover?`,
+    t('proJobs.detail.tips.coverage', { category: categoryLabel }),
     req.customerDistrict
-      ? `${districtLabel(req.customerDistrict)} — is that in your service area?`
-      : 'Customer has not shared a district yet; ask before quoting if travel matters.',
+      ? t('proJobs.detail.tips.serviceArea', { district: districtLabel(req.customerDistrict) })
+      : t('proJobs.detail.tips.noDistrict'),
     details.length > 0
-      ? 'Use the customer answers to decide whether this is a small job, visit, or custom quote.'
-      : 'The customer gave limited details; ask clarifying questions before committing.',
+      ? t('proJobs.detail.tips.useAnswers')
+      : t('proJobs.detail.tips.limitedDetails'),
     req.createdAt
-      ? `${requestAgeLabel(req.createdAt)} — faster replies can help win the job.`
-      : 'Reply quickly while the request is fresh.',
+      ? t('proJobs.detail.tips.replyWithAge', { age: requestAgeLabel(t, req.createdAt) })
+      : t('proJobs.detail.tips.replyFresh'),
   ]
 
-  if (req.customerEmail) tips.push('Email will be available if the customer accepts your quote.')
+  if (req.customerEmail) tips.push(t('proJobs.detail.tips.emailAfterAccept'))
   return tips
 }
 
@@ -194,6 +232,7 @@ function AppointmentModal({
   onClose: () => void
   onSubmit: (input: AppointmentRequestInput) => Promise<void>
 }) {
+  const t = useTranslations()
   const [kind, setKind] = useState<AppointmentRequestInput['kind']>('service')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
@@ -206,7 +245,7 @@ function AppointmentModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!date || !time) {
-      setError('Choose a date and time.')
+      setError(t('proJobs.detail.appointmentModal.errors.dateTimeRequired'))
       return
     }
     setError('')
@@ -221,10 +260,19 @@ function AppointmentModal({
         notes: notes.trim(),
       })
     } catch {
-      setError('Could not send the appointment request. Please try again.')
+      setError(t('proJobs.detail.appointmentModal.errors.generic'))
       setSubmitting(false)
     }
   }
+
+  const durationOptions = [
+    { value: '30 minutes', label: t('proJobs.detail.appointmentModal.durations.thirtyMinutes') },
+    { value: '60 minutes', label: t('proJobs.detail.appointmentModal.durations.sixtyMinutes') },
+    { value: '90 minutes', label: t('proJobs.detail.appointmentModal.durations.ninetyMinutes') },
+    { value: '2 hours', label: t('proJobs.detail.appointmentModal.durations.twoHours') },
+    { value: 'Half day', label: t('proJobs.detail.appointmentModal.durations.halfDay') },
+    { value: 'Full day', label: t('proJobs.detail.appointmentModal.durations.fullDay') },
+  ]
 
   return (
     <div
@@ -239,19 +287,19 @@ function AppointmentModal({
       >
         <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">Appointment request</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">{t('proJobs.detail.appointmentModal.kicker')}</p>
             <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
-              Schedule with {req.customerName || 'the customer'}
+              {t('proJobs.detail.appointmentModal.title', { customer: req.customerName || t('proJobs.detail.customerFallbackLower') })}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Propose a time now that the quote has been accepted.
+              {t('proJobs.detail.appointmentModal.subtitle')}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer flex-shrink-0 p-1 text-2xl leading-none"
-            aria-label="Close"
+            aria-label={t('proJobs.quoteModal.close')}
           >
             ×
           </button>
@@ -259,11 +307,19 @@ function AppointmentModal({
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
           <fieldset className="border-0 p-0 m-0">
-            <legend className="text-sm font-medium text-gray-700 mb-2">Appointment type</legend>
+            <legend className="text-sm font-medium text-gray-700 mb-2">{t('proJobs.detail.appointmentModal.typeLabel')}</legend>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                { id: 'quote' as const, label: 'Quote visit', body: 'Inspect or confirm the scope first.' },
-                { id: 'service' as const, label: 'Service appointment', body: 'Schedule the accepted job.' },
+                {
+                  id: 'quote' as const,
+                  label: t('proJobs.detail.appointmentModal.types.quote.label'),
+                  body: t('proJobs.detail.appointmentModal.types.quote.body'),
+                },
+                {
+                  id: 'service' as const,
+                  label: t('proJobs.detail.appointmentModal.types.service.label'),
+                  body: t('proJobs.detail.appointmentModal.types.service.body'),
+                },
               ].map(option => (
                 <label
                   key={option.id}
@@ -288,7 +344,7 @@ function AppointmentModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Date
+              {t('proJobs.detail.appointmentModal.date')}
               <input
                 type="date"
                 value={date}
@@ -297,7 +353,7 @@ function AppointmentModal({
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Time
+              {t('proJobs.detail.appointmentModal.time')}
               <input
                 type="time"
                 value={time}
@@ -306,37 +362,37 @@ function AppointmentModal({
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              Duration
+              {t('proJobs.detail.appointmentModal.duration')}
               <select
                 value={duration}
                 onChange={e => setDuration(e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
               >
-                {['30 minutes', '60 minutes', '90 minutes', '2 hours', 'Half day', 'Full day'].map(option => (
-                  <option key={option} value={option}>{option}</option>
+                {durationOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
             </label>
           </div>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Meeting note
+            {t('proJobs.detail.appointmentModal.meetingNote')}
             <input
               type="text"
               value={location}
               onChange={e => setLocation(e.target.value)}
-              placeholder="Gate code, entrance note, or video call link"
+              placeholder={t('proJobs.detail.appointmentModal.meetingNotePlaceholder')}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             />
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Message to customer
+            {t('proJobs.detail.appointmentModal.message')}
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={4}
-              placeholder="Mention what the customer should prepare and whether this is for a quote visit or the service."
+              placeholder={t('proJobs.detail.appointmentModal.messagePlaceholder')}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
             />
           </label>
@@ -349,7 +405,7 @@ function AppointmentModal({
               onClick={onClose}
               className="px-5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl text-sm transition-colors cursor-pointer bg-white"
             >
-              Cancel
+              {t('proJobs.quoteModal.cancel')}
             </button>
             <button
               type="submit"
@@ -357,7 +413,7 @@ function AppointmentModal({
               className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl py-3 text-base transition-colors border-none cursor-pointer"
               style={dg}
             >
-              {submitting ? 'Sending...' : 'Send appointment request'}
+              {submitting ? t('proJobs.detail.appointmentModal.sending') : t('proJobs.detail.appointmentModal.submit')}
             </button>
           </div>
         </form>
@@ -367,13 +423,13 @@ function AppointmentModal({
 }
 
 const CANCEL_REASONS = [
-  'Outside my service area',
-  'Schedule does not work',
-  'Not the right fit for my services',
-  'Need more information before I can commit',
-  'Customer requested cancellation',
-  'Other',
-]
+  { value: 'Outside my service area', key: 'outsideServiceArea' },
+  { value: 'Schedule does not work', key: 'scheduleDoesNotWork' },
+  { value: 'Not the right fit for my services', key: 'notRightFit' },
+  { value: 'Need more information before I can commit', key: 'needMoreInformation' },
+  { value: 'Customer requested cancellation', key: 'customerRequested' },
+  { value: 'Other', key: 'other' },
+] as const
 
 function CancelRequestModal({
   customerName,
@@ -384,7 +440,8 @@ function CancelRequestModal({
   onClose: () => void
   onConfirm: (reason: string) => Promise<void>
 }) {
-  const [reason, setReason] = useState(CANCEL_REASONS[0])
+  const t = useTranslations()
+  const [reason, setReason] = useState<string>(CANCEL_REASONS[0].value)
   const [details, setDetails] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -394,13 +451,14 @@ function CancelRequestModal({
     setError('')
     setSubmitting(true)
     try {
+      const reasonLabel = t(`proJobs.detail.cancelModal.reasons.${CANCEL_REASONS.find(item => item.value === reason)?.key ?? 'other'}`)
       const note = [
-        `Reason: ${reason}`,
-        details.trim() ? `Details: ${details.trim()}` : '',
+        t('proJobs.detail.cancelModal.reasonNote', { reason: reasonLabel }),
+        details.trim() ? t('proJobs.detail.cancelModal.detailsNote', { details: details.trim() }) : '',
       ].filter(Boolean).join('\n')
       await onConfirm(note)
     } catch {
-      setError('Could not cancel this request. Please try again.')
+      setError(t('proJobs.detail.cancelModal.errors.generic'))
       setSubmitting(false)
     }
   }
@@ -418,19 +476,19 @@ function CancelRequestModal({
       >
         <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">Cancel request</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">{t('proJobs.detail.cancelModal.kicker')}</p>
             <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
-              Cancel with {customerName}?
+              {t('proJobs.detail.cancelModal.title', { customer: customerName })}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              The customer will be notified and this job will move out of your active queue.
+              {t('proJobs.detail.cancelModal.subtitle')}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer flex-shrink-0 p-1 text-2xl leading-none"
-            aria-label="Close"
+            aria-label={t('proJobs.quoteModal.close')}
           >
             ×
           </button>
@@ -438,25 +496,27 @@ function CancelRequestModal({
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Why are you cancelling?
+            {t('proJobs.detail.cancelModal.reasonLabel')}
             <select
               value={reason}
               onChange={e => setReason(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             >
               {CANCEL_REASONS.map(option => (
-                <option key={option} value={option}>{option}</option>
+                <option key={option.value} value={option.value}>
+                  {t(`proJobs.detail.cancelModal.reasons.${option.key}`)}
+                </option>
               ))}
             </select>
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-            Details for the customer <span className="text-gray-400 font-normal">(optional)</span>
+            {t('proJobs.detail.cancelModal.detailsLabel')} <span className="text-gray-400 font-normal">({t('proJobs.quoteModal.optional')})</span>
             <textarea
               value={details}
               onChange={e => setDetails(e.target.value)}
               rows={4}
-              placeholder="Add context, suggest what to do next, or mention whether they can rebook later."
+              placeholder={t('proJobs.detail.cancelModal.detailsPlaceholder')}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
             />
           </label>
@@ -469,7 +529,7 @@ function CancelRequestModal({
               onClick={onClose}
               className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl py-3 text-sm cursor-pointer bg-white"
             >
-              Keep request
+              {t('proJobs.declineModal.keep')}
             </button>
             <button
               type="submit"
@@ -477,7 +537,7 @@ function CancelRequestModal({
               className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-xl py-3 text-sm cursor-pointer border-none"
               style={dg}
             >
-              {submitting ? 'Cancelling...' : 'Cancel request'}
+              {submitting ? t('proJobs.detail.cancelModal.cancelling') : t('proJobs.detail.cancelModal.submit')}
             </button>
           </div>
         </form>
@@ -491,6 +551,8 @@ function CancelRequestModal({
 export default function RequestDetailPage({ params }: { params: Promise<{ requestId: string }> }) {
   const { requestId } = use(params)
   const router = useRouter()
+  const t = useTranslations()
+  const locale = useLocale()
 
   const [req, setReq] = useState<ServiceRequest | null>(null)
   const [loading, setLoading] = useState(true)
@@ -609,17 +671,17 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
   if (forbidden || !req) {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>Not accessible</p>
-        <p className="text-gray-500 mb-6 text-sm">This request doesn&apos;t exist or you don&apos;t have permission to view it.</p>
+        <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>{t('proJobs.detail.notAccessible.title')}</p>
+        <p className="text-gray-500 mb-6 text-sm">{t('proJobs.detail.notAccessible.body')}</p>
         <button onClick={() => router.push('/pro/jobs')} className="bg-orange-500 text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:bg-orange-600 transition-colors cursor-pointer border-none">
-          Back to Jobs
+          {t('proJobs.detail.backToJobs')}
         </button>
       </div>
     )
   }
 
   if (obfuscated) {
-    const resetLabel = monthlyResetLabel()
+    const resetLabel = monthlyResetLabel(locale)
     return (
       <main className="bg-gray-50 min-h-screen pb-16">
         <div className="max-w-3xl mx-auto px-4 py-12">
@@ -627,15 +689,15 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             onClick={() => router.push('/pro/jobs')}
             className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1 bg-transparent border-none cursor-pointer"
           >
-            ← Back to Jobs
+            ← {t('proJobs.detail.backToJobs')}
           </button>
           <section className="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Inquiry hidden</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proJobs.detail.hidden.kicker')}</p>
             <h1 className="text-4xl font-black text-gray-900 leading-none mb-3" style={dg}>
-              Upgrade to view this request
+              {t('proJobs.detail.hidden.title')}
             </h1>
             <p className="text-sm leading-relaxed text-gray-600 mb-5">
-              You can view {FREE_CLEAR_INQUIRY_LIMIT} inquiries per month for free. This inquiry is saved, but its job details, location, and customer context are hidden until you upgrade or your free views reset on {resetLabel}.
+              {t('proJobs.detail.hidden.body', { limit: FREE_CLEAR_INQUIRY_LIMIT, resetLabel })}
             </p>
             <div className="relative mb-5 overflow-hidden rounded-xl border border-orange-100 bg-orange-50 p-4">
               <div className="pointer-events-none select-none blur-[3px]" aria-hidden="true">
@@ -644,21 +706,21 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <div className="h-4 w-1/2 rounded bg-slate-300/60" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center bg-orange-50/80 px-4 text-center text-sm font-bold text-gray-900">
-                Details hidden until Pro or {resetLabel}
+                {t('proJobs.detail.hidden.overlay', { resetLabel })}
               </div>
             </div>
             <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 text-sm">
               <div className="flex justify-between gap-4 py-1.5">
-                <span className="text-gray-500">Category</span>
-                <span className="font-semibold text-gray-900">{req.categoryName}</span>
+                <span className="text-gray-500">{t('proJobs.detail.labels.category')}</span>
+                <span className="font-semibold text-gray-900">{translateCategory(t, req.categoryName)}</span>
               </div>
               <div className="flex justify-between gap-4 py-1.5">
-                <span className="text-gray-500">Status</span>
-                <span className="font-semibold text-gray-900">{req.status}</span>
+                <span className="text-gray-500">{t('proJobs.detail.labels.status')}</span>
+                <span className="font-semibold text-gray-900">{t(`proJobs.status.${req.status}`)}</span>
               </div>
               <div className="flex justify-between gap-4 py-1.5">
-                <span className="text-gray-500">Received</span>
-                <span className="font-semibold text-gray-900">{requestAgeLabel(req.createdAt)}</span>
+                <span className="text-gray-500">{t('proJobs.detail.labels.received')}</span>
+                <span className="font-semibold text-gray-900">{requestAgeLabel(t, req.createdAt)}</span>
               </div>
             </div>
           </section>
@@ -673,7 +735,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
   const coords = requestCoords(req)
   const mapLabel = req.customerDistrict ? districtLabel(req.customerDistrict) : 'Budapest'
   const locationSummary = req.jobLocation
-    ? approximateLocationLabel(req.jobLocation)
+    ? approximateLocationCopy(t, req.jobLocation)
     : req.customerDistrict
     ? mapLabel
     : 'Budapest'
@@ -692,8 +754,9 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
   const quickDetailKeys = new Set(quickDetails.map(([key]) => key))
   const remainingDetails = secondaryDetails.filter(([key]) => !quickDetailKeys.has(key))
   const primaryDetail = needSummary ?? quickDetails[0]
-  const customerName = customerDisplayName(req.customerName)
-  const tips = decisionTips(req, details)
+  const customerName = customerDisplayName(t, req.customerName)
+  const categoryLabel = translateCategory(t, req.categoryName)
+  const tips = decisionTips(t, req, details)
   const isPending = req.status === 'pending'
   const isQuoted = req.status === 'quoted'
   const isAccepted = req.status === 'accepted'
@@ -709,16 +772,16 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
           onClick={() => router.push('/pro/jobs')}
           className="text-sm text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1 bg-transparent border-none cursor-pointer"
         >
-          ← Back to Jobs
+          ← {t('proJobs.detail.backToJobs')}
         </button>
 
         <div className="mb-6">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">Job request</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proJobs.detail.header.kicker')}</p>
           <h1
             className="text-5xl font-black text-gray-900 leading-[1.05]"
             style={{ ...dg, letterSpacing: '-0.02em' }}
           >
-            {req.categoryName}
+            {categoryLabel}
           </h1>
         </div>
 
@@ -734,14 +797,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
               : 'bg-gray-100 text-gray-500'
           }`}>
             {isCompleted
-              ? 'Job completed'
+              ? t('proJobs.detail.statusBanner.completed')
               : isQuoted
-              ? 'Quote sent. Awaiting customer response.'
+              ? t('proJobs.detail.statusBanner.quoted')
               : isAccepted
-              ? '✓ Customer accepted your quote'
+              ? `✓ ${t('proJobs.detail.statusBanner.accepted')}`
               : req.status === 'cancelled'
-              ? 'Request cancelled'
-              : 'You declined this request'}
+              ? t('proJobs.detail.statusBanner.cancelled')
+              : t('proJobs.detail.statusBanner.declined')}
           </div>
         )}
 
@@ -753,13 +816,13 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             {/* Job brief */}
             <section className="bg-white rounded-2xl border border-gray-200 p-5">
               <div className="mb-5">
-                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Job brief</p>
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.detail.brief.kicker')}</p>
                 <h2 className="font-black text-gray-900 text-3xl leading-none mb-2" style={dg}>
-                  {primaryDetail ? formatVal(primaryDetail[1]) : req.categoryName}
+                  {primaryDetail ? formatVal(t, primaryDetail[1]) : categoryLabel}
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   <span className="bg-orange-50 text-orange-700 border border-orange-200 text-xs font-semibold rounded-full px-3 py-1">
-                    {req.categoryName}
+                    {categoryLabel}
                   </span>
                   {req.customerDistrict && (
                     <span className="bg-gray-100 text-gray-600 text-xs font-semibold rounded-full px-3 py-1">
@@ -767,7 +830,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                     </span>
                   )}
                   <span className="bg-gray-100 text-gray-400 text-xs rounded-full px-3 py-1">
-                    {requestAgeLabel(req.createdAt)}
+                    {requestAgeLabel(t, req.createdAt)}
                   </span>
                 </div>
               </div>
@@ -776,14 +839,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                   {urgencyDetail && (
                     <div className="rounded-xl bg-orange-50 border border-orange-100 p-4">
-                      <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">Urgency</p>
-                      <p className="text-base font-black text-gray-900" style={dg}>{formatVal(urgencyDetail[1])}</p>
+                      <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">{t('proJobs.detail.brief.urgency')}</p>
+                      <p className="text-base font-black text-gray-900" style={dg}>{formatVal(t, urgencyDetail[1])}</p>
                     </div>
                   )}
                   {timingDetail && (
                     <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
-                      <p className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-1">Timing</p>
-                      <p className="text-base font-black text-gray-900" style={dg}>{formatVal(timingDetail[1])}</p>
+                      <p className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-1">{t('proJobs.detail.brief.timing')}</p>
+                      <p className="text-base font-black text-gray-900" style={dg}>{formatVal(t, timingDetail[1])}</p>
                     </div>
                   )}
                 </div>
@@ -793,24 +856,24 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                   {quickDetails.map(([key, value]) => (
                     <div key={key} className="rounded-xl bg-slate-50 border border-slate-100 p-3">
-                      <p className="text-xs text-gray-400 mb-1">{formatKey(key)}</p>
-                      <p className="text-sm font-bold text-gray-900 leading-snug">{formatVal(value)}</p>
+                      <p className="text-xs text-gray-400 mb-1">{formatKey(t, key)}</p>
+                      <p className="text-sm font-bold text-gray-900 leading-snug">{formatVal(t, value)}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400 mb-5">No specific details provided.</p>
+                <p className="text-sm text-gray-400 mb-5">{t('proJobs.detail.brief.noDetails')}</p>
               )}
 
               <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 mb-5">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Approximate location</p>
+                    <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">{t('proJobs.detail.brief.approximateLocation')}</p>
                     <p className="text-sm font-semibold text-gray-900">{locationSummary}</p>
                   </div>
                   {req.customerDistrict && (
                     <span className="shrink-0 rounded-full bg-white border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-600">
-                      District {req.customerDistrict}
+                      {t('proJobs.location.district', { district: req.customerDistrict })}
                     </span>
                   )}
                 </div>
@@ -823,14 +886,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 />
                 <p className="text-xs text-gray-400 mt-2">
                   {req.jobLocation
-                    ? 'Location shown is approximate from the customer permission. Exact address is shared after they accept your quote.'
-                    : 'Location shown is the centre of the customer&apos;s district. Exact address is shared after they accept your quote.'}
+                    ? t('proJobs.detail.brief.locationPermissionNote')
+                    : t('proJobs.detail.brief.locationDistrictNote')}
                 </p>
               </div>
 
               {req.attachmentUrls?.length ? (
                 <div className="mb-5">
-                  <h3 className="font-black text-gray-900 text-xl leading-none mb-2" style={dg}>Customer attachments</h3>
+                  <h3 className="font-black text-gray-900 text-xl leading-none mb-2" style={dg}>{t('proJobs.detail.brief.attachments')}</h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {req.attachmentUrls.map((url, index) => (
                       <a
@@ -841,10 +904,10 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                         className="group overflow-hidden rounded-xl border border-gray-200 bg-gray-50"
                       >
                         {/\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(url) ? (
-                          <img src={url} alt={`Customer attachment ${index + 1}`} className="h-28 w-full object-cover transition-transform group-hover:scale-105" />
+                          <img src={url} alt={t('proJobs.detail.brief.attachmentAlt', { index: index + 1 })} className="h-28 w-full object-cover transition-transform group-hover:scale-105" />
                         ) : (
                           <div className="flex h-28 items-center justify-center px-3 text-center text-sm font-bold text-gray-600">
-                            Attachment {index + 1}
+                            {t('proJobs.detail.brief.attachmentLabel', { index: index + 1 })}
                           </div>
                         )}
                       </a>
@@ -855,12 +918,12 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
 
               {remainingDetails.length > 0 && (
                 <div>
-                  <h3 className="font-black text-gray-900 text-xl leading-none mb-2" style={dg}>More details</h3>
+                  <h3 className="font-black text-gray-900 text-xl leading-none mb-2" style={dg}>{t('proJobs.detail.brief.moreDetails')}</h3>
                   <div className="divide-y divide-gray-100">
                     {remainingDetails.map(([k, v]) => (
                       <div key={k} className="py-2.5 flex justify-between gap-4 items-start">
-                        <span className="text-sm text-gray-500">{formatKey(k)}</span>
-                        <span className="text-sm font-semibold text-gray-900 text-right">{formatVal(v)}</span>
+                        <span className="text-sm text-gray-500">{formatKey(t, k)}</span>
+                        <span className="text-sm font-semibold text-gray-900 text-right">{formatVal(t, v)}</span>
                       </div>
                     ))}
                   </div>
@@ -871,14 +934,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             {/* Contact info — only after customer accepts */}
             {isAccepted && (
               <section className="bg-green-50 rounded-2xl border border-green-100 p-5">
-                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Customer contact</h2>
+                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.detail.contact.title')}</h2>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500 w-14">Name</span>
+                    <span className="text-gray-500 w-14">{t('proJobs.detail.labels.name')}</span>
                     <span className="font-semibold text-gray-900">{req.customerName || '—'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500 w-14">Email</span>
+                    <span className="text-gray-500 w-14">{t('proJobs.detail.labels.email')}</span>
                     <a href={`mailto:${req.customerEmail}`} className="font-semibold text-orange-500 hover:underline">
                       {req.customerEmail}
                     </a>
@@ -894,13 +957,21 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             {/* Action card */}
             <div className="bg-white rounded-2xl border border-gray-200 p-5">
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>
-                {isPending ? 'Make a decision' : isQuoted ? 'Quote sent' : isAccepted ? 'Accepted' : 'Declined'}
+                {isPending
+                  ? t('proJobs.detail.action.title.pending')
+                  : isQuoted
+                  ? t('proJobs.status.quoted')
+                  : isAccepted
+                  ? t('proJobs.status.accepted')
+                  : req.status === 'cancelled'
+                  ? t('proJobs.status.cancelled')
+                  : t('proJobs.status.declined')}
               </h2>
 
               {isPending && (
                 <>
                   <p className="text-xs text-gray-400 mb-4">
-                    Review the details and send a quote. The customer can then accept or decline it.
+                    {t('proJobs.detail.action.pendingBody')}
                   </p>
                   <div className="flex flex-col gap-2">
                     <button
@@ -908,13 +979,13 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                       className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl py-3 text-base transition-colors cursor-pointer border-none"
                       style={dg}
                     >
-                      Send a quote
+                      {t('proJobs.card.sendQuote')}
                     </button>
                     <button
                       onClick={() => setShowDeclineModal(true)}
                       className="w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl py-2.5 text-sm transition-colors cursor-pointer bg-white"
                     >
-                      Decline
+                      {t('proJobs.card.decline')}
                     </button>
                   </div>
                 </>
@@ -923,20 +994,20 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
               {isQuoted && req.quote && (
                 <>
                   <p className="text-xs text-gray-400 mb-4">
-                    Your quote has been sent. The customer will accept or decline it.
+                    {t('proJobs.detail.action.quotedBody')}
                   </p>
                   <div className="bg-slate-50 rounded-xl p-4 flex flex-col gap-2.5">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Price</span>
+                      <span className="text-gray-500">{t('proJobs.detail.labels.price')}</span>
                       <span className="font-bold text-gray-900">{req.quote.price}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Start</span>
-                      <span className="font-semibold text-gray-900">{req.quote.timeline}</span>
+                      <span className="text-gray-500">{t('proJobs.detail.labels.start')}</span>
+                      <span className="font-semibold text-gray-900">{translateQuoteTimeline(t, req.quote.timeline)}</span>
                     </div>
                     {req.quote.notes && (
                       <div className="pt-2 border-t border-slate-200">
-                        <p className="text-xs text-gray-500 mb-1">Your message</p>
+                        <p className="text-xs text-gray-500 mb-1">{t('proJobs.detail.labels.yourMessage')}</p>
                         <p className="text-sm text-gray-700 leading-relaxed">{req.quote.notes}</p>
                       </div>
                     )}
@@ -947,28 +1018,30 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
               {isAccepted && req.quote && (
                 <>
                   <p className="text-xs text-gray-400 mb-4">
-                    The customer accepted your quote. Contact them to arrange the job.
+                    {t('proJobs.detail.action.acceptedBody')}
                   </p>
                   <div className="bg-green-50 rounded-xl p-4 flex flex-col gap-2.5">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Agreed price</span>
+                      <span className="text-gray-500">{t('proJobs.detail.labels.agreedPrice')}</span>
                       <span className="font-bold text-gray-900">{req.quote.price}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Start</span>
-                      <span className="font-semibold text-gray-900">{req.quote.timeline}</span>
+                      <span className="text-gray-500">{t('proJobs.detail.labels.start')}</span>
+                      <span className="font-semibold text-gray-900">{translateQuoteTimeline(t, req.quote.timeline)}</span>
                     </div>
                   </div>
                   {req.appointmentRequest && (
                     <div className="mt-3 bg-orange-50 border border-orange-100 rounded-xl p-3 text-sm">
-                      <p className="text-xs font-bold text-orange-700 mb-1">Appointment proposed</p>
+                      <p className="text-xs font-bold text-orange-700 mb-1">{t('proJobs.detail.appointment.proposed')}</p>
                       <p className="font-semibold text-gray-900">
                         {formatAppointmentDateTime(
+                          locale,
+                          t,
                           req.appointmentRequest.date,
                           req.appointmentRequest.time
                         )}
                       </p>
-                      <p className="text-gray-500">{req.appointmentRequest.duration}</p>
+                      <p className="text-gray-500">{translateDuration(t, req.appointmentRequest.duration)}</p>
                     </div>
                   )}
                   <button
@@ -977,11 +1050,11 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                     className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-3 text-base transition-colors cursor-pointer border-none"
                     style={dg}
                   >
-                    {req.appointmentRequest ? 'Update appointment request' : 'Schedule appointment'}
+                    {req.appointmentRequest ? t('proJobs.detail.appointment.update') : t('proJobs.detail.appointment.schedule')}
                   </button>
                   {req.completion?.status === 'pro_marked_complete' ? (
                     <p className="mt-3 text-sm text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3">
-                      Waiting for the customer to confirm completion.
+                      {t('proJobs.detail.completion.waiting')}
                     </p>
                   ) : (
                     <button
@@ -990,21 +1063,25 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                       className="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl py-3 text-base transition-colors cursor-pointer border-none"
                       style={dg}
                     >
-                      Mark job complete
+                      {t('proJobs.detail.completion.markComplete')}
                     </button>
                   )}
                 </>
               )}
 
               {req.status === 'declined' && (
-                <p className="text-xs text-gray-400 mt-1">You declined this request.</p>
+                <p className="text-xs text-gray-400 mt-1">{t('proJobs.card.declined')}</p>
               )}
               {req.status === 'cancelled' && (
-                <p className="text-xs text-gray-400 mt-1">This request was cancelled{req.cancelReason ? `: ${req.cancelReason}` : ''}.</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {req.cancelReason
+                    ? t('proJobs.detail.action.cancelledWithReason', { reason: req.cancelReason })
+                    : t('proJobs.card.cancelled')}
+                </p>
               )}
               {req.status === 'completed' && (
                 <p className="text-xs text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3">
-                  The customer confirmed this job is complete.
+                  {t('proJobs.card.completed')}
                 </p>
               )}
               {canCancel && (
@@ -1013,7 +1090,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   onClick={() => setShowCancelModal(true)}
                   className="mt-3 w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl py-2.5 text-sm transition-colors cursor-pointer bg-white"
                 >
-                  Cancel request
+                  {t('proJobs.detail.cancelModal.submit')}
                 </button>
               )}
               <ReportUserButton
@@ -1023,21 +1100,32 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 reporterRole="pro"
                 contextType="request"
                 requestId={requestId}
-                buttonLabel="Report this customer"
+                buttonLabel={t('proJobs.detail.action.reportCustomer')}
+                className="mt-3 w-full border border-red-100 text-red-600 hover:bg-red-50 font-medium rounded-xl py-2.5 text-sm transition-colors cursor-pointer bg-white"
               />
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">Customer context</p>
+              <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.detail.context.kicker')}</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
                 {customerName}
               </h2>
               <div className="divide-y divide-gray-100">
                 {[
-                  ['Request age', requestAgeLabel(req.createdAt)],
-                  ['Location', req.jobLocation ? `${locationSummary}${req.customerDistrict ? ` · ${mapLabel}` : ''}` : req.customerDistrict ? mapLabel : 'District not shared'],
-                  ['Contact', isAccepted ? 'Available after acceptance' : 'Hidden until quote is accepted'],
-                  ['Detail level', details.length > 0 ? `${details.length} answer${details.length === 1 ? '' : 's'} provided` : 'Limited detail'],
+                  [t('proJobs.detail.context.requestAge'), requestAgeLabel(t, req.createdAt)],
+                  [t('proJobs.detail.context.location'), req.jobLocation ? `${locationSummary}${req.customerDistrict ? ` · ${mapLabel}` : ''}` : req.customerDistrict ? mapLabel : t('proJobs.location.notShared')],
+                  [t('proJobs.detail.context.contact'), isAccepted ? t('proJobs.detail.context.contactAvailable') : t('proJobs.detail.context.contactHidden')],
+                  [
+                    t('proJobs.detail.context.detailLevel'),
+                    details.length > 0
+                      ? t(
+                          details.length === 1
+                            ? 'proJobs.detail.context.answerProvidedSingular'
+                            : 'proJobs.detail.context.answerProvidedPlural',
+                          { count: details.length }
+                        )
+                      : t('proJobs.detail.context.limitedDetail'),
+                  ],
                 ].map(([label, value]) => (
                   <div key={label} className="py-2.5 flex justify-between gap-4 text-sm">
                     <span className="text-gray-500">{label}</span>
@@ -1049,8 +1137,8 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <div className="mt-4 grid grid-cols-1 gap-2">
                   {decisionDetails.map(([key, value]) => (
                     <div key={key} className="rounded-xl bg-gray-50 border border-gray-100 p-3">
-                      <p className="text-xs text-gray-400 mb-1">{formatKey(key)}</p>
-                      <p className="text-sm font-semibold text-gray-900">{formatVal(value)}</p>
+                      <p className="text-xs text-gray-400 mb-1">{formatKey(t, key)}</p>
+                      <p className="text-sm font-semibold text-gray-900">{formatVal(t, value)}</p>
                     </div>
                   ))}
                 </div>
@@ -1060,7 +1148,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             {/* Checklist to help decision — only while pending */}
             {isPending && (
               <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>Things to consider</h2>
+                <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.detail.tips.title')}</h2>
                 <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
                   {tips.map(tip => (
                     <li key={tip} className="flex items-start gap-2">
@@ -1075,9 +1163,9 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             {/* Tips — only while pending */}
             {isPending && (
               <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
-                <p className="text-xs font-bold text-orange-700 mb-1">Respond quickly</p>
+                <p className="text-xs font-bold text-orange-700 mb-1">{t('proJobs.detail.respondQuickly.title')}</p>
                 <p className="text-xs text-orange-600 leading-relaxed">
-                  Pros who respond within 1 hour win 3× more jobs. Even a quick &ldquo;I&apos;ll be in touch shortly&rdquo; builds trust.
+                  {t('proJobs.detail.respondQuickly.body')}
                 </p>
               </div>
             )}

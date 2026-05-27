@@ -791,6 +791,166 @@
       "keep": "Kérés megtartása",
       "declining": "Elutasítás...",
       "confirm": "Igen, elutasítom"
+    },
+    "detail": {
+      "backToJobs": "Vissza a munkákhoz",
+      "customerFallbackLower": "az ügyfél",
+      "postedAgo": "Közzétéve: {time}",
+      "postedRecently": "Nemrég közzétéve",
+      "notAccessible": {
+        "title": "Nem elérhető",
+        "body": "Ez a kérés nem létezik, vagy nincs jogosultságod megtekinteni."
+      },
+      "hidden": {
+        "kicker": "Megkeresés elrejtve",
+        "title": "Frissíts a kérés megtekintéséhez",
+        "body": "Havonta {limit} megkeresést tekinthetsz meg ingyen teljes részletességgel. Ez a megkeresés el van mentve, de a munka részletei, a helyszín és az ügyfélkörnyezet rejtve marad, amíg nem frissítesz, vagy az ingyenes megtekintéseid {resetLabel} dátumon meg nem újulnak.",
+        "overlay": "A részletek Próig vagy {resetLabel} dátumig rejtve maradnak"
+      },
+      "labels": {
+        "category": "Kategória",
+        "status": "Állapot",
+        "received": "Érkezett",
+        "name": "Név",
+        "email": "E-mail",
+        "price": "Ár",
+        "start": "Kezdés",
+        "yourMessage": "Üzeneted",
+        "agreedPrice": "Elfogadott ár"
+      },
+      "header": {
+        "kicker": "Munkakérés"
+      },
+      "statusBanner": {
+        "completed": "Munka befejezve",
+        "quoted": "Ajánlat elküldve. Várakozás az ügyfél válaszára.",
+        "accepted": "Az ügyfél elfogadta az ajánlatodat",
+        "cancelled": "Kérés lemondva",
+        "declined": "Elutasítottad ezt a kérést"
+      },
+      "brief": {
+        "kicker": "Munka összefoglaló",
+        "urgency": "Sürgősség",
+        "timing": "Időzítés",
+        "noDetails": "Nincsenek konkrét részletek megadva.",
+        "approximateLocation": "Hozzávetőleges helyszín",
+        "locationPermissionNote": "A helyszín az ügyfél engedélye alapján hozzávetőleges. A pontos címet akkor osztjuk meg, amikor elfogadja az ajánlatodat.",
+        "locationDistrictNote": "A helyszín az ügyfél kerületének központja. A pontos címet akkor osztjuk meg, amikor elfogadja az ajánlatodat.",
+        "attachments": "Ügyfél mellékletei",
+        "attachmentAlt": "{index}. ügyfélmelléklet",
+        "attachmentLabel": "{index}. melléklet",
+        "moreDetails": "További részletek"
+      },
+      "contact": {
+        "title": "Ügyfél elérhetősége"
+      },
+      "action": {
+        "title": {
+          "pending": "Döntés szükséges"
+        },
+        "pendingBody": "Nézd át a részleteket, és küldj ajánlatot. Az ügyfél ezután elfogadhatja vagy elutasíthatja.",
+        "quotedBody": "Az ajánlatod elküldtük. Az ügyfél elfogadhatja vagy elutasíthatja.",
+        "acceptedBody": "Az ügyfél elfogadta az ajánlatodat. Vedd fel vele a kapcsolatot a munka egyeztetéséhez.",
+        "cancelledWithReason": "Ezt a kérést lemondták: {reason}.",
+        "reportCustomer": "Ügyfél jelentése"
+      },
+      "appointment": {
+        "at": "ekkor:",
+        "proposed": "Időpont javasolva",
+        "update": "Időpontkérés frissítése",
+        "schedule": "Időpont egyeztetése"
+      },
+      "completion": {
+        "waiting": "Várakozás arra, hogy az ügyfél megerősítse a befejezést.",
+        "markComplete": "Munka készre jelölése"
+      },
+      "context": {
+        "kicker": "Ügyfélkörnyezet",
+        "requestAge": "Kérés kora",
+        "location": "Helyszín",
+        "contact": "Kapcsolat",
+        "contactAvailable": "Elfogadás után elérhető",
+        "contactHidden": "Az ajánlat elfogadásáig rejtve",
+        "detailLevel": "Részletesség",
+        "answerProvidedSingular": "{count} válasz megadva",
+        "answerProvidedPlural": "{count} válasz megadva",
+        "limitedDetail": "Korlátozott részletesség"
+      },
+      "tips": {
+        "title": "Amit érdemes mérlegelni",
+        "coverage": "Vállalsz {category} munkát?",
+        "serviceArea": "{district} - benne van a szolgáltatási területedben?",
+        "noDistrict": "Az ügyfél még nem adott meg kerületet; ha számít az utazás, kérdezz rá ajánlatadás előtt.",
+        "useAnswers": "Az ügyfél válaszai alapján döntsd el, hogy ez kis munka, helyszíni felmérés vagy egyedi ajánlat.",
+        "limitedDetails": "Az ügyfél kevés részletet adott meg; kérj pontosítást, mielőtt elköteleződsz.",
+        "replyWithAge": "{age} - a gyorsabb válasz segíthet megszerezni a munkát.",
+        "replyFresh": "Válaszolj gyorsan, amíg friss a kérés.",
+        "emailAfterAccept": "Az e-mail-cím elérhető lesz, ha az ügyfél elfogadja az ajánlatodat."
+      },
+      "respondQuickly": {
+        "title": "Válaszolj gyorsan",
+        "body": "Az 1 órán belül válaszoló szakemberek 3x több munkát nyernek. Már egy rövid \"hamarosan jelentkezem\" üzenet is bizalmat épít."
+      },
+      "appointmentModal": {
+        "kicker": "Időpontkérés",
+        "title": "Időpont egyeztetése vele: {customer}",
+        "subtitle": "Javasolj időpontot most, hogy az ügyfél elfogadta az ajánlatot.",
+        "typeLabel": "Időpont típusa",
+        "types": {
+          "quote": {
+            "label": "Felmérési időpont",
+            "body": "Először ellenőrizd vagy pontosítsd a munkakört."
+          },
+          "service": {
+            "label": "Munkavégzési időpont",
+            "body": "Egyeztesd le az elfogadott munkát."
+          }
+        },
+        "date": "Dátum",
+        "time": "Időpont",
+        "duration": "Időtartam",
+        "durations": {
+          "thirtyMinutes": "30 perc",
+          "sixtyMinutes": "60 perc",
+          "ninetyMinutes": "90 perc",
+          "twoHours": "2 óra",
+          "halfDay": "Fél nap",
+          "fullDay": "Teljes nap"
+        },
+        "meetingNote": "Találkozási megjegyzés",
+        "meetingNotePlaceholder": "Kapukód, bejárati megjegyzés vagy videóhívás link",
+        "message": "Üzenet az ügyfélnek",
+        "messagePlaceholder": "Írd meg, mire készüljön az ügyfél, és hogy ez felmérés vagy munkavégzés lesz.",
+        "sending": "Küldés...",
+        "submit": "Időpontkérés küldése",
+        "errors": {
+          "dateTimeRequired": "Válassz dátumot és időpontot.",
+          "generic": "Nem sikerült elküldeni az időpontkérést. Próbáld újra."
+        }
+      },
+      "cancelModal": {
+        "kicker": "Kérés lemondása",
+        "title": "Lemondod vele: {customer}?",
+        "subtitle": "Az ügyfelet értesítjük, és ez a munka kikerül az aktív listádból.",
+        "reasonLabel": "Miért mondod le?",
+        "detailsLabel": "Részletek az ügyfélnek",
+        "detailsPlaceholder": "Adj kontextust, javasolj következő lépést, vagy írd meg, hogy később újrafoglalhat-e.",
+        "reasonNote": "Ok: {reason}",
+        "detailsNote": "Részletek: {details}",
+        "cancelling": "Lemondás...",
+        "submit": "Kérés lemondása",
+        "reasons": {
+          "outsideServiceArea": "A szolgáltatási területemen kívül van",
+          "scheduleDoesNotWork": "Nem megfelelő az időzítés",
+          "notRightFit": "Nem illik a szolgáltatásaimhoz",
+          "needMoreInformation": "Több információra van szükségem, mielőtt vállalnám",
+          "customerRequested": "Az ügyfél kérte a lemondást",
+          "other": "Egyéb"
+        },
+        "errors": {
+          "generic": "Nem sikerült lemondani ezt a kérést. Próbáld újra."
+        }
+      }
     }
   },
   "proMarketplace": {
