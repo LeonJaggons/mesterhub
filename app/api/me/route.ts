@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { adminAuth, adminDb } from '@/firebase/admin'
+import { isAdminUser } from '@/firebase/adminAccess'
 import { isLocale, type Locale } from '@/lib/i18n/config'
 import { enforceUserRateLimit } from '@/lib/rateLimit'
 
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
         resolvePro(decoded.uid, decoded.email),
         preferredLocaleForUser(decoded.uid),
       ])
-      return Response.json({ pro, preferredLocale })
+      return Response.json({ pro, preferredLocale, isAdmin: isAdminUser(decoded) })
     } catch (dbErr) {
       console.error('[/api/me] firestore', dbErr)
       return Response.json({ pro: null })

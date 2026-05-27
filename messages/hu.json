@@ -275,6 +275,9 @@
       "joinPro": "Csatlakozás szakemberként",
       "settings": "Fiókbeállítások"
     },
+    "adminNav": {
+      "admin": "Admin"
+    },
     "proNav": {
       "jobs": "Munkák",
       "marketplace": "Piactér",

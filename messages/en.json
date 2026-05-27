@@ -275,6 +275,9 @@
       "joinPro": "Join as a pro",
       "settings": "Account settings"
     },
+    "adminNav": {
+      "admin": "Admin"
+    },
     "proNav": {
       "jobs": "Jobs",
       "marketplace": "Marketplace",

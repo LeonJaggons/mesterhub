@@ -262,11 +262,12 @@ function CustomerNavLink({ href, label, badge = 0 }: { href: string; label: stri
   )
 }
 
-function CustomerNav({ activeAppointments }: { activeAppointments: number }) {
+function CustomerNav({ activeAppointments, hasAdminAccess }: { activeAppointments: number; hasAdminAccess: boolean }) {
   const t = useTranslations()
 
   return (
     <>
+      {hasAdminAccess && <CustomerNavLink href="/admin" label={t('header.adminNav.admin')} />}
       <CustomerNavLink href="/requests" label={t('header.customerNav.requests')} />
       <CustomerNavLink href="/projects" label={t('header.customerNav.projects')} />
       <CustomerNavLink href="/appointments" label={t('header.customerNav.appointments')} badge={activeAppointments} />
@@ -515,12 +516,14 @@ function ProHeaderUpgradeButton() {
 function ProNav({
   user,
   pro,
+  hasAdminAccess,
   pendingJobs,
   confirmedAppointments,
   notifications,
 }: {
   user: User
   pro: ProBasic
+  hasAdminAccess: boolean
   pendingJobs: number
   confirmedAppointments: number
   notifications: NotificationsState
@@ -529,6 +532,7 @@ function ProNav({
 
   return (
     <nav className="flex items-center gap-2">
+      {hasAdminAccess && <ProNavLink href="/admin" label={t('header.adminNav.admin')} />}
       <ProNavLink href="/pro/jobs" label={t('header.proNav.jobs')} badge={pendingJobs} />
       <ProNavLink href="/pro/marketplace" label={t('header.proNav.marketplace')} />
       <ProNavLink href="/pro/work" label={t('header.proNav.work')} badge={confirmedAppointments} />
@@ -564,6 +568,7 @@ function MobileMenu({
   confirmedAppointments,
   activeAppointments,
   unreadNotifications,
+  hasAdminAccess,
 }: {
   user: User | null
   pro: ProBasic | null
@@ -571,6 +576,7 @@ function MobileMenu({
   confirmedAppointments: number
   activeAppointments: number
   unreadNotifications: number
+  hasAdminAccess: boolean
 }) {
   const t = useTranslations()
   const [open, setOpen] = useState(false)
@@ -600,6 +606,7 @@ function MobileMenu({
         <div className={styles.mobileMenuSection}>
           {pro && user ? (
             <>
+              {hasAdminAccess && <MobileNavLink href="/admin" label={t('header.adminNav.admin')} onClick={() => setOpen(false)} />}
               <MobileNavLink href="/pro/jobs" label={t('header.proNav.jobs')} badge={pendingJobs} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/marketplace" label={t('header.proNav.marketplace')} onClick={() => setOpen(false)} />
               <MobileNavLink href="/pro/work" label={t('header.proNav.work')} badge={confirmedAppointments} onClick={() => setOpen(false)} />
@@ -615,6 +622,7 @@ function MobileMenu({
               <MobileNavLink href="/instant-results" label={t('header.services.explore')} onClick={() => setOpen(false)} />
               {user && (
                 <>
+                  {hasAdminAccess && <MobileNavLink href="/admin" label={t('header.adminNav.admin')} onClick={() => setOpen(false)} />}
                   <MobileNavLink href="/requests" label={t('header.customerNav.requests')} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/projects" label={t('header.customerNav.projects')} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/appointments" label={t('header.customerNav.appointments')} badge={activeAppointments} onClick={() => setOpen(false)} />
@@ -664,6 +672,7 @@ export default function Header() {
   const isSignupPath = pathname.startsWith('/pro/signup')
   const [user, setUser] = useState<User | null>(null)
   const [pro, setPro] = useState<ProBasic | null>(null)
+  const [hasAdminAccess, setHasAdminAccess] = useState(false)
   const [resolvingAccount, setResolvingAccount] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [pendingJobs, setPendingJobs] = useState(0)
@@ -682,6 +691,7 @@ export default function Header() {
     const unsub = onAuthChange(async u => {
       if (!cancelled) setResolvingAccount(true)
       setUser(u)
+      if (!cancelled) setHasAdminAccess(false)
       if (!u) {
         if (!cancelled) {
           setPro(null)
@@ -696,10 +706,11 @@ export default function Header() {
       if (!cancelled) setActiveAppointments(0)
       try {
         const res = await authenticatedFetch('/api/me')
-        const data = (await res.json()) as { pro: ProBasic | null; preferredLocale?: Locale | null }
+        const data = (await res.json()) as { pro: ProBasic | null; preferredLocale?: Locale | null; isAdmin?: boolean }
         const profile = data.pro
         if (!cancelled && u.uid === uid) {
           setPro(profile)
+          setHasAdminAccess(Boolean(data.isAdmin))
           const route = latestRoute.current
           if (data.preferredLocale && data.preferredLocale !== route.currentLocale) {
             const { pathname, queryString } = route
@@ -712,7 +723,10 @@ export default function Header() {
           }
         }
       } catch {
-        if (!cancelled) setPro(null)
+        if (!cancelled) {
+          setPro(null)
+          setHasAdminAccess(false)
+        }
       } finally {
         if (!cancelled) setResolvingAccount(false)
       }
@@ -807,6 +821,7 @@ export default function Header() {
           <ProNav
             user={user}
             pro={pro}
+            hasAdminAccess={hasAdminAccess}
             pendingJobs={pendingJobs}
             confirmedAppointments={confirmedProAppointments}
             notifications={notifications}
@@ -815,7 +830,7 @@ export default function Header() {
       ) : (
         <nav className={styles.desktopNav}>
           <ServicesMenu categories={categories} />
-          {user && <CustomerNav activeAppointments={activeAppointments} />}
+          {user && <CustomerNav activeAppointments={activeAppointments} hasAdminAccess={hasAdminAccess} />}
           <Link href="/pro" className={`${styles.headerMenuText} ${styles.headerNavItem} px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 transition-colors`}>
             {t('header.customerNav.joinPro')}
           </Link>
@@ -849,6 +864,7 @@ export default function Header() {
           confirmedAppointments={confirmedProAppointments}
           activeAppointments={activeAppointments}
           unreadNotifications={notifications.unreadCount}
+          hasAdminAccess={hasAdminAccess}
         />
       )}
     </header>
