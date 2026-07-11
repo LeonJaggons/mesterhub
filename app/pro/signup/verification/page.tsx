@@ -7,8 +7,8 @@ import { useTranslations } from '@/lib/i18n/client'
 import { compressImageFile } from '@/lib/imageCompression'
 import { save, stageFile } from '../store'
 import styles from '../signup.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 
 export default function VerificationPage() {

@@ -7,8 +7,8 @@ import { useTranslations } from '@/lib/i18n/client'
 import { compressImageFile } from '@/lib/imageCompression'
 import { save, stageFile, type PastProject } from '../store'
 import styles from '../signup.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 const MAX_DESCRIPTION = 200
 
 type UploadState = 'idle' | 'uploading' | 'done' | 'error'

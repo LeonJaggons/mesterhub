@@ -11,8 +11,10 @@ import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 import { inquiryCreatedAtMillis, inquiryMonthKey, type InquiryTimestamp } from '@/lib/inquiryAccess'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { dg } from '@/lib/ui'
+import { StatusPill } from '@/app/components/ui/StatusPill'
+import { Avatar } from '@/app/components/ui/Avatar'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type Translator = ReturnType<typeof useTranslations>
 
 type RequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled'
@@ -41,15 +43,6 @@ type ServiceRequest = {
   acceptance?: AcceptanceDetails
   createdAt: InquiryTimestamp
   obfuscated?: boolean
-}
-
-const STATUS_COLORS: Record<RequestStatus, string> = {
-  pending: 'bg-sky-50 text-sky-700 border-sky-200',
-  quoted: 'bg-blue-50 text-blue-700 border-blue-200',
-  accepted: 'bg-green-50 text-green-700 border-green-200',
-  declined: 'bg-gray-100 text-gray-500 border-gray-200',
-  completed: 'bg-slate-800 text-white border-slate-800',
-  cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
 }
 
 function timeAgo(t: Translator, ts: InquiryTimestamp): string {
@@ -147,12 +140,7 @@ function JobCard({
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                style={{ background: '#0ea5e9' }}
-              >
-                {customerName[0]?.toUpperCase() ?? '?'}
-              </div>
+              <Avatar name={customerName} size={32} />
               <span className="font-bold text-gray-900 text-sm">
                 {customerName}
               </span>
@@ -164,9 +152,9 @@ function JobCard({
               {districtCopy(t, req)}
             </p>
           </div>
-          <span className={`text-xs font-semibold border rounded-full px-2.5 py-1 flex-shrink-0 ${STATUS_COLORS[req.status]}`}>
+          <StatusPill status={req.status} className="flex-shrink-0">
             {t(`proJobs.status.${req.status}`)}
-          </span>
+          </StatusPill>
         </div>
 
         {/* Question answers */}

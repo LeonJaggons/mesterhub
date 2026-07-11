@@ -38,8 +38,10 @@ import {
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
 import { compressImageFiles } from '@/lib/imageCompression'
+import { dg } from '@/lib/ui'
+import { Modal, ModalHeader } from '@/app/components/ui/Modal'
+import { AvatarCircle, initials } from '@/app/components/ui/Avatar'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type Translator = ReturnType<typeof useTranslations>
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -296,10 +298,6 @@ function StarRating({ rating, count }: { rating: number; count: number }) {
   )
 }
 
-function reviewerInitials(name: string): string {
-  return name.split(/\s+/).filter(Boolean).map(part => part[0]).join('').slice(0, 2).toUpperCase() || 'MC'
-}
-
 function formatReviewDate(t: Translator, locale: string, value?: string): string {
   if (!value) return t('proProfile.reviews.recently')
   const parsed = new Date(value)
@@ -490,9 +488,9 @@ function ReviewSection({
         {filteredReviews.length > 0 ? filteredReviews.map(review => (
           <article key={review.id} className="py-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-700">
-                {reviewerInitials(review.customerName || t('proProfile.reviews.customerFallback'))}
-              </div>
+              <AvatarCircle className="h-12 w-12 bg-slate-100 text-sm text-slate-700">
+                {initials(review.customerName || t('proProfile.reviews.customerFallback'), 'MC')}
+              </AvatarCircle>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -693,32 +691,15 @@ function RequestSignupModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg rounded-lg bg-white shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proProfile.signup.kicker')}</p>
-            <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.signup.title')}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              {t('proProfile.signup.subtitle')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer"
-            aria-label={t('proProfile.common.close')}
-          >
-            ×
-          </button>
-        </div>
-
+    <Modal onClose={onClose}>
+      <ModalHeader
+        kicker={t('proProfile.signup.kicker')}
+        title={t('proProfile.signup.title')}
+        subtitle={t('proProfile.signup.subtitle')}
+        onClose={onClose}
+        closeLabel={t('proProfile.common.close')}
+      />
+      <div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
@@ -796,7 +777,7 @@ function RequestSignupModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -1130,33 +1111,15 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
       </div>
 
       {requestOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4"
-          onClick={() => setRequestOpen(false)}
-        >
-          <div
-            className="w-full max-w-2xl rounded-lg bg-white shadow-2xl overflow-y-auto"
-            style={{ maxHeight: '90vh' }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
-              <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proProfile.request.modalKicker')}</p>
-                <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>{t('proProfile.request.modalTitle', { name: pro.fullName })}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                  {t('proProfile.request.modalSubtitle')}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setRequestOpen(false)}
-                className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer"
-                aria-label={t('proProfile.common.close')}
-              >
-                ×
-              </button>
-            </div>
-
+        <Modal onClose={() => setRequestOpen(false)} maxWidth="2xl" scroll>
+          <ModalHeader
+            kicker={t('proProfile.request.modalKicker')}
+            title={t('proProfile.request.modalTitle', { name: pro.fullName })}
+            subtitle={t('proProfile.request.modalSubtitle')}
+            onClose={() => setRequestOpen(false)}
+            closeLabel={t('proProfile.common.close')}
+          />
+          <div>
             <form onSubmit={(e) => { e.preventDefault(); handleSubmit() }} className="flex flex-col gap-5 p-6">
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
@@ -1315,7 +1278,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
               </div>
             </form>
           </div>
-        </div>
+        </Modal>
       )}
 
       {signupOpen && (

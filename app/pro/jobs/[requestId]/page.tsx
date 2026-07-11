@@ -19,8 +19,9 @@ import ProUpgradeCta from '@/app/pro/components/ProUpgradeCta'
 import { FREE_CLEAR_INQUIRY_LIMIT, inquiryCreatedAtMillis, type InquiryTimestamp } from '@/lib/inquiryAccess'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { dg } from '@/lib/ui'
+import { Modal, ModalHeader } from '@/app/components/ui/Modal'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type Translator = ReturnType<typeof useTranslations>
 
 // Leaflet must be client-only (requires window)
@@ -275,36 +276,16 @@ function AppointmentModal({
   ]
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(15,23,42,0.58)' }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-lg w-full max-w-xl shadow-2xl overflow-y-auto"
-        style={{ maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">{t('proJobs.detail.appointmentModal.kicker')}</p>
-            <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
-              {t('proJobs.detail.appointmentModal.title', { customer: req.customerName || t('proJobs.detail.customerFallbackLower') })}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {t('proJobs.detail.appointmentModal.subtitle')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer flex-shrink-0 p-1 text-2xl leading-none"
-            aria-label={t('proJobs.quoteModal.close')}
-          >
-            ×
-          </button>
-        </div>
+    <Modal onClose={onClose} maxWidth="xl" scroll>
+      <ModalHeader
+        kicker={t('proJobs.detail.appointmentModal.kicker')}
+        title={t('proJobs.detail.appointmentModal.title', { customer: req.customerName || t('proJobs.detail.customerFallbackLower') })}
+        subtitle={t('proJobs.detail.appointmentModal.subtitle')}
+        onClose={onClose}
+        closeLabel={t('proJobs.quoteModal.close')}
+      />
 
+      <div>
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
           <fieldset className="border-0 p-0 m-0">
             <legend className="text-sm font-medium text-gray-700 mb-2">{t('proJobs.detail.appointmentModal.typeLabel')}</legend>
@@ -418,7 +399,7 @@ function AppointmentModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -464,36 +445,15 @@ function CancelRequestModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(15,23,42,0.58)' }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-lg w-full max-w-lg shadow-2xl overflow-y-auto"
-        style={{ maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">{t('proJobs.detail.cancelModal.kicker')}</p>
-            <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
-              {t('proJobs.detail.cancelModal.title', { customer: customerName })}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {t('proJobs.detail.cancelModal.subtitle')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer flex-shrink-0 p-1 text-2xl leading-none"
-            aria-label={t('proJobs.quoteModal.close')}
-          >
-            ×
-          </button>
-        </div>
-
+    <Modal onClose={onClose} scroll>
+      <ModalHeader
+        kicker={t('proJobs.detail.cancelModal.kicker')}
+        title={t('proJobs.detail.cancelModal.title', { customer: customerName })}
+        subtitle={t('proJobs.detail.cancelModal.subtitle')}
+        onClose={onClose}
+        closeLabel={t('proJobs.quoteModal.close')}
+      />
+      <div>
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
             {t('proJobs.detail.cancelModal.reasonLabel')}
@@ -542,7 +502,7 @@ function CancelRequestModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 

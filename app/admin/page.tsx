@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 type Overview = {
   totals: Record<string, number>

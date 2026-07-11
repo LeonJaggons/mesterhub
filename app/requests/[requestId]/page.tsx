@@ -23,6 +23,7 @@ import {
 import styles from '../../account/account.module.css'
 import { ProDetailCard } from '../components/ProCard'
 import ReportUserButton from '@/app/components/reports/ReportUserButton'
+import { Modal, ModalHeader } from '@/app/components/ui/Modal'
 import StatusTimeline from '../components/StatusTimeline'
 import { AcceptQuoteModal, DeclineQuoteModal } from '../QuoteDecisionModals'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
@@ -129,35 +130,15 @@ function CancelRequestModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-lg w-full max-w-lg shadow-2xl overflow-y-auto"
-        style={{ maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-sky-500 mb-1">{t('customerRequests.detail.cancelModal.kicker')}</p>
-            <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
-              {t('customerRequests.detail.cancelModal.title', { name: proName })}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer shrink-0 p-1"
-            aria-label={t('customerRequests.detail.common.close')}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-            </svg>
-          </button>
-        </div>
+    <Modal onClose={onClose} scroll>
+      <ModalHeader
+        kicker={t('customerRequests.detail.cancelModal.kicker')}
+        title={t('customerRequests.detail.cancelModal.title', { name: proName })}
+        onClose={onClose}
+        closeLabel={t('customerRequests.detail.common.close')}
+      />
 
+      <div>
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           <p className="text-sm text-gray-500 -mt-1">
             {t('customerRequests.detail.cancelModal.body', { name: proName })}
@@ -227,7 +208,7 @@ function CancelRequestModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 

@@ -12,8 +12,8 @@ import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory, translateLicenceNote, translateService } from '@/lib/i18n/taxonomy'
 import { save } from '../store'
 import styles from '../signup.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 const MAX_SERVICES = 6
 
 // Icons live client-side only — cannot be serialised in JSON

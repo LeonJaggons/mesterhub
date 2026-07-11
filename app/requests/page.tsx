@@ -11,13 +11,13 @@ import {
   dg,
   districtLabel,
   fetchProSummary,
-  STATUS_COLORS,
   timestampMillis,
   type ProSummary,
   type ServiceRequest,
 } from './shared'
 import { ProListSnippet } from './components/ProCard'
 import CustomerActivityTabs from '@/app/components/CustomerActivityTabs'
+import { StatusPill } from '@/app/components/ui/StatusPill'
 import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
 
@@ -145,11 +145,9 @@ function RequestCard({
               <p className="text-xs text-gray-500">{translateCategory(t, req.categoryName)}</p>
             </div>
           )}
-          <span
-            className={`text-xs font-semibold border rounded-full px-2.5 py-1 shrink-0 ${STATUS_COLORS[req.status]}`}
-          >
+          <StatusPill status={req.status}>
             {requestStatusLabel(t, req.status, req.declinedBy)}
-          </span>
+          </StatusPill>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-3">

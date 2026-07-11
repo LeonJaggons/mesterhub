@@ -8,8 +8,8 @@ import { timestampMillis, type TimestampLike } from '@/app/requests/shared'
 import { translateQuoteTimeline } from '@/app/pro/jobs/JobModals'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type Translator = ReturnType<typeof useTranslations>
 
 type RequestDoc = {

@@ -2,6 +2,7 @@
 
 import type { ServiceRequestStatus } from '@/firebase/serviceRequests'
 import { useTranslations } from '@/lib/i18n/client'
+import { AvatarCircle } from '@/app/components/ui/Avatar'
 
 const STEPS: { key: ServiceRequestStatus; labelKey: string }[] = [
   { key: 'pending', labelKey: 'pending' },
@@ -70,8 +71,8 @@ export default function StatusTimeline({ status }: { status: ServiceRequestStatu
                 />
               )}
               <div className="relative z-10 flex flex-col items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 shadow-sm ${
+                <AvatarCircle
+                  className={`w-8 h-8 text-xs border-2 shadow-sm ${
                     done
                       ? 'bg-slate-800 border-slate-800 text-white'
                       : active
@@ -80,7 +81,7 @@ export default function StatusTimeline({ status }: { status: ServiceRequestStatu
                   }`}
                 >
                   {done ? '✓' : i + 1}
-                </div>
+                </AvatarCircle>
                 <span
                   className={`mt-2 max-w-20 text-[11px] font-semibold leading-tight sm:text-xs ${
                     active ? 'text-gray-900' : reached ? 'text-slate-700' : 'text-gray-400'

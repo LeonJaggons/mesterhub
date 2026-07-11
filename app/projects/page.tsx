@@ -14,6 +14,7 @@ import servicesData from '@/public/services.json'
 import styles from '../account/account.module.css'
 import { dg, districtLabel, formatAnswers, nowTimestamp, timestampMillis, type TimestampLike } from '../requests/shared'
 import CustomerActivityTabs from '@/app/components/CustomerActivityTabs'
+import { Modal, ModalHeader } from '@/app/components/ui/Modal'
 import {
   CATEGORY_QUESTIONS,
   MAX_ATTACHMENT_SIZE,
@@ -213,30 +214,16 @@ function CreateProjectModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-2xl rounded-lg bg-white shadow-2xl overflow-y-auto"
-        style={{ maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-700">{t('projects.create.kicker')}</p>
-            <h2 className="text-3xl font-black leading-none text-gray-900" style={dg}>{t('projects.create.title')}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              {t('projects.create.subtitle')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer"
-            aria-label={t('projects.create.close')}
-          >
-            ×
-          </button>
-        </div>
+    <Modal onClose={onClose} maxWidth="2xl" scroll>
+      <ModalHeader
+        kicker={t('projects.create.kicker')}
+        title={t('projects.create.title')}
+        subtitle={t('projects.create.subtitle')}
+        onClose={onClose}
+        closeLabel={t('projects.create.close')}
+      />
 
+      <div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-1.5">
@@ -393,7 +380,7 @@ function CreateProjectModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 

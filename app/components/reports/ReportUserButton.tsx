@@ -5,6 +5,9 @@ import { usePathname, useRouter } from 'next/navigation'
 import { onAuthChange } from '@/firebase/auth'
 import { authenticatedFetch } from '@/firebase/apiClient'
 import { useTranslations } from '@/lib/i18n/client'
+import { Modal, ModalHeader } from '@/app/components/ui/Modal'
+import { Button } from '@/app/components/ui/Button'
+import { Field, TextArea, Select, FieldError } from '@/app/components/ui/FormField'
 
 type TargetRole = 'pro' | 'customer' | 'user'
 type ReporterRole = 'pro' | 'customer' | 'user'
@@ -121,87 +124,57 @@ export default function ReportUserButton({
       </button>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl"
-            onClick={event => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
-              <div>
-                <p className="mb-1 text-xs font-bold uppercase tracking-widest text-red-500">{t('reports.kicker')}</p>
-                <h2 className="text-2xl font-black text-gray-950" style={{ fontFamily: 'var(--font-darker-grotesque)' }}>
-                  {t('reports.title', { name: targetName || t('reports.userFallback') })}
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  {t('reports.body')}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="border-none bg-transparent p-1 text-gray-400 hover:text-gray-600 cursor-pointer"
-                aria-label={t('reports.closeAria')}
+        <Modal onClose={() => setOpen(false)}>
+          <ModalHeader
+            kicker={t('reports.kicker')}
+            title={t('reports.title', { name: targetName || t('reports.userFallback') })}
+            subtitle={t('reports.body')}
+            onClose={() => setOpen(false)}
+            closeLabel={t('reports.closeAria')}
+            accent="red"
+          />
+
+          <form onSubmit={submitReport} className="flex flex-col gap-4 p-6">
+            <Field label={t('reports.reason')} htmlFor="report-reason">
+              <Select
+                id="report-reason"
+                value={reason}
+                onChange={event => setReason(event.target.value as ReportReason)}
               >
-                ×
-              </button>
+                {REPORT_REASONS.map(option => (
+                  <option key={option.value} value={option.value}>{t(`reports.reasons.${option.labelKey}`)}</option>
+                ))}
+              </Select>
+            </Field>
+
+            <Field label={t('reports.details')} htmlFor={detailsId}>
+              <TextArea
+                id={detailsId}
+                value={details}
+                onChange={event => setDetails(event.target.value)}
+                rows={5}
+                maxLength={2000}
+                placeholder={t('reports.detailsPlaceholder')}
+              />
+            </Field>
+
+            <p className="rounded-md border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+              {t('reports.emergency')}
+            </p>
+
+            {error && <FieldError>{error}</FieldError>}
+            {success && <p className="text-sm font-semibold text-green-700">{success}</p>}
+
+            <div className="flex gap-3 pt-1">
+              <Button type="button" variant="secondary" full onClick={() => setOpen(false)}>
+                {t('reports.close')}
+              </Button>
+              <Button type="submit" variant="destructive" full disabled={submitting || details.trim().length < 10}>
+                {submitting ? t('reports.sending') : t('reports.submit')}
+              </Button>
             </div>
-
-            <form onSubmit={submitReport} className="flex flex-col gap-4 p-6">
-              <label className="text-sm font-bold text-gray-700">
-                {t('reports.reason')}
-                <select
-                  value={reason}
-                  onChange={event => setReason(event.target.value as ReportReason)}
-                  className="mt-1 w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
-                >
-                  {REPORT_REASONS.map(option => (
-                    <option key={option.value} value={option.value}>{t(`reports.reasons.${option.labelKey}`)}</option>
-                  ))}
-                </select>
-              </label>
-
-              <label htmlFor={detailsId} className="text-sm font-bold text-gray-700">
-                {t('reports.details')}
-                <textarea
-                  id={detailsId}
-                  value={details}
-                  onChange={event => setDetails(event.target.value)}
-                  rows={5}
-                  maxLength={2000}
-                  placeholder={t('reports.detailsPlaceholder')}
-                  className="mt-1 w-full resize-none rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
-                />
-              </label>
-
-              <p className="rounded-md border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
-                {t('reports.emergency')}
-              </p>
-
-              {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
-              {success && <p className="text-sm font-semibold text-green-700">{success}</p>}
-
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="flex-1 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
-                >
-                  {t('reports.close')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting || details.trim().length < 10}
-                  className="flex-1 rounded-md border-none bg-red-600 px-4 py-3 text-sm font-black text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-                >
-                  {submitting ? t('reports.sending') : t('reports.submit')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
     </>
   )

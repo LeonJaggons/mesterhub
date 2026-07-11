@@ -3,8 +3,20 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { StatusPill } from '@/app/components/ui/StatusPill'
+import type { ServiceRequestStatus } from '@/firebase/serviceRequests'
+import {
+  useAdminList,
+  AdminSection,
+  AdminField,
+  AdminSelect,
+  AdminInput,
+  AdminListState,
+  AdminCard,
+  AdminCardHeader,
+  ADMIN_LINK_BUTTON_CLASSES,
+} from '@/app/components/ui/AdminList'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 type ServiceRequest = {
   id: string
@@ -30,31 +42,11 @@ export default function AdminRequestsPage() {
   const [status, setStatus] = useState('')
   const [query, setQuery] = useState('')
   const [reason, setReason] = useState('')
-  const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [busyId, setBusyId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  async function loadRequests(nextStatus = status, nextQuery = query) {
-    setLoading(true)
-    setError('')
-    try {
-      const params = new URLSearchParams()
-      if (nextStatus) params.set('status', nextStatus)
-      if (nextQuery.trim()) params.set('q', nextQuery.trim())
-      const res = await authenticatedFetch(`/api/admin/requests?${params}`)
-      const data = await res.json()
-      setRequests(data.serviceRequests ?? [])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load requests.')
-      setRequests([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { items: requests, loading, error, setError, load: loadRequests } = useAdminList<ServiceRequest>('/api/admin/requests', 'serviceRequests')
 
   useEffect(() => {
-    void Promise.resolve().then(() => loadRequests())
+    void loadRequests({ status, q: query })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -70,7 +62,7 @@ export default function AdminRequestsPage() {
         method: 'PATCH',
         body: JSON.stringify({ action: 'cancel', reason }),
       })
-      await loadRequests()
+      await loadRequests({ status, q: query })
       setReason('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not update request.')
@@ -81,61 +73,51 @@ export default function AdminRequestsPage() {
 
   return (
     <>
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="text-3xl font-black text-gray-950" style={dg}>Service requests</h2>
-        <p className="mt-1 text-sm text-gray-500">Monitor quote and job lifecycle state. Admin cancellation uses the same terminal status as user cancellation.</p>
+      <AdminSection title="Service requests" subtitle="Monitor quote and job lifecycle state. Admin cancellation uses the same terminal status as user cancellation." error={error}>
         <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-4">
-          <label className="text-sm font-semibold text-gray-700">
-            Status
-            <select value={status} onChange={e => { setStatus(e.target.value); loadRequests(e.target.value, query) }} className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900">
+          <AdminField label="Status">
+            <AdminSelect value={status} onChange={e => { setStatus(e.target.value); loadRequests({ status: e.target.value, q: query }) }}>
               <option value="">All statuses</option>
               {statuses.map(item => <option key={item} value={item}>{item}</option>)}
-            </select>
-          </label>
-          <label className="text-sm font-semibold text-gray-700 lg:col-span-2">
-            Search
-            <input value={query} onChange={e => setQuery(e.target.value)} onBlur={() => loadRequests(status, query)} placeholder="Name, email, category, or UID" className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900" />
-          </label>
-          <label className="text-sm font-semibold text-gray-700">
-            Cancellation reason
-            <input value={reason} onChange={e => setReason(e.target.value)} placeholder="Required for cancel" className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900" />
-          </label>
+            </AdminSelect>
+          </AdminField>
+          <AdminField label="Search" className="lg:col-span-2">
+            <AdminInput value={query} onChange={e => setQuery(e.target.value)} onBlur={() => loadRequests({ status, q: query })} placeholder="Name, email, category, or UID" />
+          </AdminField>
+          <AdminField label="Cancellation reason">
+            <AdminInput value={reason} onChange={e => setReason(e.target.value)} placeholder="Required for cancel" />
+          </AdminField>
         </div>
-        {error && <p className="mt-3 text-sm font-semibold text-red-600">{error}</p>}
-      </section>
+      </AdminSection>
 
-      {loading ? (
-        <div className="h-44 animate-pulse rounded-lg border border-gray-200 bg-white" />
-      ) : requests.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">No requests match these filters.</div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {requests.map(item => (
-            <article key={item.id} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-2xl font-black text-gray-950" style={dg}>{item.categoryName || 'Service request'}</h3>
-                  <p className="text-sm text-gray-500">{item.customerName || 'Customer'} → {item.proName || 'Pro'}</p>
-                </div>
-                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold capitalize text-gray-700">{item.status}</span>
-              </div>
-              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div><dt className="text-gray-400">Customer email</dt><dd className="font-semibold text-gray-900">{item.customerEmail || '-'}</dd></div>
-                <div><dt className="text-gray-400">Created</dt><dd className="font-semibold text-gray-900">{item.createdAt ? new Date(item.createdAt).toLocaleString() : '-'}</dd></div>
-                <div><dt className="text-gray-400">Quote</dt><dd className="font-semibold text-gray-900">{item.quote?.price ? `${item.quote.price} · ${item.quote.timeline ?? ''}` : '-'}</dd></div>
-                <div><dt className="text-gray-400">Request ID</dt><dd className="font-mono text-xs text-gray-700">{item.id}</dd></div>
-              </dl>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link href={`/messages/${item.id}`} className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">Customer thread</Link>
-                <Link href={`/pro/messages/${item.id}`} className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">Pro thread</Link>
-                <button disabled={busyId === item.id || !canCancel(item.status)} onClick={() => cancelRequest(item.id)} className="cursor-pointer rounded-md border-none bg-slate-900 px-3 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">
-                  Cancel request
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      <AdminListState loading={loading} empty={requests.length === 0} emptyMessage="No requests match these filters." gridClassName="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {requests.map(item => (
+          <AdminCard key={item.id}>
+            <AdminCardHeader
+              title={item.categoryName || 'Service request'}
+              subtitle={`${item.customerName || 'Customer'} → ${item.proName || 'Pro'}`}
+              badge={item.status && (statuses as string[]).includes(item.status) ? (
+                <StatusPill status={item.status as ServiceRequestStatus} className="capitalize">{item.status}</StatusPill>
+              ) : (
+                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold capitalize text-gray-700">{item.status ?? 'Unknown'}</span>
+              )}
+            />
+            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div><dt className="text-gray-400">Customer email</dt><dd className="font-semibold text-gray-900">{item.customerEmail || '-'}</dd></div>
+              <div><dt className="text-gray-400">Created</dt><dd className="font-semibold text-gray-900">{item.createdAt ? new Date(item.createdAt).toLocaleString() : '-'}</dd></div>
+              <div><dt className="text-gray-400">Quote</dt><dd className="font-semibold text-gray-900">{item.quote?.price ? `${item.quote.price} · ${item.quote.timeline ?? ''}` : '-'}</dd></div>
+              <div><dt className="text-gray-400">Request ID</dt><dd className="font-mono text-xs text-gray-700">{item.id}</dd></div>
+            </dl>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link href={`/messages/${item.id}`} className={ADMIN_LINK_BUTTON_CLASSES}>Customer thread</Link>
+              <Link href={`/pro/messages/${item.id}`} className={ADMIN_LINK_BUTTON_CLASSES}>Pro thread</Link>
+              <button disabled={busyId === item.id || !canCancel(item.status)} onClick={() => cancelRequest(item.id)} className="cursor-pointer rounded-md border-none bg-slate-900 px-3 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50">
+                Cancel request
+              </button>
+            </div>
+          </AdminCard>
+        ))}
+      </AdminListState>
     </>
   )
 }

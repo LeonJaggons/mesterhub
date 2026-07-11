@@ -7,8 +7,8 @@ import { normalizeHungarianPhone, onAuthChange, sendPhoneVerificationCode, signU
 import { useTranslations } from '@/lib/i18n/client'
 import { save } from '../store'
 import styles from '../signup.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 export default function AccountPage() {
   const t = useTranslations()

@@ -147,17 +147,16 @@ export const STATUS_LABELS: Record<ServiceRequestStatus, string> = {
   cancelled: 'Cancelled',
 }
 
-/** Brand: orange = primary, slate-800 = secondary dark blue */
 export const STATUS_COLORS: Record<ServiceRequestStatus, string> = {
   pending: 'bg-sky-50 text-sky-700 border-sky-200',
-  quoted: 'bg-slate-50 text-slate-800 border-slate-200',
-  accepted: 'bg-slate-800 text-white border-slate-800',
+  quoted: 'bg-blue-50 text-blue-700 border-blue-200',
+  accepted: 'bg-green-50 text-green-700 border-green-200',
   declined: 'bg-gray-100 text-gray-500 border-gray-200',
   completed: 'bg-slate-800 text-white border-slate-800',
   cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
 }
 
-export const PRO_AVATAR_COLORS = ['#0284c7', '#1e293b'] as const
+export { AVATAR_COLORS as PRO_AVATAR_COLORS } from '@/app/components/ui/Avatar'
 
 export const DISTRICT_COORDS: Record<string, [number, number]> = {
   I: [47.496, 19.039], II: [47.538, 18.983], III: [47.571, 19.043],
@@ -172,8 +171,7 @@ export const DISTRICT_COORDS: Record<string, [number, number]> = {
 
 export const DEFAULT_COORDS: [number, number] = [47.4979, 19.0402]
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
-export { dg }
+export { dg } from '@/lib/ui'
 
 
 export function timeAgo(ts: TimestampLike | null): string {
@@ -255,10 +253,4 @@ export async function fetchProSummary(uid: string): Promise<ProSummary | null> {
   }
 }
 
-export function proInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
-}
-
-export function proAvatarBg(name: string): string {
-  return PRO_AVATAR_COLORS[name.charCodeAt(0) % PRO_AVATAR_COLORS.length]
-}
+export { initials as proInitials, avatarBg as proAvatarBg } from '@/app/components/ui/Avatar'

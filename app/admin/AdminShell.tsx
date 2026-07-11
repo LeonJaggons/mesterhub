@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, type ReactNode } from 'react'
 import { onAuthChange } from '@/firebase/auth'
+import { dg } from '@/lib/ui'
 
 const navItems = [
   { href: '/admin', label: 'Overview' },
@@ -15,7 +16,6 @@ const navItems = [
   { href: '/admin/feedback', label: 'Feedback' },
 ]
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 function isActive(pathname: string, href: string) {
   return href === '/admin' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)

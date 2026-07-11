@@ -8,8 +8,8 @@ import { translateCategory } from '@/lib/i18n/taxonomy'
 import { compressImageFile } from '@/lib/imageCompression'
 import { load, save, stageFile } from '../store'
 import styles from '../signup.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 const AVAILABILITY = [
   { key: 'availabilityWeekdays', value: 'Monday–Friday' },
   { key: 'availabilityWeekends', value: 'Weekends' },

@@ -8,8 +8,8 @@ import { isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth'
 import { auth } from '@/firebase/index'
 import { useTranslations } from '@/lib/i18n/client'
 import styles from '../page.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 function VerifyLoginContent() {
   const router = useRouter()

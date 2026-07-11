@@ -5,10 +5,9 @@ import { MdVerified, MdLocationOn, MdStar } from 'react-icons/md'
 import {
   dg,
   districtNameById,
-  proAvatarBg,
-  proInitials,
   type ProSummary,
 } from '../shared'
+import { Avatar } from '@/app/components/ui/Avatar'
 import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory, translateService } from '@/lib/i18n/taxonomy'
 
@@ -21,29 +20,7 @@ function pricingLabel(t: Translator, pro: ProSummary): string {
 }
 
 export function ProAvatar({ pro, size = 56 }: { pro: ProSummary; size?: number }) {
-  if (pro.avatarUrl) {
-    return (
-      <img
-        src={pro.avatarUrl}
-        alt={pro.fullName}
-        className="rounded-full object-cover border-2 border-white shadow-sm shrink-0"
-        style={{ width: size, height: size }}
-      />
-    )
-  }
-  return (
-    <div
-      className="rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-sm"
-      style={{
-        width: size,
-        height: size,
-        background: proAvatarBg(pro.fullName),
-        fontSize: size * 0.34,
-      }}
-    >
-      {proInitials(pro.fullName)}
-    </div>
-  )
+  return <Avatar name={pro.fullName} src={pro.avatarUrl} size={size} />
 }
 
 export function ProRating({ pro }: { pro: ProSummary }) {

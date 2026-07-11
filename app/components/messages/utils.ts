@@ -1,6 +1,7 @@
 import type { Conversation } from '@/firebase/conversations'
 import type { Message } from '@/firebase/conversations'
-import { PRO_AVATAR_COLORS, timestampMillis, type TimestampLike } from '@/app/requests/shared'
+import { timestampMillis, type TimestampLike } from '@/app/requests/shared'
+import { initials as partnerInitials, avatarBg as avatarColor } from '@/app/components/ui/Avatar'
 import type { createTranslator } from '@/lib/i18n/translator'
 
 export type MessageRole = 'customer' | 'pro'
@@ -10,20 +11,7 @@ export function partnerDisplayName(conv: Conversation, role: MessageRole, custom
   return role === 'customer' ? conv.proName : (conv.customerName || customerFallback)
 }
 
-export function partnerInitials(name: string): string {
-  return (
-    name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || '?'
-  )
-}
-
-export function avatarColor(name: string): string {
-  return PRO_AVATAR_COLORS[name.charCodeAt(0) % PRO_AVATAR_COLORS.length]
-}
+export { partnerInitials, avatarColor }
 
 export function requestHref(requestId: string, role: MessageRole): string {
   return role === 'customer' ? `/requests/${requestId}` : `/pro/jobs/${requestId}`

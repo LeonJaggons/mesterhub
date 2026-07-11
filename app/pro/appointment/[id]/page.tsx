@@ -22,8 +22,10 @@ import {
   type ServiceRequestStatus,
 } from '@/firebase/serviceRequests'
 import type { InquiryTimestamp } from '@/lib/inquiryAccess'
+import { dg } from '@/lib/ui'
+import { Modal, ModalHeader } from '@/app/components/ui/Modal'
+import { AvatarCircle } from '@/app/components/ui/Avatar'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 const actionButtonBase = 'inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-bold leading-5 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60'
 const primaryActionButton = `${actionButtonBase} border border-sky-500 bg-sky-500 text-white hover:bg-sky-600 hover:border-sky-600`
 const darkActionButton = `${actionButtonBase} border border-slate-800 bg-slate-800 text-white hover:bg-slate-900 hover:border-slate-900`
@@ -193,18 +195,15 @@ function RescheduleModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4" onClick={onClose}>
-      <div className="w-full max-w-xl overflow-y-auto rounded-lg bg-white shadow-2xl" style={{ maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-500">{t('proAppointment.reschedule.kicker')}</p>
-            <h2 className="text-2xl font-black text-gray-900" style={dg}>{t('proAppointment.reschedule.title')}</h2>
-            <p className="mt-1 text-sm text-gray-500">{t('proAppointment.reschedule.body')}</p>
-          </div>
-          <button type="button" onClick={onClose} className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer" aria-label={t('proAppointment.common.close')}>
-            ×
-          </button>
-        </div>
+    <Modal onClose={onClose} maxWidth="xl" scroll>
+      <ModalHeader
+        kicker={t('proAppointment.reschedule.kicker')}
+        title={t('proAppointment.reschedule.title')}
+        subtitle={t('proAppointment.reschedule.body')}
+        onClose={onClose}
+        closeLabel={t('proAppointment.common.close')}
+      />
+      <div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
@@ -259,7 +258,7 @@ function RescheduleModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -301,18 +300,15 @@ function CancelAppointmentModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-lg bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-500">{t('proAppointment.cancelModal.kicker')}</p>
-            <h2 className="text-2xl font-black text-gray-900" style={dg}>{t('proAppointment.cancelModal.title', { name: customerName || t('proAppointment.cancelModal.customerFallback') })}</h2>
-            <p className="mt-1 text-sm text-gray-500">{t('proAppointment.cancelModal.body')}</p>
-          </div>
-          <button type="button" onClick={onClose} className="border-none bg-transparent p-1 text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer" aria-label={t('proAppointment.common.close')}>
-            ×
-          </button>
-        </div>
+    <Modal onClose={onClose}>
+      <ModalHeader
+        kicker={t('proAppointment.cancelModal.kicker')}
+        title={t('proAppointment.cancelModal.title', { name: customerName || t('proAppointment.cancelModal.customerFallback') })}
+        subtitle={t('proAppointment.cancelModal.body')}
+        onClose={onClose}
+        closeLabel={t('proAppointment.common.close')}
+      />
+      <div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
           <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
             {t('proAppointment.cancelModal.why')}
@@ -339,7 +335,7 @@ function CancelAppointmentModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -547,11 +543,11 @@ export default function AppointmentPage({ params }: { params: Promise<{ id: stri
                         active ? 'bg-sky-50 border-sky-200' : 'bg-gray-50 border-gray-100'
                       }`}
                     >
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mb-2 ${
+                      <AvatarCircle className={`w-7 h-7 text-xs mb-2 ${
                         active ? 'bg-sky-500 text-white' : 'bg-gray-200 text-gray-500'
                       }`}>
                         {index + 1}
-                      </div>
+                      </AvatarCircle>
                       <p className={`text-sm font-semibold ${current ? 'text-sky-800' : active ? 'text-gray-900' : 'text-gray-400'}`}>
                         {stage}
                       </p>

@@ -15,6 +15,8 @@ import {
   seoDistricts,
   servicePath,
 } from '@/lib/seo'
+import { dg } from '@/lib/ui'
+import { AvatarCircle } from '@/app/components/ui/Avatar'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -92,7 +94,6 @@ const CATEGORY_SEO_TARGETS: Record<string, string> = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' }
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -301,12 +302,9 @@ export default function HomeContent() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {STEPS.map((step) => (
               <div key={step.number} className="flex flex-col gap-4">
-                <div
-                  className="w-12 h-12 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-xl flex-shrink-0"
-                  style={dg}
-                >
+                <AvatarCircle className="w-12 h-12 bg-slate-800 text-white text-xl" style={dg}>
                   {step.number}
-                </div>
+                </AvatarCircle>
                 <h3 className="font-black text-xl text-gray-900" style={dg}>{t(`home.content.steps.${step.key}.title`)}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{t(`home.content.steps.${step.key}.body`)}</p>
               </div>

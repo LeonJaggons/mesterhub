@@ -8,8 +8,8 @@ import type { JobLocation } from '@/firebase/serviceRequests'
 import type { InquiryTimestamp } from '@/lib/inquiryAccess'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 type Translator = ReturnType<typeof useTranslations>
 
 type RequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled'

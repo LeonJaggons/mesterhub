@@ -10,8 +10,8 @@ import { authenticatedFetch } from '@/firebase/apiClient'
 import { uploadProFile } from '@/firebase/storage'
 import { useTranslations } from '@/lib/i18n/client'
 import styles from '../signup.module.css'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 const CHECKLIST_KEYS = ['checklist1', 'checklist2', 'checklist3', 'checklist4'] as const
 

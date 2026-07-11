@@ -4,6 +4,8 @@ import JsonLd from '@/app/components/JsonLd'
 import { getTranslations } from '@/lib/i18n/server'
 import { getRequestLocale } from '@/lib/i18n/server'
 import { faqJsonLd, localizedMetadata, localizedPath, siteName, siteUrl } from '@/lib/seo'
+import { dg } from '@/lib/ui'
+import { AvatarCircle } from '@/app/components/ui/Avatar'
 
 const BENEFITS = [
   'found',
@@ -32,7 +34,6 @@ const FAQ = [
   'prices',
 ] as const
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale()
@@ -169,12 +170,9 @@ export default async function JoinAsProPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {STEPS.map((step) => (
               <div key={step.number} className="flex flex-col gap-4">
-                <div
-                  className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center font-black text-xl flex-shrink-0"
-                  style={dg}
-                >
+                <AvatarCircle className="w-12 h-12 bg-sky-500 text-white text-xl" style={dg}>
                   {step.number}
-                </div>
+                </AvatarCircle>
                 <h3 className="font-black text-xl text-gray-900" style={dg}>{t(`proLanding.steps.${step.key}.title`)}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{t(`proLanding.steps.${step.key}.body`)}</p>
               </div>

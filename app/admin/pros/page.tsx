@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { authenticatedFetch } from '@/firebase/apiClient'
+import { dg } from '@/lib/ui'
 
-const dg = { fontFamily: 'var(--font-darker-grotesque)' } as const
 
 type AdminPro = {
   uid: string
