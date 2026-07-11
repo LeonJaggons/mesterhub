@@ -600,7 +600,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <section className="bg-white rounded-2xl border border-gray-200 p-5">
+      <section className="bg-white rounded-lg border border-gray-200 p-5">
         <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proProfile.details.kicker')}</p>
         <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proProfile.details.title')}</h2>
         <div className="divide-y divide-gray-100">
@@ -621,12 +621,12 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-200 p-5">
+      <section className="bg-white rounded-lg border border-gray-200 p-5">
         <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proProfile.trust.kicker')}</p>
         <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proProfile.trust.title')}</h2>
         <div className="flex flex-col gap-2">
           {checks.map(check => (
-            <div key={check.label} className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
+            <div key={check.label} className="flex items-center gap-2 rounded-md bg-gray-50 border border-gray-100 px-3 py-2">
               <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold">✓</span>
               <span className="text-sm font-semibold text-gray-800">{check.label}</span>
             </div>
@@ -635,7 +635,7 @@ function TrustAndDetails({ pro }: { pro: ProProfile }) {
       </section>
 
       {topDistricts.length > 0 && (
-        <section className="bg-white rounded-2xl border border-gray-200 p-5">
+        <section className="bg-white rounded-lg border border-gray-200 p-5">
           <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proProfile.coverage.kicker')}</p>
           <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proProfile.coverage.title')}</h2>
           <div className="flex flex-wrap gap-2">
@@ -698,7 +698,7 @@ function RequestSignupModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+        className="w-full max-w-lg rounded-lg bg-white shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
@@ -728,7 +728,7 @@ function RequestSignupModal({
                 value={form.firstName}
                 onChange={handleChange}
                 required
-                className="h-11 rounded-lg border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                className="h-11 rounded border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
@@ -738,7 +738,7 @@ function RequestSignupModal({
                 value={form.lastName}
                 onChange={handleChange}
                 required
-                className="h-11 rounded-lg border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                className="h-11 rounded border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
               />
             </label>
           </div>
@@ -751,7 +751,7 @@ function RequestSignupModal({
               value={form.email}
               onChange={handleChange}
               required
-              className="h-11 rounded-lg border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+              className="h-11 rounded border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
             />
           </label>
 
@@ -764,7 +764,7 @@ function RequestSignupModal({
               onChange={handleChange}
               required
               minLength={8}
-              className="h-11 rounded-lg border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+              className="h-11 rounded border border-gray-300 px-3 text-base text-gray-900 outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
             />
           </label>
 
@@ -781,14 +781,14 @@ function RequestSignupModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
+              className="rounded-md border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
             >
               {t('proProfile.common.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 rounded-xl border-none bg-orange-500 py-3 text-base font-bold text-white hover:bg-orange-600 disabled:opacity-50 cursor-pointer"
+              className="flex-1 rounded-md border-none bg-sky-500 py-3 text-base font-bold text-white hover:bg-sky-600 disabled:opacity-50 cursor-pointer"
               style={dg}
             >
               {loading ? t('proProfile.signup.creating') : t('proProfile.signup.submit')}
@@ -1017,7 +1017,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
   if (submitted) {
     return (
-      <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 text-center">
+      <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-6 text-center">
         <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M5 13l4 4L19 7" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1063,7 +1063,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
             setError(null)
             setRequestOpen(true)
           }}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black rounded-sm py-3 text-base transition-colors cursor-pointer border-none"
+          className="w-full bg-sky-500 hover:bg-sky-600 text-white font-black rounded-sm py-3 text-base transition-colors cursor-pointer border-none"
           style={dg}
         >
           {t('proProfile.request.cta')}
@@ -1135,7 +1135,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
           onClick={() => setRequestOpen(false)}
         >
           <div
-            className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-y-auto"
+            className="w-full max-w-2xl rounded-lg bg-white shadow-2xl overflow-y-auto"
             style={{ maxHeight: '90vh' }}
             onClick={e => e.stopPropagation()}
           >
@@ -1160,13 +1160,13 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
             <form onSubmit={(e) => { e.preventDefault(); handleSubmit() }} className="flex flex-col gap-5 p-6">
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  {t('proProfile.request.districtLabel')} <span className="text-orange-500">*</span>
+                  {t('proProfile.request.districtLabel')} <span className="text-sky-500">*</span>
                 </label>
                 <div className="relative">
                   <select
                     value={customerDistrict}
                     onChange={e => setCustomerDistrict(e.target.value)}
-                    className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white pr-8 focus:outline-none focus:border-orange-400 transition-colors"
+                    className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white pr-8 focus:outline-none focus:border-sky-400 transition-colors"
                   >
                     <option value="">{t('proProfile.request.selectDistrict')}</option>
                     {districtsData.districts.map(d => (
@@ -1179,12 +1179,12 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  {t('proProfile.request.urgencyLabel')} <span className="text-orange-500">*</span>
+                  {t('proProfile.request.urgencyLabel')} <span className="text-sky-500">*</span>
                 </label>
                 <select
                   value={urgency}
                   onChange={e => setUrgency(e.target.value)}
-                  className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+                  className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
                 >
                   <option value="">{t('proProfile.request.selectUrgency')}</option>
                   {URGENCY_OPTIONS.map(option => (
@@ -1203,7 +1203,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                           <select
                             value={answers[q.id] ?? ''}
                             onChange={e => setAnswers(p => ({ ...p, [q.id]: e.target.value }))}
-                            className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white pr-8 focus:outline-none focus:border-orange-400 transition-colors"
+                            className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white pr-8 focus:outline-none focus:border-sky-400 transition-colors"
                           >
                             <option value="">{t('proProfile.request.selectAnswer')}</option>
                             {q.options?.map(o => <option key={o.value} value={o.value}>{translateOption(t, `proProfile.request.questionOptions.${q.id}`, o.label)}</option>)}
@@ -1216,7 +1216,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                           value={answers[q.id] ?? ''}
                           onChange={e => setAnswers(p => ({ ...p, [q.id]: e.target.value }))}
                           placeholder={q.placeholder ? t(`proProfile.request.questions.${q.id}.placeholder`, { defaultValue: q.placeholder }) : undefined}
-                          className="w-full border border-gray-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-orange-400 transition-colors"
+                          className="w-full border border-gray-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-sky-400 transition-colors"
                         />
                       )}
                     </div>
@@ -1226,13 +1226,13 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
 
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                  {t('proProfile.request.describeLabel')} <span className="text-orange-500">*</span>
+                  {t('proProfile.request.describeLabel')} <span className="text-sky-500">*</span>
                 </label>
                 <textarea
                   value={projectDetails}
                   onChange={e => setProjectDetails(e.target.value)}
                   placeholder={t('proProfile.request.describePlaceholder')}
-                  className="w-full min-h-32 resize-y border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-orange-400 transition-colors"
+                  className="w-full min-h-32 resize-y border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-sky-400 transition-colors"
                   required
                 />
               </div>
@@ -1283,7 +1283,7 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                 <select
                   value={preferredTiming}
                   onChange={e => setPreferredTiming(e.target.value)}
-                  className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+                  className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
                 >
                   <option value="">{t('proProfile.request.selectTiming')}</option>
                   <option value="As soon as possible">{t('proProfile.request.timing.asap')}</option>
@@ -1300,14 +1300,14 @@ function EstimateWidget({ pro, ctaId }: { pro: ProProfile; ctaId?: string }) {
                 <button
                   type="button"
                   onClick={() => setRequestOpen(false)}
-                  className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  className="rounded-md border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
                 >
                   {t('proProfile.common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || !projectDetails.trim() || !customerDistrict || !urgency}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-xl py-3 text-base transition-colors cursor-pointer disabled:cursor-not-allowed border-none"
+                  className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-md py-3 text-base transition-colors cursor-pointer disabled:cursor-not-allowed border-none"
                   style={dg}
                 >
                   {submitting ? t('proProfile.request.sending') : t('proProfile.request.sendRequest')}
@@ -1384,11 +1384,11 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
         <div className="flex gap-6 mb-8">
           <div className="w-28 h-28 rounded-full bg-gray-100 flex-shrink-0" />
           <div className="flex-1 space-y-3 pt-2">
-            <div className="h-7 bg-gray-100 rounded w-48" />
-            <div className="h-4 bg-gray-100 rounded w-32" />
+            <div className="h-7 bg-gray-100 rounded-sm w-48" />
+            <div className="h-4 bg-gray-100 rounded-sm w-32" />
           </div>
         </div>
-        <div className="h-24 bg-gray-100 rounded mb-6" />
+        <div className="h-24 bg-gray-100 rounded-sm mb-6" />
       </div>
     )
   }
@@ -1398,7 +1398,7 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>{t('proProfile.notFound.title')}</p>
         <p className="text-gray-500 mb-6">{t('proProfile.notFound.body')}</p>
-        <Link href="/" className="inline-block bg-orange-500 text-white font-semibold rounded-lg px-6 py-2.5 text-sm hover:bg-orange-600 transition-colors">
+        <Link href="/" className="inline-block bg-sky-500 text-white font-semibold rounded px-6 py-2.5 text-sm hover:bg-sky-600 transition-colors">
           {t('proProfile.notFound.back')}
         </Link>
       </div>
@@ -1663,11 +1663,11 @@ export default function ProProfilePage({ params }: { params: Promise<{ uid: stri
 
       <div className="fixed bottom-0 left-0 right-0 z-30 flex gap-2 border-t border-gray-200 bg-white p-3 lg:hidden">
         {isOwnProfile ? (
-          <Link href="/pro/jobs" className="flex-1 rounded-sm bg-orange-500 py-3 text-center text-sm font-bold text-white hover:bg-orange-600" style={dg}>
+          <Link href="/pro/jobs" className="flex-1 rounded-sm bg-sky-500 py-3 text-center text-sm font-bold text-white hover:bg-sky-600" style={dg}>
             {t('proProfile.mobile.dashboard')}
           </Link>
         ) : (
-          <button type="button" onClick={scrollToEstimate} className="flex-1 rounded-sm bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600" style={dg}>
+          <button type="button" onClick={scrollToEstimate} className="flex-1 rounded-sm bg-sky-500 py-3 text-sm font-bold text-white hover:bg-sky-600" style={dg}>
             {t('proProfile.request.cta')}
           </button>
         )}

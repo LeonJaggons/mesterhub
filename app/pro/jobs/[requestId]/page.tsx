@@ -25,7 +25,7 @@ type Translator = ReturnType<typeof useTranslations>
 
 // Leaflet must be client-only (requires window)
 const MapView = dynamic(() => import('./MapView'), { ssr: false, loading: () => (
-  <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />
+  <div className="h-64 rounded-md bg-gray-100 animate-pulse" />
 )})
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -281,7 +281,7 @@ function AppointmentModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-xl shadow-2xl overflow-y-auto"
+        className="bg-white rounded-lg w-full max-w-xl shadow-2xl overflow-y-auto"
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
@@ -323,8 +323,8 @@ function AppointmentModal({
               ].map(option => (
                 <label
                   key={option.id}
-                  className={`rounded-xl border p-3 cursor-pointer ${
-                    kind === option.id ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'
+                  className={`rounded-md border p-3 cursor-pointer ${
+                    kind === option.id ? 'border-sky-300 bg-sky-50' : 'border-gray-200 bg-white'
                   }`}
                 >
                   <input
@@ -349,7 +349,7 @@ function AppointmentModal({
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
@@ -358,7 +358,7 @@ function AppointmentModal({
                 type="time"
                 value={time}
                 onChange={e => setTime(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
               />
             </label>
             <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
@@ -366,7 +366,7 @@ function AppointmentModal({
               <select
                 value={duration}
                 onChange={e => setDuration(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
               >
                 {durationOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -382,7 +382,7 @@ function AppointmentModal({
               value={location}
               onChange={e => setLocation(e.target.value)}
               placeholder={t('proJobs.detail.appointmentModal.meetingNotePlaceholder')}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             />
           </label>
 
@@ -393,7 +393,7 @@ function AppointmentModal({
               onChange={e => setNotes(e.target.value)}
               rows={4}
               placeholder={t('proJobs.detail.appointmentModal.messagePlaceholder')}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
+              className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 resize-none"
             />
           </label>
 
@@ -403,14 +403,14 @@ function AppointmentModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl text-sm transition-colors cursor-pointer bg-white"
+              className="px-5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-md text-sm transition-colors cursor-pointer bg-white"
             >
               {t('proJobs.quoteModal.cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting || !date || !time}
-              className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl py-3 text-base transition-colors border-none cursor-pointer"
+              className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-md py-3 text-base transition-colors border-none cursor-pointer"
               style={dg}
             >
               {submitting ? t('proJobs.detail.appointmentModal.sending') : t('proJobs.detail.appointmentModal.submit')}
@@ -470,7 +470,7 @@ function CancelRequestModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-y-auto"
+        className="bg-white rounded-lg w-full max-w-lg shadow-2xl overflow-y-auto"
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
@@ -500,7 +500,7 @@ function CancelRequestModal({
             <select
               value={reason}
               onChange={e => setReason(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             >
               {CANCEL_REASONS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -517,7 +517,7 @@ function CancelRequestModal({
               onChange={e => setDetails(e.target.value)}
               rows={4}
               placeholder={t('proJobs.detail.cancelModal.detailsPlaceholder')}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
+              className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 resize-none"
             />
           </label>
 
@@ -527,14 +527,14 @@ function CancelRequestModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl py-3 text-sm cursor-pointer bg-white"
+              className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-md py-3 text-sm cursor-pointer bg-white"
             >
               {t('proJobs.declineModal.keep')}
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-xl py-3 text-sm cursor-pointer border-none"
+              className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-md py-3 text-sm cursor-pointer border-none"
               style={dg}
             >
               {submitting ? t('proJobs.detail.cancelModal.cancelling') : t('proJobs.detail.cancelModal.submit')}
@@ -656,13 +656,13 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-14 animate-pulse">
-        <div className="h-6 bg-gray-100 rounded w-24 mb-8" />
+        <div className="h-6 bg-gray-100 rounded-sm w-24 mb-8" />
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 space-y-4">
-            <div className="h-64 bg-gray-100 rounded-xl" />
-            <div className="h-32 bg-gray-100 rounded-xl" />
+            <div className="h-64 bg-gray-100 rounded-md" />
+            <div className="h-32 bg-gray-100 rounded-md" />
           </div>
-          <div className="lg:col-span-2 h-64 bg-gray-100 rounded-xl" />
+          <div className="lg:col-span-2 h-64 bg-gray-100 rounded-md" />
         </div>
       </div>
     )
@@ -673,7 +673,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
         <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>{t('proJobs.detail.notAccessible.title')}</p>
         <p className="text-gray-500 mb-6 text-sm">{t('proJobs.detail.notAccessible.body')}</p>
-        <button onClick={() => router.push('/pro/jobs')} className="bg-orange-500 text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:bg-orange-600 transition-colors cursor-pointer border-none">
+        <button onClick={() => router.push('/pro/jobs')} className="bg-sky-500 text-white rounded px-5 py-2.5 text-sm font-semibold hover:bg-sky-600 transition-colors cursor-pointer border-none">
           {t('proJobs.detail.backToJobs')}
         </button>
       </div>
@@ -691,7 +691,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
           >
             ← {t('proJobs.detail.backToJobs')}
           </button>
-          <section className="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
+          <section className="rounded-lg border border-sky-100 bg-white p-6 shadow-sm">
             <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-3">{t('proJobs.detail.hidden.kicker')}</p>
             <h1 className="text-4xl font-black text-gray-900 leading-none mb-3" style={dg}>
               {t('proJobs.detail.hidden.title')}
@@ -699,17 +699,17 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
             <p className="text-sm leading-relaxed text-gray-600 mb-5">
               {t('proJobs.detail.hidden.body', { limit: FREE_CLEAR_INQUIRY_LIMIT, resetLabel })}
             </p>
-            <div className="relative mb-5 overflow-hidden rounded-xl border border-orange-100 bg-orange-50 p-4">
+            <div className="relative mb-5 overflow-hidden rounded-md border border-sky-100 bg-sky-50 p-4">
               <div className="pointer-events-none select-none blur-[3px]" aria-hidden="true">
-                <div className="mb-3 h-5 w-4/5 rounded bg-slate-300/80" />
-                <div className="mb-3 h-4 w-2/3 rounded bg-slate-300/70" />
-                <div className="h-4 w-1/2 rounded bg-slate-300/60" />
+                <div className="mb-3 h-5 w-4/5 rounded-sm bg-slate-300/80" />
+                <div className="mb-3 h-4 w-2/3 rounded-sm bg-slate-300/70" />
+                <div className="h-4 w-1/2 rounded-sm bg-slate-300/60" />
               </div>
-              <div className="absolute inset-0 flex items-center justify-center bg-orange-50/80 px-4 text-center text-sm font-bold text-gray-900">
+              <div className="absolute inset-0 flex items-center justify-center bg-sky-50/80 px-4 text-center text-sm font-bold text-gray-900">
                 {t('proJobs.detail.hidden.overlay', { resetLabel })}
               </div>
             </div>
-            <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 text-sm">
+            <div className="rounded-md bg-gray-50 border border-gray-100 p-4 text-sm">
               <div className="flex justify-between gap-4 py-1.5">
                 <span className="text-gray-500">{t('proJobs.detail.labels.category')}</span>
                 <span className="font-semibold text-gray-900">{translateCategory(t, req.categoryName)}</span>
@@ -787,7 +787,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
 
         {/* Status banner */}
         {!isPending && (
-          <div className={`rounded-xl p-3 mb-5 text-sm font-semibold text-center ${
+          <div className={`rounded-md p-3 mb-5 text-sm font-semibold text-center ${
             isCompleted
               ? 'bg-slate-800 text-white border border-slate-800'
               : isQuoted
@@ -814,14 +814,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
           <div className="lg:col-span-3 flex flex-col gap-4">
 
             {/* Job brief */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-5">
+            <section className="bg-white rounded-lg border border-gray-200 p-5">
               <div className="mb-5">
                 <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.detail.brief.kicker')}</p>
                 <h2 className="font-black text-gray-900 text-3xl leading-none mb-2" style={dg}>
                   {primaryDetail ? formatVal(t, primaryDetail[1]) : categoryLabel}
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  <span className="bg-orange-50 text-orange-700 border border-orange-200 text-xs font-semibold rounded-full px-3 py-1">
+                  <span className="bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold rounded-full px-3 py-1">
                     {categoryLabel}
                   </span>
                   {req.customerDistrict && (
@@ -838,13 +838,13 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
               {(urgencyDetail || timingDetail) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                   {urgencyDetail && (
-                    <div className="rounded-xl bg-orange-50 border border-orange-100 p-4">
+                    <div className="rounded-md bg-sky-50 border border-sky-100 p-4">
                       <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-1">{t('proJobs.detail.brief.urgency')}</p>
                       <p className="text-base font-black text-gray-900" style={dg}>{formatVal(t, urgencyDetail[1])}</p>
                     </div>
                   )}
                   {timingDetail && (
-                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                    <div className="rounded-md bg-slate-50 border border-slate-100 p-4">
                       <p className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-1">{t('proJobs.detail.brief.timing')}</p>
                       <p className="text-base font-black text-gray-900" style={dg}>{formatVal(t, timingDetail[1])}</p>
                     </div>
@@ -855,7 +855,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
               {quickDetails.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                   {quickDetails.map(([key, value]) => (
-                    <div key={key} className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                    <div key={key} className="rounded-md bg-slate-50 border border-slate-100 p-3">
                       <p className="text-xs text-gray-400 mb-1">{formatKey(t, key)}</p>
                       <p className="text-sm font-bold text-gray-900 leading-snug">{formatVal(t, value)}</p>
                     </div>
@@ -865,7 +865,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <p className="text-sm text-gray-400 mb-5">{t('proJobs.detail.brief.noDetails')}</p>
               )}
 
-              <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 mb-5">
+              <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 mb-5">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">{t('proJobs.detail.brief.approximateLocation')}</p>
@@ -901,7 +901,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                         href={url}
                         target="_blank"
                         rel="noreferrer"
-                        className="group overflow-hidden rounded-xl border border-gray-200 bg-gray-50"
+                        className="group overflow-hidden rounded-md border border-gray-200 bg-gray-50"
                       >
                         {/\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(url) ? (
                           <img src={url} alt={t('proJobs.detail.brief.attachmentAlt', { index: index + 1 })} className="h-28 w-full object-cover transition-transform group-hover:scale-105" />
@@ -933,7 +933,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
 
             {/* Contact info — only after customer accepts */}
             {isAccepted && (
-              <section className="bg-green-50 rounded-2xl border border-green-100 p-5">
+              <section className="bg-green-50 rounded-lg border border-green-100 p-5">
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.detail.contact.title')}</h2>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-sm">
@@ -942,7 +942,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-gray-500 w-14">{t('proJobs.detail.labels.email')}</span>
-                    <a href={`mailto:${req.customerEmail}`} className="font-semibold text-orange-500 hover:underline">
+                    <a href={`mailto:${req.customerEmail}`} className="font-semibold text-sky-500 hover:underline">
                       {req.customerEmail}
                     </a>
                   </div>
@@ -955,7 +955,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
           <div className="lg:col-span-2 flex flex-col gap-4">
 
             {/* Action card */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>
                 {isPending
                   ? t('proJobs.detail.action.title.pending')
@@ -976,14 +976,14 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   <div className="flex flex-col gap-2">
                     <button
                       onClick={() => setShowQuoteModal(true)}
-                      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl py-3 text-base transition-colors cursor-pointer border-none"
+                      className="w-full bg-sky-500 hover:bg-sky-600 text-white font-black rounded-md py-3 text-base transition-colors cursor-pointer border-none"
                       style={dg}
                     >
                       {t('proJobs.card.sendQuote')}
                     </button>
                     <button
                       onClick={() => setShowDeclineModal(true)}
-                      className="w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl py-2.5 text-sm transition-colors cursor-pointer bg-white"
+                      className="w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-md py-2.5 text-sm transition-colors cursor-pointer bg-white"
                     >
                       {t('proJobs.card.decline')}
                     </button>
@@ -996,7 +996,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   <p className="text-xs text-gray-400 mb-4">
                     {t('proJobs.detail.action.quotedBody')}
                   </p>
-                  <div className="bg-slate-50 rounded-xl p-4 flex flex-col gap-2.5">
+                  <div className="bg-slate-50 rounded-md p-4 flex flex-col gap-2.5">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-500">{t('proJobs.detail.labels.price')}</span>
                       <span className="font-bold text-gray-900">{req.quote.price}</span>
@@ -1020,7 +1020,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   <p className="text-xs text-gray-400 mb-4">
                     {t('proJobs.detail.action.acceptedBody')}
                   </p>
-                  <div className="bg-green-50 rounded-xl p-4 flex flex-col gap-2.5">
+                  <div className="bg-green-50 rounded-md p-4 flex flex-col gap-2.5">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-500">{t('proJobs.detail.labels.agreedPrice')}</span>
                       <span className="font-bold text-gray-900">{req.quote.price}</span>
@@ -1031,8 +1031,8 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                     </div>
                   </div>
                   {req.appointmentRequest && (
-                    <div className="mt-3 bg-orange-50 border border-orange-100 rounded-xl p-3 text-sm">
-                      <p className="text-xs font-bold text-orange-700 mb-1">{t('proJobs.detail.appointment.proposed')}</p>
+                    <div className="mt-3 bg-sky-50 border border-sky-100 rounded-md p-3 text-sm">
+                      <p className="text-xs font-bold text-sky-700 mb-1">{t('proJobs.detail.appointment.proposed')}</p>
                       <p className="font-semibold text-gray-900">
                         {formatAppointmentDateTime(
                           locale,
@@ -1047,20 +1047,20 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                   <button
                     type="button"
                     onClick={() => setShowAppointmentModal(true)}
-                    className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-3 text-base transition-colors cursor-pointer border-none"
+                    className="mt-3 w-full bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-md py-3 text-base transition-colors cursor-pointer border-none"
                     style={dg}
                   >
                     {req.appointmentRequest ? t('proJobs.detail.appointment.update') : t('proJobs.detail.appointment.schedule')}
                   </button>
                   {req.completion?.status === 'pro_marked_complete' ? (
-                    <p className="mt-3 text-sm text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3">
+                    <p className="mt-3 text-sm text-green-700 bg-green-50 border border-green-100 rounded-md px-4 py-3">
                       {t('proJobs.detail.completion.waiting')}
                     </p>
                   ) : (
                     <button
                       type="button"
                       onClick={handleMarkComplete}
-                      className="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl py-3 text-base transition-colors cursor-pointer border-none"
+                      className="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-md py-3 text-base transition-colors cursor-pointer border-none"
                       style={dg}
                     >
                       {t('proJobs.detail.completion.markComplete')}
@@ -1080,7 +1080,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 </p>
               )}
               {req.status === 'completed' && (
-                <p className="text-xs text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3">
+                <p className="text-xs text-green-700 bg-green-50 border border-green-100 rounded-md px-4 py-3">
                   {t('proJobs.card.completed')}
                 </p>
               )}
@@ -1088,7 +1088,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 <button
                   type="button"
                   onClick={() => setShowCancelModal(true)}
-                  className="mt-3 w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl py-2.5 text-sm transition-colors cursor-pointer bg-white"
+                  className="mt-3 w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-md py-2.5 text-sm transition-colors cursor-pointer bg-white"
                 >
                   {t('proJobs.detail.cancelModal.submit')}
                 </button>
@@ -1101,11 +1101,11 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
                 contextType="request"
                 requestId={requestId}
                 buttonLabel={t('proJobs.detail.action.reportCustomer')}
-                className="mt-3 w-full border border-red-100 text-red-600 hover:bg-red-50 font-medium rounded-xl py-2.5 text-sm transition-colors cursor-pointer bg-white"
+                className="mt-3 w-full border border-red-100 text-red-600 hover:bg-red-50 font-medium rounded-md py-2.5 text-sm transition-colors cursor-pointer bg-white"
               />
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
               <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.detail.context.kicker')}</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>
                 {customerName}
@@ -1136,7 +1136,7 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
               {decisionDetails.length > 0 && (
                 <div className="mt-4 grid grid-cols-1 gap-2">
                   {decisionDetails.map(([key, value]) => (
-                    <div key={key} className="rounded-xl bg-gray-50 border border-gray-100 p-3">
+                    <div key={key} className="rounded-md bg-gray-50 border border-gray-100 p-3">
                       <p className="text-xs text-gray-400 mb-1">{formatKey(t, key)}</p>
                       <p className="text-sm font-semibold text-gray-900">{formatVal(t, value)}</p>
                     </div>
@@ -1147,12 +1147,12 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
 
             {/* Checklist to help decision — only while pending */}
             {isPending && (
-              <div className="bg-white rounded-2xl border border-gray-200 p-5">
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.detail.tips.title')}</h2>
                 <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
                   {tips.map(tip => (
                     <li key={tip} className="flex items-start gap-2">
-                      <span className="text-orange-400 flex-shrink-0 mt-0.5">○</span>
+                      <span className="text-sky-400 flex-shrink-0 mt-0.5">○</span>
                       {tip}
                     </li>
                   ))}
@@ -1162,9 +1162,9 @@ export default function RequestDetailPage({ params }: { params: Promise<{ reques
 
             {/* Tips — only while pending */}
             {isPending && (
-              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
-                <p className="text-xs font-bold text-orange-700 mb-1">{t('proJobs.detail.respondQuickly.title')}</p>
-                <p className="text-xs text-orange-600 leading-relaxed">
+              <div className="bg-sky-50 border border-sky-100 rounded-lg p-4">
+                <p className="text-xs font-bold text-sky-700 mb-1">{t('proJobs.detail.respondQuickly.title')}</p>
+                <p className="text-xs text-sky-600 leading-relaxed">
                   {t('proJobs.detail.respondQuickly.body')}
                 </p>
               </div>

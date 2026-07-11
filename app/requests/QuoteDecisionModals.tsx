@@ -36,13 +36,13 @@ function ModalShell({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-y-auto"
+        className="bg-white rounded-lg w-full max-w-lg shadow-2xl overflow-y-auto"
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">{subtitle}</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-sky-500 mb-1">{subtitle}</p>
             <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
               {title}
             </h2>
@@ -129,7 +129,7 @@ export function AcceptQuoteModal({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-message" className="text-sm font-bold text-gray-700">
-            {t('customerRequests.detail.acceptModal.messageLabel')} <span className="text-orange-500">*</span>
+            {t('customerRequests.detail.acceptModal.messageLabel')} <span className="text-sky-500">*</span>
           </label>
           <textarea
             id="accept-message"
@@ -137,13 +137,13 @@ export function AcceptQuoteModal({
             onChange={e => setMessage(e.target.value)}
             rows={4}
             placeholder={t('customerRequests.detail.acceptModal.messagePlaceholder')}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
+            className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 resize-none"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-phone" className="text-sm font-bold text-gray-700">
-            {t('customerRequests.detail.acceptModal.phoneLabel')} <span className="text-orange-500">*</span>
+            {t('customerRequests.detail.acceptModal.phoneLabel')} <span className="text-sky-500">*</span>
           </label>
           <input
             id="accept-phone"
@@ -154,13 +154,13 @@ export function AcceptQuoteModal({
             pattern="\+[1-9][0-9]{7,14}"
             title={t('customerRequests.detail.acceptModal.phoneTitle')}
             required
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+            className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="accept-address" className="text-sm font-bold text-gray-700">
-            {t('customerRequests.detail.acceptModal.addressLabel')} <span className="text-orange-500">*</span>
+            {t('customerRequests.detail.acceptModal.addressLabel')} <span className="text-sky-500">*</span>
           </label>
           <AddressAutocompleteInput
             id="accept-address"
@@ -168,7 +168,7 @@ export function AcceptQuoteModal({
             onChange={setAddress}
             placeholder={t('customerRequests.detail.acceptModal.addressPlaceholder')}
             required
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+            className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           />
         </div>
 
@@ -180,7 +180,7 @@ export function AcceptQuoteModal({
             id="accept-start"
             value={preferredStart}
             onChange={e => setPreferredStart(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+            className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           >
             {START_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{t(`customerRequests.detail.acceptModal.startOptions.${opt.labelKey}`)}</option>
@@ -194,7 +194,7 @@ export function AcceptQuoteModal({
           <button
             type="submit"
             disabled={submitting || !canSubmit}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-black rounded-xl py-3 text-base transition-colors border-none cursor-pointer"
+            className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white font-black rounded-md py-3 text-base transition-colors border-none cursor-pointer"
             style={dg}
           >
             {submitting ? t('customerRequests.detail.acceptModal.accepting') : t('customerRequests.detail.acceptModal.submit')}
@@ -202,7 +202,7 @@ export function AcceptQuoteModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl text-sm cursor-pointer bg-white"
+            className="px-5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-md text-sm cursor-pointer bg-white"
           >
             {t('customerRequests.detail.common.cancel')}
           </button>
@@ -254,7 +254,7 @@ export function DeclineQuoteModal({
             onChange={e => setReason(e.target.value)}
             rows={3}
             placeholder={t('customerRequests.detail.declineModal.reasonPlaceholder')}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+            className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm resize-none focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
           />
         </div>
 
@@ -264,7 +264,7 @@ export function DeclineQuoteModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl py-3 text-sm cursor-pointer bg-white"
+            className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-md py-3 text-sm cursor-pointer bg-white"
           >
             {t('customerRequests.detail.declineModal.keep')}
           </button>
@@ -272,7 +272,7 @@ export function DeclineQuoteModal({
             type="button"
             onClick={handleConfirm}
             disabled={confirming}
-            className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-xl py-3 text-sm cursor-pointer border-none"
+            className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-md py-3 text-sm cursor-pointer border-none"
             style={dg}
           >
             {confirming ? t('customerRequests.detail.declineModal.declining') : t('customerRequests.detail.declineModal.confirm')}

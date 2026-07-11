@@ -154,7 +154,7 @@ export default function HomeContent() {
           </p>
           <Link
             href="/instant-results"
-            className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg px-8 py-3.5 text-base transition-colors"
+            className="inline-block bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded px-8 py-3.5 text-base transition-colors"
           >
             {t('home.content.why.cta')}
           </Link>
@@ -166,7 +166,7 @@ export default function HomeContent() {
         <div className="max-w-4xl mx-auto divide-y divide-gray-100">
           {FEATURES.map((f) => (
             <div key={f.key} className="py-16 flex flex-col sm:flex-row items-start gap-10">
-              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+              <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-slate-50 flex items-center justify-center">
                 <f.icon size={30} className="text-slate-800" />
               </div>
               <div>
@@ -193,7 +193,7 @@ export default function HomeContent() {
           <p className="text-gray-500 text-base mb-10">{t('home.content.testimonials.body')}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {TESTIMONIALS.map((testimonial) => (
-              <div key={testimonial.name} className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4 shadow-sm">
+              <div key={testimonial.name} className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col gap-4 shadow-sm">
                 <Stars rating={testimonial.rating} />
                 <p className="text-gray-700 text-base leading-relaxed flex-1">&ldquo;{t(`home.content.testimonials.${testimonial.key}.quote`)}&rdquo;</p>
                 <div className="pt-4 border-t border-gray-100">
@@ -260,7 +260,7 @@ export default function HomeContent() {
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {serviceLinks.map(entry => (
-                <Link key={entry.id} href={servicePath(entry, locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                <Link key={entry.id} href={servicePath(entry, locale)} className="rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-sky-300 hover:text-sky-600">
                   {entry.labels[locale]}
                 </Link>
               ))}
@@ -278,11 +278,11 @@ export default function HomeContent() {
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {districtLinks.map(district => (
-                <Link key={district.id} href={districtServicePath(district, handyman, locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                <Link key={district.id} href={districtServicePath(district, handyman, locale)} className="rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-sky-300 hover:text-sky-600">
                   {locale === 'hu' ? `${district.name} ezermester` : `Handyman in ${district.name}`}
                 </Link>
               ))}
-              <Link href={districtPath(seoDistricts[0], locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+              <Link href={districtPath(seoDistricts[0], locale)} className="rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-sky-300 hover:text-sky-600">
                 {locale === 'hu' ? 'Összes budapesti kerület' : 'All Budapest districts'}
               </Link>
             </div>
@@ -334,7 +334,7 @@ export default function HomeContent() {
           </p>
           <Link
             href="/instant-results"
-            className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
+            className="inline-block bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded px-9 py-3.5 text-base transition-colors"
           >
             {t('home.content.finalCta.cta')}
           </Link>

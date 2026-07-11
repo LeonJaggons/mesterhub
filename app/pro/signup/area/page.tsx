@@ -69,7 +69,7 @@ export default function AreaPage() {
           })}
         </span>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={selectAll} style={{ fontSize: '0.8125rem', color: '#f97316', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+          <button onClick={selectAll} style={{ fontSize: '0.8125rem', color: '#0ea5e9', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
             {t('proSignup.area.selectAll')}
           </button>
           <button onClick={clearAll} style={{ fontSize: '0.8125rem', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}>

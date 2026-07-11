@@ -149,7 +149,7 @@ export const STATUS_LABELS: Record<ServiceRequestStatus, string> = {
 
 /** Brand: orange = primary, slate-800 = secondary dark blue */
 export const STATUS_COLORS: Record<ServiceRequestStatus, string> = {
-  pending: 'bg-orange-50 text-orange-700 border-orange-200',
+  pending: 'bg-sky-50 text-sky-700 border-sky-200',
   quoted: 'bg-slate-50 text-slate-800 border-slate-200',
   accepted: 'bg-slate-800 text-white border-slate-800',
   declined: 'bg-gray-100 text-gray-500 border-gray-200',
@@ -157,7 +157,7 @@ export const STATUS_COLORS: Record<ServiceRequestStatus, string> = {
   cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
 }
 
-export const PRO_AVATAR_COLORS = ['#ea580c', '#1e293b'] as const
+export const PRO_AVATAR_COLORS = ['#0284c7', '#1e293b'] as const
 
 export const DISTRICT_COORDS: Record<string, [number, number]> = {
   I: [47.496, 19.039], II: [47.538, 18.983], III: [47.571, 19.043],

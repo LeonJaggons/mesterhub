@@ -61,9 +61,9 @@ export function emailCardHtml(input: {
   tone?: 'orange' | 'green' | 'slate'
 }): string {
   const tone = input.tone ?? 'orange'
-  const accent = tone === 'green' ? '#16a34a' : tone === 'slate' ? '#475569' : '#f97316'
-  const heroBg = tone === 'green' ? '#ecfdf5' : tone === 'slate' ? '#f8fafc' : '#fff7ed'
-  const border = tone === 'green' ? '#bbf7d0' : tone === 'slate' ? '#e2e8f0' : '#f1d8c7'
+  const accent = tone === 'green' ? '#16a34a' : tone === 'slate' ? '#475569' : '#0ea5e9'
+  const heroBg = tone === 'green' ? '#ecfdf5' : tone === 'slate' ? '#f8fafc' : '#f0f9ff'
+  const border = tone === 'green' ? '#bbf7d0' : tone === 'slate' ? '#e2e8f0' : '#bae6fd'
   const rows = (input.rows ?? [])
     .filter(([, value]) => cleanString(value))
     .map(([label, value]) => `
@@ -98,7 +98,7 @@ export function emailCardHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.ctaUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">${escapeEmailHtml(input.ctaLabel)}</a>
         </td>
       </tr>

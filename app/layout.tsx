@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import FeedbackFab from "./components/FeedbackFab";
@@ -10,13 +10,18 @@ import { getMessages } from "@/lib/i18n/messages";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { homeMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
-const googleSansFlex = localFont({
-  src: "../public/GoogleSansFlex.ttf",
-  variable: "--font-google-sans-flex",
+const headingFont = Inter({
+  subsets: ["latin", "latin-ext"],
+  weight: ["600", "700", "800"],
+  variable: "--font-heading",
   display: "swap",
-  declarations: [
-    { prop: "size-adjust", value: "88%" },
-  ],
+});
+
+const bodyFont = Inter({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,7 +39,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${googleSansFlex.variable} h-full antialiased`}
+      className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col root">
         <JsonLd data={[organizationJsonLd(), websiteJsonLd(locale)]} />

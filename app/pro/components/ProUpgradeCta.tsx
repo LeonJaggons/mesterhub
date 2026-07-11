@@ -104,8 +104,8 @@ export default function ProUpgradeCta({
 
   const isInline = variant === 'inline'
   const shell = isInline
-    ? 'rounded-xl border border-orange-100 bg-orange-50/70 px-4 py-3'
-    : 'rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-5 shadow-sm'
+    ? 'rounded-md border border-sky-100 bg-sky-50/70 px-4 py-3'
+    : 'rounded-lg border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-5 shadow-sm'
 
   async function openCheckout() {
     setBillingLoading(true)
@@ -123,7 +123,7 @@ export default function ProUpgradeCta({
     <div className={`${shell} ${className}`}>
       <div className={isInline ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between' : ''}>
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-orange-500">
+          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-500">
             {copy.tone === 'trial' ? 'Mestermind Pro trial' : 'Mestermind Pro'}
           </p>
           <h2 className={isInline ? 'text-base font-black text-gray-900' : 'text-2xl font-black leading-none text-gray-900'}>
@@ -138,8 +138,8 @@ export default function ProUpgradeCta({
           disabled={billingLoading}
           onClick={openCheckout}
           className={isInline
-            ? `${styles.shimmerButton} inline-flex shrink-0 items-center justify-center rounded-lg px-4 py-2 text-sm font-bold text-white`
-            : `${styles.shimmerButton} mt-4 inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold text-white`}
+            ? `${styles.shimmerButton} inline-flex shrink-0 items-center justify-center rounded px-4 py-2 text-sm font-bold text-white`
+            : `${styles.shimmerButton} mt-4 inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-bold text-white`}
         >
           {billingLoading ? 'Opening Stripe...' : copy.action}
         </button>

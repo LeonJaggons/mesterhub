@@ -154,8 +154,8 @@ function estimateRequestEmailHtml(input: {
     return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">New estimate request</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">New estimate request</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">This inquiry is saved in your Mestermind inbox</div>
         </td>
       </tr>
@@ -172,7 +172,7 @@ function estimateRequestEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request</a>
         </td>
       </tr>
@@ -196,8 +196,8 @@ function estimateRequestEmailHtml(input: {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">New estimate request</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">New estimate request</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">A customer wants pricing from your Mestermind profile</div>
         </td>
       </tr>
@@ -229,7 +229,7 @@ function estimateRequestEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request details</a>
         </td>
       </tr>
@@ -254,8 +254,8 @@ function estimateRequestEmailHtmlHu(input: {
     return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Új árajánlatkérés</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">Új árajánlatkérés</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Ez az érdeklődés mentve lett a Mestermind fiókodban</div>
         </td>
       </tr>
@@ -272,7 +272,7 @@ function estimateRequestEmailHtmlHu(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Kérés megtekintése</a>
         </td>
       </tr>
@@ -296,8 +296,8 @@ function estimateRequestEmailHtmlHu(input: {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Új árajánlatkérés</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">Új árajánlatkérés</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Egy ügyfél árat kér a Mestermind profilodtól</div>
         </td>
       </tr>
@@ -329,7 +329,7 @@ function estimateRequestEmailHtmlHu(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:18px 0 24px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Kérés részleteinek megtekintése</a>
         </td>
       </tr>

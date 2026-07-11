@@ -304,7 +304,7 @@ function ProCard({ pro }: { pro: Pro }) {
   const avatarProps = { initials: pro.initials, color: pro.initialsColor, bg: pro.initialsBg, avatarUrl: pro.avatarUrl }
   return (
     <Link href={`/pro/${pro.id}`} className="block mb-2 last:mb-0 group">
-      <div className="bg-white border-b border-gray-200 shadow-sm group-hover:shadow-md rounded-xl transition-shadow">
+      <div className="bg-white border-b border-gray-200 shadow-sm group-hover:shadow-md rounded-md transition-shadow">
         <div className="p-3 lg:p-4">
           <div className="flex flex-wrap">
 
@@ -376,7 +376,7 @@ function ProCard({ pro }: { pro: Pro }) {
 
                   {/* Review quote — desktop only */}
                   {pro.review && (
-                    <div className="hidden md:block mt-1 cursor-pointer p-2 bg-gray-100 rounded border border-gray-200">
+                    <div className="hidden md:block mt-1 cursor-pointer p-2 bg-gray-100 rounded-sm border border-gray-200">
                       <p className={`text-sm text-gray-600 leading-relaxed ${styles.descriptionClamp}`}>
                         {pro.review}
                       </p>
@@ -402,7 +402,7 @@ function ProCard({ pro }: { pro: Pro }) {
                   )}
                 </div>
                 <div className="hidden md:block mt-2">
-                  <span className="bg-slate-800 text-white rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">
+                  <span className="bg-slate-800 text-white rounded px-4 py-2 text-sm font-semibold whitespace-nowrap">
                     {t('instantResults.card.viewProfile')}
                   </span>
                 </div>
@@ -422,7 +422,7 @@ function TopMatchBanner({ pros }: { pros: Pro[] }) {
   if (first3.length === 0) return null
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 rounded-xl p-3 sm:p-4 mb-4 border border-slate-200">
+    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 rounded-md p-3 sm:p-4 mb-4 border border-slate-200">
       <div className="flex flex-row-reverse items-center">
         {first3.map((pro, i) => (
           <div
@@ -523,7 +523,7 @@ function Sidebar({
   return (
     <aside className="hidden lg:flex flex-col border-r border-gray-200" style={{ width: 288 }}>
       <div className={styles.sidebarInner}>
-        <div className="bg-gray-100 rounded-lg p-3 mt-4 mx-3 border border-gray-200">
+        <div className="bg-gray-100 rounded p-3 mt-4 mx-3 border border-gray-200">
           <p className="font-bold text-sm">{q || t('instantResults.filters.servicesFallback')}</p>
           <p className="text-2xl font-bold text-slate-800 mt-1">
             {averagePrice
@@ -545,7 +545,7 @@ function Sidebar({
             <select
               value={filters.sort}
               onChange={e => patch({ sort: e.target.value as ResultsFilters['sort'] })}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
+              className="w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
             >
               <option value="recommended">{t('instantResults.filters.sort.recommended')}</option>
               <option value="rating">{t('instantResults.filters.sort.rating')}</option>
@@ -559,7 +559,7 @@ function Sidebar({
             <select
               value={filters.categoryName}
               onChange={e => patch({ categoryName: e.target.value, serviceName: '' })}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
+              className="w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
             >
               <option value="">{t('instantResults.filters.allCategories')}</option>
               {servicesData.categories.map(category => (
@@ -573,7 +573,7 @@ function Sidebar({
             <select
               value={filters.serviceName}
               onChange={e => patch({ serviceName: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
+              className="w-full rounded border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-100"
             >
               <option value="">{t('instantResults.filters.allServices')}</option>
               {serviceOptions.map(service => (
@@ -829,13 +829,13 @@ export default function InstantResults({
           {loading ? (
             <div className="flex flex-col gap-3 mt-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                <div key={i} className="bg-white rounded-md border border-gray-200 p-6 animate-pulse">
                   <div className="flex gap-4">
                     <div className="w-[108px] h-[108px] rounded-full bg-gray-100 flex-shrink-0" />
                     <div className="flex-1 space-y-3 pt-1">
-                      <div className="h-4 bg-gray-100 rounded w-1/3" />
-                      <div className="h-3 bg-gray-100 rounded w-1/4" />
-                      <div className="h-3 bg-gray-100 rounded w-1/2" />
+                      <div className="h-4 bg-gray-100 rounded-sm w-1/3" />
+                      <div className="h-3 bg-gray-100 rounded-sm w-1/4" />
+                      <div className="h-3 bg-gray-100 rounded-sm w-1/2" />
                     </div>
                   </div>
                 </div>
@@ -856,7 +856,7 @@ export default function InstantResults({
                 </div>
               ) : (
                 <div>
-                  <div className="mb-3 flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="mb-3 flex flex-col gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
                     <span>
                       {t('instantResults.filters.showingProfessionals', {
                         shown: lastVisibleResult,
@@ -874,7 +874,7 @@ export default function InstantResults({
                       <button
                         type="button"
                         onClick={() => setVisibleCount(current => Math.min(current + RESULTS_PER_PAGE, filteredPros.length))}
-                        className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="cursor-pointer rounded border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {t('instantResults.filters.loadMore')}
                       </button>

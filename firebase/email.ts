@@ -87,7 +87,7 @@ function wrapMestermindEmail(input: Pick<SendEmailInput, 'subject' | 'text' | 'b
                 <table role="presentation" cellspacing="0" cellpadding="0" align="center">
                   <tr>
                     <td style="font-size:24px;line-height:1;font-weight:800;letter-spacing:-0.03em;color:#111827;">
-                      mester<span style="color:#f97316;">mind</span>
+                      mester<span style="color:#0ea5e9;">mind</span>
                     </td>
                   </tr>
                 </table>

@@ -83,13 +83,13 @@ export default async function JoinAsProPage() {
         <div className="absolute inset-0 bg-gray-950/45" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-950/50 via-gray-950/18 to-gray-950/40" aria-hidden="true" />
         <div className="relative mx-auto max-w-3xl text-center">
-          <p className="text-xs font-bold tracking-widest uppercase text-orange-400 mb-4">{t('proLanding.hero.eyebrow')}</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-sky-400 mb-4">{t('proLanding.hero.eyebrow')}</p>
           <h1
             className="text-5xl md:text-6xl font-black leading-[1.05] mb-6"
             style={{ ...dg, letterSpacing: '-0.03em' }}
           >
             {t('proLanding.hero.headlineLine1')}<br />
-            <span className="text-orange-400">{t('proLanding.hero.headlineLine2')}</span>
+            <span className="text-sky-400">{t('proLanding.hero.headlineLine2')}</span>
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
             {t('proLanding.hero.body')}
@@ -97,13 +97,13 @@ export default async function JoinAsProPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/pro/signup"
-              className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg px-8 py-3.5 text-base transition-colors"
+              className="inline-block bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded px-8 py-3.5 text-base transition-colors"
             >
               {t('proLanding.hero.primaryCta')}
             </Link>
             <Link
               href="#how-it-works"
-              className="inline-block rounded-lg bg-white px-8 py-3.5 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-100"
+              className="inline-block rounded bg-white px-8 py-3.5 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-100"
             >
               {t('proLanding.hero.secondaryCta')}
             </Link>
@@ -138,7 +138,7 @@ export default async function JoinAsProPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {BENEFITS.map((benefit) => (
               <div key={benefit} className="flex gap-4">
-                <div className="flex-shrink-0 w-2 h-2 rounded-full bg-orange-500 mt-2.5" />
+                <div className="flex-shrink-0 w-2 h-2 rounded-full bg-sky-500 mt-2.5" />
                 <div>
                   <h3
                     className="text-xl font-black text-gray-900 mb-2"
@@ -170,7 +170,7 @@ export default async function JoinAsProPage() {
             {STEPS.map((step) => (
               <div key={step.number} className="flex flex-col gap-4">
                 <div
-                  className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center font-black text-xl flex-shrink-0"
+                  className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center font-black text-xl flex-shrink-0"
                   style={dg}
                 >
                   {step.number}
@@ -228,7 +228,7 @@ export default async function JoinAsProPage() {
           </p>
           <Link
             href="/pro/signup"
-            className="inline-block bg-orange-500 text-white hover:bg-orange-600 font-semibold rounded-lg px-9 py-3.5 text-base transition-colors"
+            className="inline-block bg-sky-500 text-white hover:bg-sky-600 font-semibold rounded px-9 py-3.5 text-base transition-colors"
           >
             {t('proLanding.finalCta.cta')}
           </Link>

@@ -63,7 +63,7 @@ function ProjectCard({
   const categoryLabel = translateCategory(t, project.categoryName)
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:border-slate-300 hover:shadow-md">
+    <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:border-slate-300 hover:shadow-md">
       <div className="p-5">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -97,7 +97,7 @@ function ProjectCard({
         {details.length > 0 && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {details.map(detail => (
-              <div key={detail.key} className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+              <div key={detail.key} className="rounded-md border border-gray-100 bg-gray-50 p-3">
                 <p className="mb-1 text-xs text-gray-400">{detail.key}</p>
                 <p className="text-sm font-semibold text-gray-900">{detail.value}</p>
               </div>
@@ -111,7 +111,7 @@ function ProjectCard({
           type="button"
           onClick={() => onQuote(project)}
           disabled={submitting}
-          className="w-full rounded-lg bg-slate-800 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          className="w-full rounded bg-slate-800 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {submitting ? t('proMarketplace.card.sendingQuote') : t('proMarketplace.card.sendQuote')}
         </button>
@@ -183,7 +183,7 @@ export default function ProMarketplacePage() {
               {t('proMarketplace.header.subtitle')}
             </p>
           </div>
-          <Link href="/pro/jobs" className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          <Link href="/pro/jobs" className="rounded border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50">
             {t('proMarketplace.header.backToJobs')}
           </Link>
         </div>
@@ -191,7 +191,7 @@ export default function ProMarketplacePage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <section className="lg:col-span-2">
             {error && (
-              <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              <div className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                 {error}
               </div>
             )}
@@ -199,23 +199,23 @@ export default function ProMarketplacePage() {
             {loading ? (
               <div className="flex flex-col gap-3">
                 {[1, 2, 3].map(item => (
-                  <div key={item} className="h-56 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+                  <div key={item} className="h-56 animate-pulse rounded-lg border border-gray-200 bg-white" />
                 ))}
               </div>
             ) : access && !access.eligible ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+              <div className="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
                 <p className="text-2xl font-black text-gray-900" style={dg}>{t('proMarketplace.unavailable.title')}</p>
                 <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
                   {access.reason ?? t('proMarketplace.unavailable.body')}
                 </p>
                 {!access.hasProPlan && (
-                  <Link href="/pro/settings" className="mt-5 inline-block rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-orange-600">
+                  <Link href="/pro/settings" className="mt-5 inline-block rounded bg-sky-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-600">
                     {t('proMarketplace.unavailable.upgrade')}
                   </Link>
                 )}
               </div>
             ) : projects.length === 0 ? (
-              <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+              <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
                 <p className="text-xl font-black text-gray-900" style={dg}>{t('proMarketplace.empty.title')}</p>
                 <p className="mt-1 text-sm">{t('proMarketplace.empty.body')}</p>
               </div>
@@ -235,7 +235,7 @@ export default function ProMarketplacePage() {
 
           <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
             <ProUpgradeCta />
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
               <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proMarketplace.sidebar.kicker')}</p>
               <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proMarketplace.sidebar.title')}</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">

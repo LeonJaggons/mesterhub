@@ -131,8 +131,8 @@ function quoteEmailHtml(input: {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">New quote received</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">New quote received</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Review the price, timing, and message from your pro</div>
         </td>
       </tr>
@@ -177,7 +177,7 @@ function quoteEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Review quote</a>
         </td>
       </tr>
@@ -230,7 +230,7 @@ function declinedEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request</a>
         </td>
       </tr>
@@ -286,7 +286,7 @@ function emailCardHtml(input: {
 }): string {
   const tone = input.tone ?? 'orange'
   const colors = {
-    orange: { bg: '#fff7ed', border: '#f1d8c7', accent: '#f97316' },
+    orange: { bg: '#f0f9ff', border: '#bae6fd', accent: '#0ea5e9' },
     green: { bg: '#ecfdf5', border: '#bbf7d0', accent: '#16a34a' },
     slate: { bg: '#fafafa', border: '#e9eced', accent: '#676d73' },
   }[tone]
@@ -319,7 +319,7 @@ function emailCardHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.ctaUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">${escapeEmailHtml(input.ctaLabel)}</a>
         </td>
       </tr>
@@ -364,7 +364,7 @@ function acceptedQuoteEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Open job</a>
         </td>
       </tr>
@@ -424,7 +424,7 @@ function declinedQuoteEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request</a>
         </td>
       </tr>
@@ -461,8 +461,8 @@ function appointmentEmailHtml(input: {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Appointment proposed</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">Appointment proposed</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Review the date and time from your pro</div>
         </td>
       </tr>
@@ -491,7 +491,7 @@ function appointmentEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Confirm appointment</a>
         </td>
       </tr>
@@ -558,7 +558,7 @@ function appointmentConfirmedEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Open job</a>
         </td>
       </tr>
@@ -611,7 +611,7 @@ function completionRequestedEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Review job</a>
         </td>
       </tr>
@@ -655,7 +655,7 @@ function jobCompletedEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View completed job</a>
         </td>
       </tr>
@@ -679,8 +679,8 @@ function reviewRequestEmailHtml(input: {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">How did it go?</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">How did it go?</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Your review helps other customers hire with confidence</div>
         </td>
       </tr>
@@ -689,7 +689,7 @@ function reviewRequestEmailHtml(input: {
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:24px;">
       <tr>
         <td width="72" valign="middle" style="padding:0 16px 20px 0;">
-          <div style="width:72px;height:72px;border-radius:50%;background:#f97316;color:#ffffff;text-align:center;font-size:24px;line-height:72px;font-weight:700;">${escapeEmailHtml(initials(input.proName))}</div>
+          <div style="width:72px;height:72px;border-radius:50%;background:#0ea5e9;color:#ffffff;text-align:center;font-size:24px;line-height:72px;font-weight:700;">${escapeEmailHtml(initials(input.proName))}</div>
         </td>
         <td valign="middle" style="padding:0 0 20px;">
           <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">Review ${escapeEmailHtml(input.proName)}</h1>
@@ -714,7 +714,7 @@ function reviewRequestEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Leave a review</a>
         </td>
       </tr>
@@ -766,7 +766,7 @@ function cancelledEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.requestUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View request</a>
         </td>
       </tr>

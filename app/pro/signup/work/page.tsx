@@ -220,7 +220,7 @@ export default function WorkPhotosPage() {
                     style={{ cursor: state === 'uploading' ? 'wait' : 'pointer', padding: '1.5rem' }}
                     onClick={() => state !== 'uploading' && inputRef.current?.click()}
                   >
-                    <MdOutlineUploadFile size={26} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />
+                    <MdOutlineUploadFile size={26} color="#0ea5e9" style={{ margin: '0 auto 0.5rem' }} />
                     <p className={styles.uploadTitle}>{state === 'uploading' ? t('proSignup.common.uploading') : t('proSignup.work.uploadSlot', { slot: slotLabel })}</p>
                     {state === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{t('proSignup.common.uploadFailedRetry')}</p>}
                     <p className={styles.uploadHint}>{t('proSignup.common.jpgPng')}</p>

@@ -1,16 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Autocomplete } from '@base-ui/react/autocomplete'
 import { Button } from '@base-ui/react/button'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
+import { LogoMark } from './Header'
 import styles from './Hero.module.css'
 
 const CAROUSEL_KEYS = ['cleaning', 'repairs', 'painting', 'moving'] as const
 const POPULAR_SEARCH_KEYS = ['houseCleaning', 'handyman', 'plumbing', 'moving'] as const
-type TiltStyle = CSSProperties & { '--tilt-x'?: string; '--tilt-y'?: string }
 
 type District = { id: number; roman: string; name: string }
 
@@ -18,6 +18,15 @@ function StarIcon() {
   return (
     <svg aria-label="star rating" height="14" width="14" fill="currentColor" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
       <path d="M8.627 5.246L7.342 1.258a.356.356 0 00-.684 0L5.373 5.244l-4.015.049c-.346.004-.489.466-.212.682l3.222 2.513-1.197 4.018c-.103.345.272.63.553.421L7 10.494l3.276 2.435c.282.209.656-.076.553-.422L9.632 8.49l3.222-2.513c.277-.216.134-.677-.211-.682l-4.016-.048z" />
+    </svg>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg height="17" width="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   )
 }
@@ -179,6 +188,7 @@ function SearchBar({ variant = 'hero' }: { variant?: 'hero' | 'sticky' }) {
     >
       <div className={styles.searchFields}>
         <div className={styles.autocompleteRoot}>
+          <span className={styles.queryIcon} aria-hidden="true"><SearchIcon /></span>
           <Autocomplete.Root items={items} filteredItems={items} onValueChange={handleSearch}>
             <Autocomplete.Input
               className={styles.queryInput}
@@ -220,7 +230,6 @@ export default function Hero() {
   const t = useTranslations()
   const searchRef = useRef<HTMLDivElement>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
-  const [tiltStyle, setTiltStyle] = useState<TiltStyle>({ '--tilt-x': '0deg', '--tilt-y': '0deg' })
   const carouselItems = CAROUSEL_KEYS.map(key => t(`home.hero.carousel.${key}`))
   const popularSearches = POPULAR_SEARCH_KEYS.map(key => t(`home.hero.popularSearches.${key}`))
 
@@ -235,73 +244,49 @@ export default function Hero() {
     return () => observer.disconnect()
   }, [])
 
-  function handleImageMove(event: ReactMouseEvent<HTMLDivElement>) {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const x = (event.clientX - rect.left) / rect.width - 0.5
-    const y = (event.clientY - rect.top) / rect.height - 0.5
-
-    setTiltStyle({
-      '--tilt-x': `${-y * 7}deg`,
-      '--tilt-y': `${x * 9}deg`,
-    })
-  }
-
-  function resetImageTilt() {
-    setTiltStyle({ '--tilt-x': '0deg', '--tilt-y': '0deg' })
-  }
-
   return (
     <>
       <section className={styles.hero}>
         <div className={styles.heroInner}>
-          <div className={styles.content}>
-            <h1 className={styles.heading}>
-              <div className={styles.carouselWrapper}>
-                <ul className={styles.carouselList}>
-                  {carouselItems.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                  <li aria-hidden="true">{carouselItems[0]}</li>
-                </ul>
-              </div>
-              {t('home.hero.madeEasy')}
-            </h1>
-            <div ref={searchRef} className={styles.searchBarContainer}>
-              <SearchBar />
-            </div>
-            <div className={styles.popularRow} aria-label={t('home.hero.popularSearchesLabel')}>
-              <span className={styles.popularLabel}>{t('home.hero.popularNow')}</span>
-              <div className={styles.popularLinks}>
-                {popularSearches.map(service => (
-                  <Link key={service} href={`/instant-results?q=${encodeURIComponent(service)}`}>
-                    {service}
-                  </Link>
+          <h1 className={styles.heading}>
+            <div className={styles.carouselWrapper}>
+              <ul className={styles.carouselList}>
+                {carouselItems.map((item, i) => (
+                  <li key={i}>{item}</li>
                 ))}
-              </div>
+                <li aria-hidden="true">{carouselItems[0]}</li>
+              </ul>
             </div>
-            <p className={styles.trustText}>
-              {t('home.hero.trustPrefix')} &middot; 4.9/5{' '}
-              <span className={styles.starGreen}><StarIcon /></span>{' '}
-              {t('home.hero.trustSuffix')}
-            </p>
+            {t('home.hero.madeEasy')}
+          </h1>
+          <div ref={searchRef} className={styles.searchBarContainer}>
+            <SearchBar />
           </div>
-          <div
-            className={styles.heroImage}
-            style={tiltStyle}
-            onMouseMove={handleImageMove}
-            onMouseLeave={resetImageTilt}
-          >
-            <img
-              src="/hero.avif"
-              alt={t('home.hero.heroImageAlt')}
-              className={styles.heroImageImg}
-            />
+          <div className={styles.popularRow} aria-label={t('home.hero.popularSearchesLabel')}>
+            <span className={styles.popularLabel}>{t('home.hero.popularNow')}</span>
+            <div className={styles.popularLinks}>
+              {popularSearches.map(service => (
+                <Link key={service} href={`/instant-results?q=${encodeURIComponent(service)}`}>
+                  {service}
+                </Link>
+              ))}
+            </div>
           </div>
+          <p className={styles.trustText}>
+            {t('home.hero.trustPrefix')} &middot; 4.9/5{' '}
+            <span className={styles.starGreen}><StarIcon /></span>{' '}
+            {t('home.hero.trustSuffix')}
+          </p>
         </div>
       </section>
 
       <div className={`${styles.stickyBar} ${stickyVisible ? styles.stickyBarVisible : ''}`}>
-        <SearchBar variant="sticky" />
+        <div className={styles.stickyBarInner}>
+          <Link href="/" aria-label={t('header.aria.home')} className={styles.stickyBarLogo}>
+            <LogoMark />
+          </Link>
+          <SearchBar variant="sticky" />
+        </div>
       </div>
     </>
   )

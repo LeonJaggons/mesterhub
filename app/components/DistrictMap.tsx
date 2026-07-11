@@ -44,7 +44,7 @@ export default function DistrictMap({
       <Circle
         center={[lat, lng]}
         radius={radius}
-        pathOptions={{ color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15, weight: 2 }}
+        pathOptions={{ color: '#0ea5e9', fillColor: '#0ea5e9', fillOpacity: 0.15, weight: 2 }}
       >
         <Popup>{popupText ?? `${districtLabel} — approximate service area`}</Popup>
       </Circle>

@@ -32,7 +32,7 @@ type Translator = ReturnType<typeof useTranslations>
 
 const DistrictMap = dynamic(() => import('@/app/components/DistrictMap'), {
   ssr: false,
-  loading: () => <div className="h-64 rounded-xl bg-gray-100 animate-pulse" />,
+  loading: () => <div className="h-64 rounded-md bg-gray-100 animate-pulse" />,
 })
 
 const CANCELLATION_REASONS = [
@@ -75,7 +75,7 @@ function StatusBanner({ req }: { req: ServiceRequest }) {
   const t = useTranslations()
   const label = requestStatusLabel(t, req.status, req.declinedBy)
   const colors: Record<string, string> = {
-    pending: 'bg-orange-50 text-orange-800 border-orange-200',
+    pending: 'bg-sky-50 text-sky-800 border-sky-200',
     quoted: 'bg-slate-50 text-slate-800 border-slate-200',
     accepted: 'bg-slate-800 text-white border-slate-800',
     declined: 'bg-gray-100 text-gray-600 border-gray-200',
@@ -83,7 +83,7 @@ function StatusBanner({ req }: { req: ServiceRequest }) {
     cancelled: 'bg-gray-100 text-gray-600 border-gray-200',
   }
   return (
-    <div className={`rounded-xl border px-4 py-3 text-sm font-semibold text-center ${colors[req.status]}`}>
+    <div className={`rounded-md border px-4 py-3 text-sm font-semibold text-center ${colors[req.status]}`}>
       {label}
     </div>
   )
@@ -135,13 +135,13 @@ function CancelRequestModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-y-auto"
+        className="bg-white rounded-lg w-full max-w-lg shadow-2xl overflow-y-auto"
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-1">{t('customerRequests.detail.cancelModal.kicker')}</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-sky-500 mb-1">{t('customerRequests.detail.cancelModal.kicker')}</p>
             <h2 className="text-2xl font-black text-gray-900" style={{ ...dg, letterSpacing: '-0.02em' }}>
               {t('customerRequests.detail.cancelModal.title', { name: proName })}
             </h2>
@@ -172,7 +172,7 @@ function CancelRequestModal({
               id="cancel-reason"
               value={reason}
               onChange={e => setReason(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm bg-white focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             >
               {CANCELLATION_REASONS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -192,11 +192,11 @@ function CancelRequestModal({
               onChange={e => setDetails(e.target.value)}
               rows={4}
               placeholder={t('customerRequests.detail.cancelModal.detailsPlaceholder')}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
+              className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 resize-none"
             />
           </div>
 
-          <label className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+          <label className="flex items-start gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
             <input
               type="checkbox"
               checked={needsFollowUp}
@@ -212,14 +212,14 @@ function CancelRequestModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl py-3 text-sm cursor-pointer bg-white"
+              className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-md py-3 text-sm cursor-pointer bg-white"
             >
               {t('customerRequests.detail.cancelModal.keep')}
             </button>
             <button
               type="submit"
               disabled={confirming}
-              className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-xl py-3 text-sm cursor-pointer border-none"
+              className="flex-1 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-black rounded-md py-3 text-sm cursor-pointer border-none"
               style={dg}
             >
               {confirming ? t('customerRequests.detail.cancelModal.cancelling') : t('customerRequests.detail.cancelModal.confirm')}
@@ -243,7 +243,7 @@ function NeedHelpCard({ requestId, status, proName }: { requestId: string; statu
   ].join('\n'))
 
   return (
-    <section className="bg-white rounded-2xl border border-orange-100 p-5 shadow-sm">
+    <section className="bg-white rounded-lg border border-sky-100 p-5 shadow-sm">
       <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('customerRequests.detail.help.kicker')}</p>
       <h2 className="font-black text-gray-900 text-xl leading-none mb-2" style={dg}>
         {t('customerRequests.detail.help.title')}
@@ -254,13 +254,13 @@ function NeedHelpCard({ requestId, status, proName }: { requestId: string; statu
       <div className="flex flex-col gap-2">
         <a
           href={`mailto:support@mestermind.com?subject=${subject}&body=${body}`}
-          className="block w-full rounded-xl bg-orange-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-orange-600"
+          className="block w-full rounded-md bg-sky-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-sky-600"
         >
           {t('customerRequests.detail.help.email')}
         </a>
         <Link
           href="/help"
-          className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          className="block w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
         >
           {t('customerRequests.detail.help.helpCenter')}
         </Link>
@@ -305,18 +305,18 @@ function ReviewCard({
 
   if (existingReview) {
     return (
-      <section id="review" className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm scroll-mt-24">
+      <section id="review" className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm scroll-mt-24">
         <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('customerRequests.detail.review.yourReview')}</p>
         <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>
           {t('customerRequests.detail.review.thanks', { name: proName })}
         </h2>
         <div className="mb-3 flex items-center gap-1.5">
           {[1, 2, 3, 4, 5].map(value => (
-            <MdStar key={value} size={20} color={value <= existingReview.rating ? '#f97316' : '#d1d5db'} />
+            <MdStar key={value} size={20} color={value <= existingReview.rating ? '#0ea5e9' : '#d1d5db'} />
           ))}
           <span className="ml-1 text-sm font-bold text-gray-700">{existingReview.rating}/5</span>
         </div>
-        <p className="whitespace-pre-wrap rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-sm leading-6 text-gray-700">
+        <p className="whitespace-pre-wrap rounded-md bg-gray-50 border border-gray-100 px-4 py-3 text-sm leading-6 text-gray-700">
           {existingReview.comment}
         </p>
       </section>
@@ -324,7 +324,7 @@ function ReviewCard({
   }
 
   return (
-    <section id="review" className="bg-white rounded-2xl border-2 border-orange-200 p-5 shadow-sm scroll-mt-24">
+    <section id="review" className="bg-white rounded-lg border-2 border-sky-200 p-5 shadow-sm scroll-mt-24">
       <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('customerRequests.detail.review.kicker')}</p>
       <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>
         {t('customerRequests.detail.review.title', { name: proName })}
@@ -344,7 +344,7 @@ function ReviewCard({
                 className="border-none bg-transparent p-0.5 cursor-pointer"
                 aria-label={t(value === 1 ? 'customerRequests.detail.review.starSingular' : 'customerRequests.detail.review.starPlural', { count: value })}
               >
-                <MdStar size={30} color={value <= rating ? '#f97316' : '#d1d5db'} />
+                <MdStar size={30} color={value <= rating ? '#0ea5e9' : '#d1d5db'} />
               </button>
             ))}
           </div>
@@ -360,7 +360,7 @@ function ReviewCard({
             rows={4}
             maxLength={1200}
             placeholder={t('customerRequests.detail.review.commentPlaceholder')}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
+            className="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 resize-none"
           />
           <p className="mt-1 text-xs text-gray-400">{t('customerRequests.detail.review.minimum')}</p>
         </div>
@@ -368,7 +368,7 @@ function ReviewCard({
         <button
           type="submit"
           disabled={submitting || comment.trim().length < 20}
-          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold rounded-xl py-3 text-base cursor-pointer disabled:cursor-not-allowed border-none"
+          className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold rounded-md py-3 text-base cursor-pointer disabled:cursor-not-allowed border-none"
           style={dg}
         >
           {submitting ? t('customerRequests.detail.review.submitting') : t('customerRequests.detail.review.submit')}
@@ -527,13 +527,13 @@ export default function RequestDetailPage() {
     return (
       <main className="bg-gray-50 min-h-screen flex-1">
         <div className="max-w-5xl mx-auto px-4 py-12 animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-32 mb-8" />
+          <div className="h-6 bg-gray-200 rounded-sm w-32 mb-8" />
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-3 space-y-4">
-              <div className="h-72 bg-gray-200 rounded-2xl" />
-              <div className="h-48 bg-gray-200 rounded-2xl" />
+              <div className="h-72 bg-gray-200 rounded-lg" />
+              <div className="h-48 bg-gray-200 rounded-lg" />
             </div>
-            <div className="lg:col-span-2 h-96 bg-gray-200 rounded-2xl" />
+            <div className="lg:col-span-2 h-96 bg-gray-200 rounded-lg" />
           </div>
         </div>
       </main>
@@ -545,7 +545,7 @@ export default function RequestDetailPage() {
       <main className="bg-gray-50 min-h-screen flex-1">
         <div className="max-w-lg mx-auto px-4 py-20 text-center">
           <p className="text-xl font-bold text-gray-900 mb-2" style={dg}>{t('customerRequests.detail.notFound.title')}</p>
-          <Link href="/requests" className="inline-block mt-4 text-orange-600 font-semibold hover:underline">
+          <Link href="/requests" className="inline-block mt-4 text-sky-600 font-semibold hover:underline">
             {t('customerRequests.detail.notFound.back')}
           </Link>
         </div>
@@ -603,7 +603,7 @@ export default function RequestDetailPage() {
             )}
 
             {isQuoted && req.quote && (
-              <section className="bg-white rounded-2xl border-2 border-slate-200 p-5 shadow-sm">
+              <section className="bg-white rounded-lg border-2 border-slate-200 p-5 shadow-sm">
                 <h2 className="font-black text-slate-800 text-lg mb-3" style={dg}>{t('customerRequests.detail.quote.ready', { name: displayName })}</h2>
                 <p className="text-3xl font-black text-gray-900 mb-1" style={dg}>{req.quote.price}</p>
                 {req.quote.timeline && (
@@ -613,7 +613,7 @@ export default function RequestDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowAccept(true)}
-                    className={`flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl py-3 text-base cursor-pointer border-none ${styles.quotePulseButton}`}
+                    className={`flex-1 bg-sky-500 hover:bg-sky-600 text-white font-black rounded-md py-3 text-base cursor-pointer border-none ${styles.quotePulseButton}`}
                     style={dg}
                   >
                     {t('customerRequests.detail.quote.accept')}
@@ -621,7 +621,7 @@ export default function RequestDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowDecline(true)}
-                    className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl py-3 text-sm cursor-pointer bg-white"
+                    className="flex-1 border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-md py-3 text-sm cursor-pointer bg-white"
                   >
                     {t('customerRequests.detail.quote.decline')}
                   </button>
@@ -630,7 +630,7 @@ export default function RequestDetailPage() {
             )}
 
             {isAccepted && req.completion?.status === 'pro_marked_complete' && (
-              <section className="bg-white rounded-2xl border-2 border-green-200 p-5 shadow-sm">
+              <section className="bg-white rounded-lg border-2 border-green-200 p-5 shadow-sm">
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>
                   {t('customerRequests.detail.completion.title')}
                 </h2>
@@ -640,7 +640,7 @@ export default function RequestDetailPage() {
                 <button
                   type="button"
                   onClick={handleConfirmComplete}
-                  className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl py-3 text-base cursor-pointer border-none"
+                  className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-md py-3 text-base cursor-pointer border-none"
                   style={dg}
                 >
                   {t('customerRequests.detail.completion.confirm')}
@@ -649,8 +649,8 @@ export default function RequestDetailPage() {
             )}
 
             {isAccepted && req.appointmentRequest && (
-              <section className="bg-white rounded-2xl border-2 border-orange-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">
+              <section className="bg-white rounded-lg border-2 border-sky-200 p-5 shadow-sm">
+                <p className="text-xs font-bold tracking-widest uppercase text-sky-500 mb-2">
                   {t('customerRequests.detail.appointment.kicker')}
                 </p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>
@@ -658,8 +658,8 @@ export default function RequestDetailPage() {
                     ? t('customerRequests.detail.appointment.confirmedTitle')
                     : t('customerRequests.detail.appointment.confirmTitle')}
                 </h2>
-                <div className="rounded-xl bg-orange-50 border border-orange-100 p-4 mb-4">
-                  <p className="text-sm font-bold text-orange-700 mb-1">
+                <div className="rounded-md bg-sky-50 border border-sky-100 p-4 mb-4">
+                  <p className="text-sm font-bold text-sky-700 mb-1">
                     {req.appointmentRequest.kind === 'quote' ? t('customerRequests.detail.appointment.quoteVisit') : t('customerRequests.detail.appointment.serviceAppointment')}
                   </p>
                   <p className="text-lg font-bold text-gray-900">
@@ -682,12 +682,12 @@ export default function RequestDetailPage() {
                   )}
                 </div>
                 {req.appointmentRequest.status === 'confirmed' && (
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 mb-4">
+                  <div className="rounded-md border border-slate-100 bg-slate-50 p-4 mb-4">
                     <h3 className="font-black text-slate-800 text-xl leading-none mb-3" style={dg}>
                       {t('customerRequests.detail.appointment.hired', { name: displayName })}
                     </h3>
                     {req.quote?.price && (
-                      <div className="rounded-lg bg-white border border-slate-100 px-4 py-3 mb-4">
+                      <div className="rounded bg-white border border-slate-100 px-4 py-3 mb-4">
                         <dt className="text-sm text-gray-500">{t('customerRequests.detail.appointment.quotedPrice')}</dt>
                         <dd className="font-black text-2xl text-gray-900" style={dg}>{req.quote.price}</dd>
                       </div>
@@ -724,7 +724,7 @@ export default function RequestDetailPage() {
                   <button
                     type="button"
                     onClick={handleConfirmAppointment}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-3 text-base cursor-pointer border-none"
+                    className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-md py-3 text-base cursor-pointer border-none"
                     style={dg}
                   >
                     {t('customerRequests.detail.appointment.confirmButton')}
@@ -735,7 +735,7 @@ export default function RequestDetailPage() {
                       <button
                         type="button"
                         onClick={() => setShowCancel(true)}
-                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
+                        className="w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
                       >
                         {t('customerRequests.detail.appointment.cancelButton')}
                       </button>
@@ -746,15 +746,15 @@ export default function RequestDetailPage() {
             )}
 
             {isAccepted && req.appointmentChangeRequest && (
-              <section className="bg-white rounded-2xl border-2 border-orange-200 p-5 shadow-sm">
-                <p className="text-xs font-bold tracking-widest uppercase text-orange-500 mb-2">
+              <section className="bg-white rounded-lg border-2 border-sky-200 p-5 shadow-sm">
+                <p className="text-xs font-bold tracking-widest uppercase text-sky-500 mb-2">
                   {t('customerRequests.detail.appointment.changeKicker')}
                 </p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-3" style={dg}>
                   {t('customerRequests.detail.appointment.changeTitle')}
                 </h2>
-                <div className="rounded-xl bg-orange-50 border border-orange-100 p-4 mb-4">
-                  <p className="text-sm font-bold text-orange-700 mb-1">
+                <div className="rounded-md bg-sky-50 border border-sky-100 p-4 mb-4">
+                  <p className="text-sm font-bold text-sky-700 mb-1">
                     {req.appointmentChangeRequest.kind === 'quote' ? t('customerRequests.detail.appointment.quoteVisit') : t('customerRequests.detail.appointment.serviceAppointment')}
                   </p>
                   <p className="text-lg font-bold text-gray-900">
@@ -776,7 +776,7 @@ export default function RequestDetailPage() {
                 <button
                   type="button"
                   onClick={handleConfirmAppointment}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-3 text-base cursor-pointer border-none"
+                  className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-md py-3 text-base cursor-pointer border-none"
                   style={dg}
                 >
                   {t('customerRequests.detail.appointment.approveChange')}
@@ -784,7 +784,7 @@ export default function RequestDetailPage() {
               </section>
             )}
 
-            <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <section className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
               <h2 className="font-black text-gray-900 text-lg mb-1 flex items-center gap-2" style={dg}>
                 <MdLocationOn className="text-slate-800" size={22} />
                 {t('customerRequests.detail.location.title')}
@@ -807,10 +807,10 @@ export default function RequestDetailPage() {
               </p>
             </section>
 
-            <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <section className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
               <h2 className="font-black text-gray-900 text-lg mb-4" style={dg}>{t('customerRequests.detail.project.title')}</h2>
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className="bg-orange-50 text-orange-700 border border-orange-200 text-xs font-semibold rounded-full px-3 py-1">
+                <span className="bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold rounded-full px-3 py-1">
                   {translateCategory(t, req.categoryName)}
                 </span>
                 {req.customerDistrict && (
@@ -834,14 +834,14 @@ export default function RequestDetailPage() {
             </section>
 
             {req.quote && !hasConfirmedAppointment && (req.status === 'quoted' || req.status === 'accepted' || req.status === 'completed') && (
-              <section className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+              <section className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
                 <h2 className="font-black text-slate-800 text-lg mb-3" style={dg}>{t('customerRequests.detail.quote.fromPro', { name: displayName })}</h2>
                 <p className="text-2xl font-black text-gray-900" style={dg}>{req.quote.price}</p>
                 {req.quote.timeline && (
                   <p className="text-sm text-gray-600 mt-2">{t('customerRequests.detail.quote.timeline', { timeline: req.quote.timeline })}</p>
                 )}
                 {req.quote.notes && (
-                  <p className="text-sm text-gray-700 mt-3 p-3 bg-slate-50 rounded-lg whitespace-pre-wrap">
+                  <p className="text-sm text-gray-700 mt-3 p-3 bg-slate-50 rounded whitespace-pre-wrap">
                     {req.quote.notes}
                   </p>
                 )}
@@ -849,7 +849,7 @@ export default function RequestDetailPage() {
             )}
 
             {req.status === 'pending' && (
-              <div className="rounded-xl bg-orange-50 border border-orange-100 px-4 py-3 text-sm text-orange-800">
+              <div className="rounded-md bg-sky-50 border border-sky-100 px-4 py-3 text-sm text-sky-800">
                 {t('customerRequests.detail.pendingResponse', { name: displayName })}
               </div>
             )}
@@ -867,9 +867,9 @@ export default function RequestDetailPage() {
             {pro ? (
               <ProDetailCard pro={pro} />
             ) : (
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+              <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
                 <p className="font-bold text-gray-900" style={dg}>{req.proName}</p>
-                <Link href={`/pro/${req.proUid}`} className="mt-4 block text-center py-2.5 rounded-lg bg-orange-500 text-white text-sm font-semibold">
+                <Link href={`/pro/${req.proUid}`} className="mt-4 block text-center py-2.5 rounded bg-sky-500 text-white text-sm font-semibold">
                   {t('customerRequests.detail.sidebar.viewProfile')}
                 </Link>
               </div>
@@ -877,7 +877,7 @@ export default function RequestDetailPage() {
             {hasConversation && !hasConfirmedAppointment && (
               <Link
                 href={`/messages/${requestId}`}
-                className="block w-full rounded-xl bg-slate-800 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-slate-900"
+                className="block w-full rounded-md bg-slate-800 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-slate-900"
               >
                 {t('customerRequests.detail.sidebar.openConversation')}
               </Link>
@@ -886,7 +886,7 @@ export default function RequestDetailPage() {
               <button
                 type="button"
                 onClick={() => setShowCancel(true)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
+                className="w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
               >
                 {t('customerRequests.detail.sidebar.cancelRequest')}
               </button>

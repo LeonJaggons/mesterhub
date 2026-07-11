@@ -183,12 +183,12 @@ export default function CompletePage() {
         <Link
           href="/pro/jobs"
           style={{
-            display: 'block', width: '100%', padding: '0.9rem', background: '#f97316', color: 'white',
+            display: 'block', width: '100%', padding: '0.9rem', background: '#0ea5e9', color: 'white',
             textAlign: 'center', fontWeight: 700, borderRadius: '0.625rem', textDecoration: 'none',
             fontSize: '1rem', ...dg, transition: 'background 0.15s', letterSpacing: '-0.01em',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#ea580c')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#f97316')}
+          onMouseEnter={e => (e.currentTarget.style.background = '#0284c7')}
+          onMouseLeave={e => (e.currentTarget.style.background = '#0ea5e9')}
         >
           {t('proSignup.complete.dashboard')}
         </Link>

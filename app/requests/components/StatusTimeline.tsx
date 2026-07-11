@@ -24,8 +24,8 @@ export default function StatusTimeline({ status }: { status: ServiceRequestStatu
   const closed = status === 'declined' || status === 'cancelled'
 
   const currentCard = (
-    <aside className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:w-[240px] md:shrink-0">
-      <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-orange-500">
+    <aside className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:w-[240px] md:shrink-0">
+      <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-sky-500">
         {t(`customerRequests.detail.timeline.${status}.eyebrow`)}
       </p>
       <h2 className="text-lg font-black leading-tight text-gray-900">
@@ -41,7 +41,7 @@ export default function StatusTimeline({ status }: { status: ServiceRequestStatu
     return (
       <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
         {currentCard}
-        <div className="rounded-2xl bg-white border border-gray-200 px-4 py-4 text-sm font-medium text-gray-600 text-center shadow-sm md:flex md:flex-1 md:items-center md:justify-center">
+        <div className="rounded-lg bg-white border border-gray-200 px-4 py-4 text-sm font-medium text-gray-600 text-center shadow-sm md:flex md:flex-1 md:items-center md:justify-center">
           {t('customerRequests.detail.timeline.closedLine', { status: t(`customerRequests.status.${status}`).toLowerCase() })}
         </div>
       </div>
@@ -53,7 +53,7 @@ export default function StatusTimeline({ status }: { status: ServiceRequestStatu
       {currentCard}
       <ol
         aria-label={t('customerRequests.detail.timeline.progressAria')}
-        className="grid grid-cols-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm md:flex-1 md:items-center"
+        className="grid grid-cols-4 rounded-lg border border-gray-200 bg-white px-4 py-4 shadow-sm md:flex-1 md:items-center"
       >
         {STEPS.map((step, i) => {
           const done = current > i
@@ -75,7 +75,7 @@ export default function StatusTimeline({ status }: { status: ServiceRequestStatu
                     done
                       ? 'bg-slate-800 border-slate-800 text-white'
                       : active
-                        ? 'bg-orange-500 border-orange-500 text-white'
+                        ? 'bg-sky-500 border-sky-500 text-white'
                         : 'bg-white border-gray-200 text-gray-400'
                   }`}
                 >

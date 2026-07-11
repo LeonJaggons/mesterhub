@@ -82,7 +82,7 @@ export default function AdminUsersPage() {
 
   return (
     <>
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-3xl font-black text-gray-950" style={dg}>Customers</h2>
@@ -95,11 +95,11 @@ export default function AdminUsersPage() {
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900"
               placeholder="Name, email, phone, UID, district"
             />
           </label>
-          <button className="cursor-pointer rounded-xl border-none bg-orange-500 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60" disabled={loading}>
+          <button className="cursor-pointer rounded-md border-none bg-sky-500 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60" disabled={loading}>
             Search
           </button>
         </form>
@@ -107,15 +107,15 @@ export default function AdminUsersPage() {
       </section>
 
       {loading ? (
-        <div className="h-44 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+        <div className="h-44 animate-pulse rounded-lg border border-gray-200 bg-white" />
       ) : users.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
           No customers found.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {users.map(user => (
-            <article key={user.uid} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <article key={user.uid} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-black text-gray-950" style={dg}>{user.displayName || 'Unnamed customer'}</h3>
@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
                 <button
                   disabled={busyUid === user.uid}
                   onClick={() => deleteUser(user)}
-                  className="w-full cursor-pointer rounded-xl border border-red-200 bg-red-50 py-2.5 font-semibold text-red-700 disabled:opacity-60"
+                  className="w-full cursor-pointer rounded-md border border-red-200 bg-red-50 py-2.5 font-semibold text-red-700 disabled:opacity-60"
                 >
                   Delete Customer
                 </button>

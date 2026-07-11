@@ -68,7 +68,7 @@
 .checkCircle {
   width: 20px;
   height: 20px;
-  border-radius: 4px;
+  border-radius: 3px;
   border: 2px solid #d3d4d5;
   display: flex;
   align-items: center;

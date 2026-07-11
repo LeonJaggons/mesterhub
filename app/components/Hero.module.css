@@ -3,46 +3,29 @@
   position: relative;
   z-index: 1;
   overflow: hidden;
-  padding-top: 1.5rem;
+  padding-top: 2.5rem;
   padding-bottom: 3.5rem;
 
   @media (min-width: 768px) {
-    padding-top: 3.5rem;
-    padding-bottom: 5rem;
+    padding-top: 4.5rem;
+    padding-bottom: 5.5rem;
   }
 }
 
 .heroInner {
   display: flex;
-  position: relative;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1.25rem;
-  align-items: center;
-  gap: 0;
-  isolation: isolate;
-
-  @media (min-width: 1024px) {
-    padding: 0 3rem 0 4rem;
-  }
-}
-
-.content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   z-index: 2;
-
-  @media (min-width: 768px) {
-    align-items: flex-start;
-  }
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  isolation: isolate;
 }
 
 .heading {
-  font-size: clamp(2.15rem, 5.6vw, 4.35rem);
+  font-size: clamp(2.15rem, 5.6vw, 4rem);
   font-weight: 900;
   line-height: 1.1;
   margin: 0 0 2rem;
@@ -51,11 +34,6 @@
 
   @media (max-width: 479px) {
     font-size: clamp(1.95rem, 8.7vw, 2.35rem);
-  }
-
-  @media (min-width: 768px) {
-    text-align: left;
-    margin-bottom: 2.5rem;
   }
 }
 
@@ -91,24 +69,24 @@
 
 .searchBarContainer {
   width: 100%;
-  max-width: 580px;
+  max-width: 640px;
 }
 
 .popularRow {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.45rem;
   width: 100%;
-  max-width: 580px;
+  max-width: 640px;
   margin: -0.2rem 0 1rem;
   color: #6b7280;
   font-size: 0.82rem;
   text-align: center;
 
   @media (min-width: 768px) {
-    align-items: center;
     flex-direction: row;
-    text-align: left;
+    justify-content: center;
   }
 }
 
@@ -123,19 +101,15 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.4rem;
-
-  @media (min-width: 768px) {
-    justify-content: flex-start;
-  }
 }
 
 .popularLinks a {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #fed7aa;
+  border: 1px solid #bae6fd;
   border-radius: 999px;
-  background: rgba(255, 247, 237, 0.92);
-  color: #9a3412;
+  background: rgba(240, 249, 255, 0.92);
+  color: #075985;
   font-weight: 700;
   line-height: 1;
   padding: 0.42rem 0.68rem;
@@ -147,8 +121,8 @@
 }
 
 .popularLinks a:hover {
-  border-color: #fdba74;
-  background: #ffedd5;
+  border-color: #7dd3fc;
+  background: #e0f2fe;
   transform: translateY(-1px);
 }
 
@@ -156,36 +130,60 @@
 .searchBarSticky {
   display: flex;
   width: 100%;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  border-radius: 0.375rem;
+  box-shadow:
+    0 18px 40px -12px rgba(14, 165, 233, 0.35),
+    0 4px 14px rgba(0, 0, 0, 0.14);
   margin-bottom: 1rem;
   background: white;
   overflow: visible;
+  transition: box-shadow 0.2s ease;
+}
+
+.searchBar:focus-within {
+  box-shadow:
+    0 20px 48px -12px rgba(14, 165, 233, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.14);
 }
 
 .searchBarSticky {
-  max-width: 760px;
-  margin: 0 auto 0;
-  box-shadow: none;
-  border: 1.5px solid #d3d4d5;
-  border-radius: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  max-width: 520px;
+  margin: 0;
+  box-shadow:
+    0 10px 24px -8px rgba(15, 23, 42, 0.16),
+    0 2px 6px rgba(15, 23, 42, 0.08);
+  border-radius: 0.375rem;
   overflow: visible;
   isolation: isolate;
 }
 
 .searchBarSticky .searchFields {
-  border: none;
-  border-radius: 0;
-  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-right: none;
+  border-radius: 0.375rem 0 0 0.375rem;
+}
+
+.searchBarSticky .queryIcon {
+  left: 0.875rem;
 }
 
 .searchBarSticky .queryInput {
-  border-radius: 0;
+  padding: 0.6rem 0.6rem 0.6rem 2.35rem;
+  font-size: 0.9375rem;
+  border-radius: 0.375rem 0 0 0.375rem;
 }
 
-.searchBarSticky .districtTrigger,
+.searchBarSticky .districtTrigger {
+  padding: 0 0.7rem 0 0.6rem;
+  font-size: 0.875rem;
+}
+
 .searchBarSticky .searchBtn {
-  border-radius: 0;
+  padding: 0 1.1rem;
+  font-size: 0.9375rem;
+  border-radius: 0 0.375rem 0.375rem 0;
 }
 
 .searchFields {
@@ -194,26 +192,40 @@
   min-width: 0;
   border: 1.5px solid #d3d4d5;
   border-right: none;
-  border-radius: 0.5rem 0 0 0.5rem;
+  border-radius: 0.375rem 0 0 0.375rem;
   overflow: visible;
 }
 
 /* Wrapper so Autocomplete.Root fills the flex space */
 .autocompleteRoot {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
+  align-items: center;
+}
+
+.queryIcon {
+  position: absolute;
+  left: 1.125rem;
+  top: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  color: #b0b1b3;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .queryInput {
   width: 100%;
   border: none;
   outline: none;
-  padding: 0.875rem 0.75rem 0.875rem 1rem;
-  font-size: 0.9375rem;
+  padding: 1.125rem 0.75rem 1.125rem 2.75rem;
+  font-size: 1.0625rem;
   color: #1b1c1e;
   background: white;
-  border-radius: 0.5rem 0 0 0.5rem;
+  border-radius: 0.375rem 0 0 0.375rem;
 
   &::placeholder {
     color: #9a9b9d;
@@ -234,7 +246,7 @@
 
 .autocompletePopup {
   background: white;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   border: 1px solid #e5e7eb;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -261,7 +273,7 @@
 
 .autocompleteItem {
   padding: 0.625rem 0.75rem;
-  border-radius: 0.375rem;
+  border-radius: 0.1875rem;
   font-size: 0.9375rem;
   color: #1b1c1e;
   cursor: pointer;
@@ -301,11 +313,11 @@
   align-items: center;
   gap: 0.375rem;
   height: 100%;
-  padding: 0 0.75rem 0 0.625rem;
+  padding: 0 0.875rem 0 0.75rem;
   border: none;
   background: white;
   cursor: pointer;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   color: #1b1c1e;
   white-space: nowrap;
 
@@ -354,7 +366,7 @@
   z-index: 200;
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
@@ -390,7 +402,7 @@
   width: 100%;
   padding: 0.5rem 0.75rem;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.1875rem;
   background: white;
   font-size: 0.875rem;
   color: #1b1c1e;
@@ -403,11 +415,11 @@
 }
 
 .districtOptionSelected {
-  background: #fff7ed;
-  color: #c2410c;
+  background: #f0f9ff;
+  color: #0369a1;
 
   &:hover {
-    background: #ffedd5;
+    background: #e0f2fe;
   }
 }
 
@@ -417,29 +429,32 @@
   color: #6b7280;
 
   .districtOptionSelected & {
-    color: #c2410c;
+    color: #0369a1;
   }
 }
 
 .searchBtn {
-  background: #f97316;
+  background: #0ea5e9;
   color: white;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 700;
-  padding: 0 1.5rem;
+  padding: 0 1.75rem;
   border: none;
   cursor: pointer;
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0 0.375rem 0.375rem 0;
   flex-shrink: 0;
   white-space: nowrap;
-  transition: background 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
 
   &:hover {
-    background: #ea580c;
+    background: #0284c7;
   }
 
   &:active {
-    background: #c2410c;
+    background: #0369a1;
+    transform: scale(0.98);
   }
 }
 
@@ -454,63 +469,12 @@
   flex-wrap: wrap;
   justify-content: center;
   text-align: center;
-
-  @media (min-width: 768px) {
-    justify-content: flex-start;
-    text-align: left;
-  }
 }
 
 .starGreen {
   color: #22c55e;
   display: inline-flex;
   align-items: center;
-}
-
-/* Hero image */
-
-.heroImage {
-  display: none;
-
-  @media (min-width: 768px) {
-    display: block;
-    position: relative;
-    z-index: 0;
-    flex-shrink: 0;
-    width: 500px;
-    height: 560px;
-    margin-left: -11rem;
-    border-radius: 1.35rem;
-    overflow: hidden;
-    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
-    transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-    transform-style: preserve-3d;
-    transition:
-      box-shadow 0.2s ease,
-      transform 0.12s ease-out;
-    will-change: transform;
-  }
-
-  @media (min-width: 1024px) {
-    width: 620px;
-    height: 660px;
-    margin-left: -15rem;
-  }
-
-  @media (min-width: 1200px) {
-    width: 690px;
-    height: 700px;
-    margin-left: -17rem;
-    margin-right: -3rem;
-  }
-}
-
-.heroImageImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transform: scale(1.035);
 }
 
 /* Sticky search bar */
@@ -520,20 +484,23 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 50;
-  background: white;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  padding: 0.7rem 1.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
   display: none;
   justify-content: center;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-100%);
+  transform: translateY(-10px) scale(0.99);
   transition:
-    opacity 0.22s ease,
-    transform 0.22s ease,
-    visibility 0s linear 0.22s;
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0s linear 0.2s;
   will-change: opacity, transform;
 
   @media (min-width: 768px) {
@@ -545,9 +512,25 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   transition:
-    opacity 0.22s ease,
-    transform 0.22s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease,
     visibility 0s;
+}
+
+.stickyBarInner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+}
+
+.stickyBarLogo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-right: 1.75rem;
+  padding-right: 1.75rem;
+  border-right: 1px solid #e5e7eb;
 }

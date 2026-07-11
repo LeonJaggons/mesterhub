@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
         <p style="margin:0 0 16px;color:#334155;font-size:16px;line-height:1.6;">${escapeHtml(copy.intro)}</p>
         <p style="margin:0 0 20px;color:#334155;font-size:16px;line-height:1.6;">${escapeHtml(copy.instruction)}</p>
         <p style="margin:0 0 20px;">
-          <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:11px 24px;border-radius:6px;background:#f97316;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">${escapeHtml(copy.cta)}</a>
+          <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:11px 24px;border-radius:6px;background:#0ea5e9;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">${escapeHtml(copy.cta)}</a>
         </p>
         <p style="margin:0;color:#676d73;font-size:14px;line-height:22px;">${escapeHtml(copy.ignore)}</p>
       `,

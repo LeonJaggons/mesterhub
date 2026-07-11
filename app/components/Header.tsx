@@ -36,7 +36,7 @@ export function LogoMark() {
         </svg>
       </span>
       <span className={`${styles.logoText} select-none`}>
-        <span className="text-gray-900">mester</span><span className="text-orange-500">mind</span>
+        <span className="text-gray-900">mester</span><span className="text-sky-500">mind</span>
       </span>
     </span>
   )
@@ -233,7 +233,7 @@ function ServicesMenu({ categories }: { categories: Category[] }) {
       onMouseLeave={() => { closeTimer.current = setTimeout(() => setOpen(false), 100) }}
     >
       <button
-        className={`${styles.headerMenuText} ${styles.headerNavItem} flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors`}
+        className={`${styles.headerMenuText} ${styles.headerNavItem} flex cursor-pointer items-center gap-1 rounded px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors`}
         aria-expanded={open}
       >
         {t('header.services.explore')}
@@ -252,7 +252,7 @@ function CustomerNavLink({ href, label, badge = 0 }: { href: string; label: stri
   return (
     <Link
       href={href}
-      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded-lg transition-colors ${
+      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded transition-colors ${
         active ? 'text-slate-800 bg-slate-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
@@ -268,9 +268,7 @@ function CustomerNav({ activeAppointments, hasAdminAccess }: { activeAppointment
   return (
     <>
       {hasAdminAccess && <CustomerNavLink href="/admin" label={t('header.adminNav.admin')} />}
-      <CustomerNavLink href="/requests" label={t('header.customerNav.requests')} />
-      <CustomerNavLink href="/projects" label={t('header.customerNav.projects')} />
-      <CustomerNavLink href="/appointments" label={t('header.customerNav.appointments')} badge={activeAppointments} />
+      <CustomerNavLink href="/requests" label={t('header.customerNav.requests')} badge={activeAppointments} />
       <CustomerNavLink href="/messages" label={t('header.customerNav.messages')} />
     </>
   )
@@ -307,6 +305,10 @@ function CustomerProfileMenu({ user }: { user: User }) {
           {t('header.auth.help')}
         </Link>
         <hr className={styles.menuSeparator} />
+        <Link href="/pro" className={styles.menuItem} onClick={() => setOpen(false)}>
+          {t('header.customerNav.joinPro')}
+        </Link>
+        <hr className={styles.menuSeparator} />
         <button className={`${styles.menuItem} ${styles.menuItemDanger}`} onClick={handleSignOut}>
           {t('header.auth.signOut')}
         </button>
@@ -330,7 +332,7 @@ function ProNavLink({ href, label, badge = 0 }: { href: string; label: string; b
   return (
     <Link
       href={href}
-      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded-lg transition-colors ${
+      className={`${styles.headerMenuText} ${styles.headerNavItem} relative flex items-center gap-1 px-2.5 py-1.5 font-normal rounded transition-colors ${
         active ? 'text-slate-800 bg-slate-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
@@ -623,9 +625,7 @@ function MobileMenu({
               {user && (
                 <>
                   {hasAdminAccess && <MobileNavLink href="/admin" label={t('header.adminNav.admin')} onClick={() => setOpen(false)} />}
-                  <MobileNavLink href="/requests" label={t('header.customerNav.requests')} onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/projects" label={t('header.customerNav.projects')} onClick={() => setOpen(false)} />
-                  <MobileNavLink href="/appointments" label={t('header.customerNav.appointments')} badge={activeAppointments} onClick={() => setOpen(false)} />
+                  <MobileNavLink href="/requests" label={t('header.customerNav.requests')} badge={activeAppointments} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/messages" label={t('header.customerNav.messages')} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/notifications" label={t('header.proNav.notifications')} badge={unreadNotifications} onClick={() => setOpen(false)} />
                   <MobileNavLink href="/settings" label={t('header.customerNav.settings')} onClick={() => setOpen(false)} />
@@ -830,10 +830,13 @@ export default function Header() {
       ) : (
         <nav className={styles.desktopNav}>
           <ServicesMenu categories={categories} />
-          {user && <CustomerNav activeAppointments={activeAppointments} hasAdminAccess={hasAdminAccess} />}
-          <Link href="/pro" className={`${styles.headerMenuText} ${styles.headerNavItem} px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 transition-colors`}>
-            {t('header.customerNav.joinPro')}
-          </Link>
+          {user ? (
+            <CustomerNav activeAppointments={activeAppointments} hasAdminAccess={hasAdminAccess} />
+          ) : (
+            <Link href="/pro" className={`${styles.headerMenuText} ${styles.headerNavItem} px-2.5 py-1.5 font-normal text-gray-600 hover:text-gray-900 transition-colors`}>
+              {t('header.customerNav.joinPro')}
+            </Link>
+          )}
           <LanguageChooser />
           {user ? (
             <>
@@ -845,11 +848,11 @@ export default function Header() {
           ) : (
             <>
               <Link href="/register">
-                <Button className={`${styles.headerMenuText} rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 px-5 py-2 font-semibold text-white cursor-pointer shadow-sm transition-all`}>
+                <Button className={`${styles.headerMenuText} rounded bg-gradient-to-br from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 px-5 py-2 font-semibold text-white cursor-pointer shadow-sm transition-all`}>
                   {t('header.auth.signUp')}
                 </Button>
               </Link>
-              <Link href="/login" className={`${styles.headerMenuText} ${styles.headerNavItem} px-3 py-1.5 font-normal text-gray-700 hover:bg-gray-100 rounded-lg transition-colors`}>
+              <Link href="/login" className={`${styles.headerMenuText} ${styles.headerNavItem} px-3 py-1.5 font-normal text-gray-700 hover:bg-gray-100 rounded transition-colors`}>
                 {t('header.auth.login')}
               </Link>
             </>

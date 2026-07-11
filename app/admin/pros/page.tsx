@@ -273,7 +273,7 @@ export default function AdminProsPage() {
 
   return (
     <>
-      <section className="rounded-2xl border border-orange-100 bg-orange-50/40 p-5 shadow-sm">
+      <section className="rounded-lg border border-sky-100 bg-sky-50/40 p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-3xl font-black text-gray-950" style={dg}>Import Qjob pros</h2>
@@ -285,7 +285,7 @@ export default function AdminProsPage() {
             type="button"
             disabled={!importFile || importing}
             onClick={importQjobPros}
-            className="cursor-pointer rounded-xl border-none bg-orange-500 px-5 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="cursor-pointer rounded-md border-none bg-sky-500 px-5 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
             {importing ? 'Importing...' : 'Import JSON'}
           </button>
@@ -298,7 +298,7 @@ export default function AdminProsPage() {
               type="file"
               accept="application/json,.json"
               onChange={event => setImportFile(event.target.files?.[0] ?? null)}
-              className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded-md border border-sky-100 bg-white px-3 py-2 text-gray-900"
             />
           </label>
           <label className="text-sm font-semibold text-gray-700">
@@ -306,7 +306,7 @@ export default function AdminProsPage() {
             <select
               value={importStatus}
               onChange={event => setImportStatus(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded-md border border-sky-100 bg-white px-3 py-2 text-gray-900"
             >
               {STATUSES.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
             </select>
@@ -319,29 +319,29 @@ export default function AdminProsPage() {
               step="100"
               value={imageDelayMs}
               onChange={event => setImageDelayMs(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-orange-100 bg-white px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded-md border border-sky-100 bg-white px-3 py-2 text-gray-900"
             />
           </label>
         </div>
 
         {importSummary && <p className="mt-3 text-sm font-semibold text-green-700">{importSummary}</p>}
         {(importing || importLog.length > 0) && (
-          <div className="mt-4 rounded-xl border border-orange-100 bg-white p-4">
+          <div className="mt-4 rounded-md border border-sky-100 bg-white p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-bold text-gray-900">
                 Progress {importTotal ? `${importCurrent}/${importTotal}` : ''}
               </p>
-              {importing && <span className="text-xs font-semibold text-orange-700">Running...</span>}
+              {importing && <span className="text-xs font-semibold text-sky-700">Running...</span>}
             </div>
             {importTotal > 0 && (
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-orange-100">
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-sky-100">
                 <div
-                  className="h-full rounded-full bg-orange-500 transition-all"
+                  className="h-full rounded-full bg-sky-500 transition-all"
                   style={{ width: `${Math.min(100, Math.round((importCurrent / importTotal) * 100))}%` }}
                 />
               </div>
             )}
-            <div className="mt-3 max-h-56 overflow-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-slate-100">
+            <div className="mt-3 max-h-56 overflow-auto rounded bg-slate-950 p-3 font-mono text-xs text-slate-100">
               {importLog.length === 0 ? (
                 <div>Waiting for import progress...</div>
               ) : (
@@ -351,9 +351,9 @@ export default function AdminProsPage() {
           </div>
         )}
         {importResults.length > 0 && (
-          <div className="mt-4 max-h-64 overflow-auto rounded-xl border border-orange-100 bg-white">
+          <div className="mt-4 max-h-64 overflow-auto rounded-md border border-sky-100 bg-white">
             <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 bg-orange-50 text-xs uppercase text-orange-700">
+              <thead className="sticky top-0 bg-sky-50 text-xs uppercase text-sky-700">
                 <tr>
                   <th className="px-3 py-2">Status</th>
                   <th className="px-3 py-2">Name</th>
@@ -363,7 +363,7 @@ export default function AdminProsPage() {
               </thead>
               <tbody>
                 {importResults.slice(0, 100).map((result, index) => (
-                  <tr key={`${result.email}-${index}`} className="border-t border-orange-50">
+                  <tr key={`${result.email}-${index}`} className="border-t border-sky-50">
                     <td className="px-3 py-2 font-semibold text-gray-900">{result.status}</td>
                     <td className="px-3 py-2 text-gray-700">{result.name || '-'}</td>
                     <td className="px-3 py-2 text-gray-700">{result.email}</td>
@@ -376,7 +376,7 @@ export default function AdminProsPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-3xl font-black text-gray-950" style={dg}>Pro verification</h2>
@@ -391,7 +391,7 @@ export default function AdminProsPage() {
               onChange={e => {
                 void changeStatus(e.target.value)
               }}
-              className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900"
             >
               {STATUSES.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
             </select>
@@ -401,7 +401,7 @@ export default function AdminProsPage() {
             <input
               value={reason}
               onChange={e => setReason(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900"
               placeholder="Reason for rejection or suspension"
             />
           </label>
@@ -410,7 +410,7 @@ export default function AdminProsPage() {
         {passwordMessage && <p className="mt-3 text-sm font-semibold text-green-700">{passwordMessage}</p>}
       </section>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-semibold text-gray-700">
           Page {pageIndex + 1} · Showing {pros.length} pros
         </p>
@@ -419,7 +419,7 @@ export default function AdminProsPage() {
             type="button"
             disabled={loading || pageIndex === 0}
             onClick={goToPreviousPage}
-            className="cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Previous
           </button>
@@ -427,7 +427,7 @@ export default function AdminProsPage() {
             type="button"
             disabled={loading || !hasNextPage}
             onClick={goToNextPage}
-            className="cursor-pointer rounded-xl border-none bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-md border-none bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Next
           </button>
@@ -435,21 +435,21 @@ export default function AdminProsPage() {
       </div>
 
       {loading ? (
-        <div className="h-44 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+        <div className="h-44 animate-pulse rounded-lg border border-gray-200 bg-white" />
       ) : pros.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
           No pros with this status.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {pros.map(pro => (
-            <article key={pro.uid} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <article key={pro.uid} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-black text-gray-950" style={dg}>{pro.fullName || 'Unnamed pro'}</h3>
                   <p className="text-sm text-gray-500">{pro.categoryName || 'No category'} · {pro.account?.email || 'No email'}</p>
                 </div>
-                <span className="rounded-full border border-orange-100 bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700">
+                <span className="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">
                   {pro.status}
                 </span>
               </div>
@@ -467,16 +467,16 @@ export default function AdminProsPage() {
                   ['Certificate', pro.verification?.certificateUrl],
                   ['Insurance', pro.verification?.insuranceUrl],
                 ].map(([label, url]) => url ? (
-                  <a key={label} href={url} target="_blank" rel="noreferrer" className="font-semibold text-orange-600 hover:underline">{label}</a>
+                  <a key={label} href={url} target="_blank" rel="noreferrer" className="font-semibold text-sky-600 hover:underline">{label}</a>
                 ) : null)}
               </div>
               <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-4">
-                <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'approve')} className="cursor-pointer rounded-xl border-none bg-orange-500 py-2.5 font-bold text-white disabled:opacity-60">Approve</button>
-                <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'reject')} className="cursor-pointer rounded-xl border border-gray-200 bg-white py-2.5 font-semibold text-gray-700 disabled:opacity-60">Reject</button>
-                <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'suspend')} className="cursor-pointer rounded-xl border-none bg-slate-800 py-2.5 font-semibold text-white disabled:opacity-60">Suspend</button>
-                <button disabled={busyUid === pro.uid} onClick={() => deletePro(pro)} className="cursor-pointer rounded-xl border border-red-200 bg-red-50 py-2.5 font-semibold text-red-700 disabled:opacity-60">Delete</button>
+                <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'approve')} className="cursor-pointer rounded-md border-none bg-sky-500 py-2.5 font-bold text-white disabled:opacity-60">Approve</button>
+                <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'reject')} className="cursor-pointer rounded-md border border-gray-200 bg-white py-2.5 font-semibold text-gray-700 disabled:opacity-60">Reject</button>
+                <button disabled={busyUid === pro.uid} onClick={() => act(pro.uid, 'suspend')} className="cursor-pointer rounded-md border-none bg-slate-800 py-2.5 font-semibold text-white disabled:opacity-60">Suspend</button>
+                <button disabled={busyUid === pro.uid} onClick={() => deletePro(pro)} className="cursor-pointer rounded-md border border-red-200 bg-red-50 py-2.5 font-semibold text-red-700 disabled:opacity-60">Delete</button>
               </div>
-              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3">
+              <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 p-3">
                 <label className="text-sm font-semibold text-gray-700">
                   Set account password
                   <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
@@ -485,14 +485,14 @@ export default function AdminProsPage() {
                       autoComplete="new-password"
                       value={passwordByUid[pro.uid] ?? ''}
                       onChange={event => setPasswordByUid(previous => ({ ...previous, [pro.uid]: event.target.value }))}
-                      className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900"
+                      className="rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900"
                       placeholder="Minimum 8 characters"
                     />
                     <button
                       type="button"
                       disabled={busyUid === pro.uid || (passwordByUid[pro.uid]?.trim().length ?? 0) < 8}
                       onClick={() => setProPassword(pro)}
-                      className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Set password
                     </button>

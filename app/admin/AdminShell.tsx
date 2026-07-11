@@ -34,10 +34,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 lg:px-8">
-        <section className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-orange-500">Admin</p>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-sky-500">Admin</p>
               <h1 className="text-4xl font-black leading-none text-gray-950 sm:text-5xl" style={{ ...dg, letterSpacing: '-0.03em' }}>
                 Mestermind control panel
               </h1>
@@ -52,8 +52,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
                     isActive(pathname, item.href)
-                      ? 'bg-orange-500 text-white shadow-sm'
-                      : 'border border-gray-200 bg-white text-gray-600 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700'
+                      ? 'bg-sky-500 text-white shadow-sm'
+                      : 'border border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700'
                   }`}
                 >
                   {item.label}

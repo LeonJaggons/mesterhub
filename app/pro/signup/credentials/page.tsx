@@ -44,7 +44,7 @@ function UploadBox({ state, fileName, inputRef, onRetry, copy }: {
       style={{ cursor: state === 'uploading' ? 'wait' : 'pointer' }}
       onClick={() => state !== 'uploading' && inputRef.current?.click()}
     >
-      <MdOutlineUploadFile size={28} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />
+      <MdOutlineUploadFile size={28} color="#0ea5e9" style={{ margin: '0 auto 0.5rem' }} />
       {state === 'uploading' && <p className={styles.uploadTitle}>{copy.uploading}</p>}
       {state === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{copy.uploadFailed}</p>}
       {state === 'idle' && (

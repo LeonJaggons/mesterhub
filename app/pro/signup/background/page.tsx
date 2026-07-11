@@ -31,9 +31,9 @@ export default function BackgroundPage() {
           onClick={() => setOpted(true)}
           style={{
             padding: '1.25rem 1.5rem',
-            border: `2px solid ${opted === true ? '#f97316' : '#e5e7eb'}`,
+            border: `2px solid ${opted === true ? '#0ea5e9' : '#e5e7eb'}`,
             borderRadius: '0.75rem',
-            background: opted === true ? '#fff7ed' : 'white',
+            background: opted === true ? '#f0f9ff' : 'white',
             cursor: 'pointer',
             textAlign: 'left',
             transition: 'border-color 0.15s, background 0.15s',
@@ -41,7 +41,7 @@ export default function BackgroundPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#111827', ...dg }}>{t('proSignup.background.yes')}</span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#f97316', color: 'white', borderRadius: '1rem', padding: '0.2rem 0.6rem' }}>{t('proSignup.background.recommended')}</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#0ea5e9', color: 'white', borderRadius: '1rem', padding: '0.2rem 0.6rem' }}>{t('proSignup.background.recommended')}</span>
           </div>
           <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
             {t('proSignup.background.yesBody', { badge: t('proSignup.background.badge') })}

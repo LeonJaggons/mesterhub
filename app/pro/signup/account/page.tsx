@@ -148,10 +148,10 @@ export default function AccountPage() {
         <div style={{
           marginBottom: '1.25rem',
           padding: '1rem',
-          border: '1px solid #fed7aa',
-          background: '#fff7ed',
+          border: '1px solid #bae6fd',
+          background: '#f0f9ff',
           borderRadius: '0.75rem',
-          color: '#9a3412',
+          color: '#075985',
           fontSize: '0.875rem',
           lineHeight: 1.5,
         }}>

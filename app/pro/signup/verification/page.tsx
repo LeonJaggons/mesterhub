@@ -82,7 +82,7 @@ export default function VerificationPage() {
             style={{ cursor: idState === 'uploading' ? 'wait' : 'pointer' }}
             onClick={() => idState !== 'uploading' && idInputRef.current?.click()}
           >
-            <MdOutlineUploadFile size={32} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />
+            <MdOutlineUploadFile size={32} color="#0ea5e9" style={{ margin: '0 auto 0.5rem' }} />
             {idState === 'uploading' && <p className={styles.uploadTitle}>{t('proSignup.common.uploading')}</p>}
             {idState === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{t('proSignup.common.uploadFailedClickRetry')}</p>}
             {idState === 'idle' && (
@@ -123,7 +123,7 @@ export default function VerificationPage() {
           >
             {selfiePreview
               ? <img src={selfiePreview} alt={t('proSignup.verification.selfieAlt')} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 0.5rem' }} />
-              : <MdOutlineCameraAlt size={32} color="#f97316" style={{ margin: '0 auto 0.5rem' }} />}
+              : <MdOutlineCameraAlt size={32} color="#0ea5e9" style={{ margin: '0 auto 0.5rem' }} />}
             {selfieState === 'uploading' && <p className={styles.uploadTitle}>{t('proSignup.common.uploading')}</p>}
             {selfieState === 'error' && <p className={styles.uploadTitle} style={{ color: '#ef4444' }}>{t('proSignup.common.uploadFailedClickRetry')}</p>}
             {selfieState === 'idle' && (

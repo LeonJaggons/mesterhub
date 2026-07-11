@@ -90,8 +90,8 @@ function reviewPostedEmailHtml(input: {
   return `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
       <tr>
-        <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">New review</div>
+        <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+          <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">New review</div>
           <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">A customer reviewed your completed job</div>
         </td>
       </tr>
@@ -101,7 +101,7 @@ function reviewPostedEmailHtml(input: {
       <tr>
         <td style="padding:0 0 18px;">
           <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${escapeEmailHtml(input.customerName)} left you a review</h1>
-          <div style="margin-top:10px;color:#f97316;font-size:24px;line-height:28px;letter-spacing:1px;">${stars(input.rating)}</div>
+          <div style="margin-top:10px;color:#0ea5e9;font-size:24px;line-height:28px;letter-spacing:1px;">${stars(input.rating)}</div>
           <div style="margin-top:4px;color:#676d73;font-size:14px;line-height:20px;">${input.rating}/5 for ${escapeEmailHtml(input.categoryName)}</div>
         </td>
       </tr>
@@ -118,7 +118,7 @@ function reviewPostedEmailHtml(input: {
 
     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
       <tr>
-        <td style="background:#f97316;border-radius:4px;">
+        <td style="background:#0ea5e9;border-radius:4px;">
           <a href="${escapeEmailHtml(input.profileUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">View reviews</a>
         </td>
       </tr>
@@ -268,8 +268,8 @@ export async function POST(request: NextRequest) {
           bodyHtml: `
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
               <tr>
-                <td style="height:112px;background:#fff7ed;border-radius:4px 4px 0 0;border-bottom:1px solid #f1d8c7;text-align:center;">
-                  <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Új értékelés</div>
+                <td style="height:112px;background:#f0f9ff;border-radius:4px 4px 0 0;border-bottom:1px solid #bae6fd;text-align:center;">
+                  <div style="font-size:13px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0ea5e9;">Új értékelés</div>
                   <div style="margin-top:8px;font-size:15px;line-height:22px;color:#676d73;">Egy ügyfél értékelte a befejezett munkád</div>
                 </td>
               </tr>
@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
               <tr>
                 <td style="padding:0 0 18px;">
                   <h1 style="margin:0;color:#2f3033;font-size:24px;line-height:32px;font-weight:700;">${escapeEmailHtml(review.customerName)} értékelést írt rólad</h1>
-                  <div style="margin-top:10px;color:#f97316;font-size:24px;line-height:28px;letter-spacing:1px;">${stars(review.rating)}</div>
+                  <div style="margin-top:10px;color:#0ea5e9;font-size:24px;line-height:28px;letter-spacing:1px;">${stars(review.rating)}</div>
                   <div style="margin-top:4px;color:#676d73;font-size:14px;line-height:20px;">${review.rating}/5 ehhez: ${escapeEmailHtml(categoryNameHu)}</div>
                 </td>
               </tr>
@@ -296,7 +296,7 @@ export async function POST(request: NextRequest) {
 
             <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:22px 0 4px;">
               <tr>
-                <td style="background:#f97316;border-radius:4px;">
+                <td style="background:#0ea5e9;border-radius:4px;">
                   <a href="${escapeEmailHtml(profileUrl)}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;">Értékelések megtekintése</a>
                 </td>
               </tr>

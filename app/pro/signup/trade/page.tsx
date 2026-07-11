@@ -124,7 +124,7 @@ export default function TradePage() {
                 className={styles.categoryCard}
                 onClick={() => selectCategory(cat)}
               >
-                {Icon && <Icon size={28} color="#f97316" />}
+                {Icon && <Icon size={28} color="#0ea5e9" />}
                 <span className={styles.categoryCardName}>{translateCategory(t, cat.name)}</span>
                 {cat.regulated && <span className={styles.regulatedBadge}>{t('proSignup.trade.licensed')}</span>}
               </button>
@@ -140,7 +140,7 @@ export default function TradePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
             {CATEGORY_ICONS[selected.name] && (() => {
               const Icon = CATEGORY_ICONS[selected.name]
-              return <Icon size={28} color="#f97316" />
+              return <Icon size={28} color="#0ea5e9" />
             })()}
             <span style={{ fontWeight: 700, fontSize: '1.125rem', color: '#111827', ...dg }}>{translateCategory(t, selected.name)}</span>
           </div>

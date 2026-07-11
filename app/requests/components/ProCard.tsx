@@ -64,7 +64,7 @@ export function ProRating({ pro }: { pro: ProSummary }) {
           <MdStar
             key={i}
             size={14}
-            color={i <= Math.round(rating) ? '#f97316' : '#d1d5db'}
+            color={i <= Math.round(rating) ? '#0ea5e9' : '#d1d5db'}
           />
         ))}
       </span>
@@ -80,14 +80,14 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
   const moreDistricts = pro.districts.length - topDistricts.length
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="h-20 bg-gradient-to-br from-orange-400 to-orange-600" />
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className="h-20 bg-gradient-to-br from-sky-400 to-sky-600" />
       <div className="px-5 pb-5 -mt-10">
         <ProAvatar pro={pro} size={72} />
         <div className="mt-3">
           <Link
             href={`/pro/${pro.uid}`}
-            className="text-xl font-black text-gray-900 hover:text-orange-600 transition-colors"
+            className="text-xl font-black text-gray-900 hover:text-sky-600 transition-colors"
             style={dg}
           >
             {pro.fullName}
@@ -133,7 +133,7 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
                 {pro.services.slice(0, 5).map(s => (
                   <span
                     key={s}
-                    className="text-xs bg-orange-50 text-orange-800 border border-orange-100 rounded-full px-2 py-0.5"
+                    className="text-xs bg-sky-50 text-sky-800 border border-sky-100 rounded-full px-2 py-0.5"
                   >
                     {translateService(t, s)}
                   </span>
@@ -164,7 +164,7 @@ export function ProDetailCard({ pro }: { pro: ProSummary }) {
 
         <Link
           href={`/pro/${pro.uid}`}
-          className="mt-5 block w-full text-center py-2.5 rounded-lg bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 transition-colors"
+          className="mt-5 block w-full text-center py-2.5 rounded bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors"
         >
           {t('customerRequests.proCard.viewFullProfile')}
         </Link>

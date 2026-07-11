@@ -119,7 +119,7 @@ function MetricCard({
       : 'border-gray-200 bg-white'
 
   return (
-    <div className={`rounded-2xl border p-5 shadow-sm ${toneClass}`}>
+    <div className={`rounded-lg border p-5 shadow-sm ${toneClass}`}>
       <p className={`mb-2 text-xs font-bold uppercase tracking-widest ${tone === 'dark' ? 'text-slate-300' : tone === 'orange' ? 'text-slate-700' : 'text-gray-400'}`}>
         {label}
       </p>
@@ -135,7 +135,7 @@ function EarningsChart({ buckets }: { buckets: MonthBucket[] }) {
   const maxValue = Math.max(1, ...buckets.flatMap(bucket => [bucket.actual, bucket.expected]))
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proEarnings.chart.kicker')}</p>
@@ -155,12 +155,12 @@ function EarningsChart({ buckets }: { buckets: MonthBucket[] }) {
             <div key={bucket.key} className="flex flex-1 flex-col items-center gap-2">
               <div className="flex h-48 w-full items-end justify-center gap-1.5">
                 <div
-                  className="w-5 rounded-t-lg bg-slate-800"
+                  className="w-5 rounded-t bg-slate-800"
                   style={{ height: `${actualHeight}%` }}
                   title={t('proEarnings.chart.realTooltip', { month: bucket.label, value: money(locale, bucket.actual) })}
                 />
                 <div
-                  className="w-5 rounded-t-lg bg-slate-300"
+                  className="w-5 rounded-t bg-slate-300"
                   style={{ height: `${expectedHeight}%` }}
                   title={t('proEarnings.chart.expectedTooltip', { month: bucket.label, value: money(locale, bucket.expected) })}
                 />
@@ -173,7 +173,7 @@ function EarningsChart({ buckets }: { buckets: MonthBucket[] }) {
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {buckets.slice(-3).map(bucket => (
-          <div key={bucket.key} className="rounded-xl bg-gray-50 p-3">
+          <div key={bucket.key} className="rounded-md bg-gray-50 p-3">
             <p className="text-xs font-bold text-gray-400">{bucket.label}</p>
             <p className="mt-1 text-sm font-bold text-slate-800">{money(locale, bucket.actual)}</p>
             <p className="text-xs text-slate-500">{t('proEarnings.chart.expectedAddition', { value: money(locale, bucket.expected) })}</p>
@@ -188,7 +188,7 @@ function JobList({ title, jobs, empty }: { title: string; jobs: EarningsJob[]; e
   const t = useTranslations()
   const locale = useLocale()
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{title}</h2>
       {jobs.length > 0 ? (
         <div className="divide-y divide-gray-100">
@@ -274,7 +274,7 @@ export default function ProEarningsPage() {
         {loading ? (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
             {[1, 2, 3, 4].map(item => (
-              <div key={item} className="h-36 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+              <div key={item} className="h-36 animate-pulse rounded-lg border border-gray-200 bg-white" />
             ))}
           </div>
         ) : (
@@ -309,7 +309,7 @@ export default function ProEarningsPage() {
                 <EarningsChart buckets={buckets} />
               </div>
               <aside className="flex flex-col gap-4">
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                   <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-700">{t('proEarnings.forecast.kicker')}</p>
                   <h2 className="mb-4 text-2xl font-black leading-none text-gray-900" style={dg}>{t('proEarnings.forecast.title')}</h2>
                   <div className="divide-y divide-gray-100">
@@ -325,7 +325,7 @@ export default function ProEarningsPage() {
                     ))}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
                   <p className="mb-1 text-sm font-bold text-slate-800">
                     {t(active.length === 1 ? 'proEarnings.activeJobs.singular' : 'proEarnings.activeJobs.plural', { count: active.length })}
                   </p>

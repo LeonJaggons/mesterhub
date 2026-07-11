@@ -44,7 +44,7 @@ type ServiceRequest = {
 }
 
 const STATUS_COLORS: Record<RequestStatus, string> = {
-  pending: 'bg-orange-50 text-orange-700 border-orange-200',
+  pending: 'bg-sky-50 text-sky-700 border-sky-200',
   quoted: 'bg-blue-50 text-blue-700 border-blue-200',
   accepted: 'bg-green-50 text-green-700 border-green-200',
   declined: 'bg-gray-100 text-gray-500 border-gray-200',
@@ -141,7 +141,7 @@ function JobCard({
   const customerName = customerDisplayName(t, req.customerName)
   const categoryLabel = translateCategory(t, req.categoryName)
   const card = (
-    <div className={`bg-white rounded-2xl border shadow-sm transition-shadow ${isPending ? 'border-orange-200' : isQuoted ? 'border-blue-200' : 'border-gray-200 group-hover:shadow-md'}`}>
+    <div className={`bg-white rounded-lg border shadow-sm transition-shadow ${isPending ? 'border-sky-200' : isQuoted ? 'border-blue-200' : 'border-gray-200 group-hover:shadow-md'}`}>
       <div className="p-5">
         {/* Header row */}
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -149,7 +149,7 @@ function JobCard({
             <div className="flex items-center gap-2 mb-0.5">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                style={{ background: '#f97316' }}
+                style={{ background: '#0ea5e9' }}
               >
                 {customerName[0]?.toUpperCase() ?? '?'}
               </div>
@@ -171,7 +171,7 @@ function JobCard({
 
         {/* Question answers */}
         {details.length > 0 && (
-          <div className="bg-gray-50 rounded-xl p-3 mb-3 flex flex-wrap gap-x-4 gap-y-1.5">
+          <div className="bg-gray-50 rounded-md p-3 mb-3 flex flex-wrap gap-x-4 gap-y-1.5">
             {details.map(d => (
               <div key={d.key} className="text-sm">
                 <span className="text-gray-400">{d.key}: </span>
@@ -183,7 +183,7 @@ function JobCard({
 
         {/* Quote summary */}
         {isQuoted && req.quote && (
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-3 flex items-center gap-3 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3 mb-3 flex items-center gap-3 text-sm">
             <span className="text-blue-600 font-bold">{req.quote.price}</span>
             <span className="text-blue-400">·</span>
             <span className="text-blue-600">{translateQuoteTimeline(t, req.quote.timeline)}</span>
@@ -192,10 +192,10 @@ function JobCard({
 
         {/* Contact info — only visible after accepting */}
         {isAccepted && (
-          <div className="bg-green-50 border border-green-100 rounded-xl p-3 mb-3 flex flex-col gap-1">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3 mb-3 flex flex-col gap-1">
             <p className="text-xs font-bold text-green-700 mb-1">{t('proJobs.card.contactDetails')}</p>
             <p className="text-sm text-gray-700">{req.customerName}</p>
-            <p className="text-sm text-orange-500">{req.customerEmail}</p>
+            <p className="text-sm text-sky-500">{req.customerEmail}</p>
           </div>
         )}
 
@@ -204,14 +204,14 @@ function JobCard({
           <div className="flex gap-2 mt-1">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAccept(req.id) }}
-              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg py-2.5 text-sm transition-colors cursor-pointer border-none"
+              className="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded py-2.5 text-sm transition-colors cursor-pointer border-none"
               style={dg}
             >
               {t('proJobs.card.sendQuote')}
             </button>
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDecline(req.id) }}
-              className="px-4 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-lg text-sm transition-colors cursor-pointer bg-white"
+              className="px-4 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded text-sm transition-colors cursor-pointer bg-white"
             >
               {t('proJobs.card.decline')}
             </button>
@@ -237,17 +237,17 @@ function JobCard({
 function HiddenInquiryUpgradeCard({ resetLabel }: { resetLabel: string }) {
   const t = useTranslations()
   return (
-    <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
-      <div className="relative border-b border-orange-100 bg-orange-50 p-5">
+    <div className="overflow-hidden rounded-lg border border-sky-100 bg-white shadow-sm">
+      <div className="relative border-b border-sky-100 bg-sky-50 p-5">
         <div className="pointer-events-none select-none blur-[3px]" aria-hidden="true">
           <div className="mb-3 flex items-center gap-3">
             <div className="h-8 w-8 rounded-full bg-slate-300/80" />
-            <div className="h-4 w-36 rounded bg-slate-300/80" />
+            <div className="h-4 w-36 rounded-sm bg-slate-300/80" />
           </div>
-          <div className="mb-2 h-4 w-4/5 rounded bg-slate-300/70" />
-          <div className="h-4 w-2/3 rounded bg-slate-300/60" />
+          <div className="mb-2 h-4 w-4/5 rounded-sm bg-slate-300/70" />
+          <div className="h-4 w-2/3 rounded-sm bg-slate-300/60" />
         </div>
-        <div className="absolute inset-0 flex flex-col justify-center bg-orange-50/80 px-5">
+        <div className="absolute inset-0 flex flex-col justify-center bg-sky-50/80 px-5">
           <p className="text-sm font-bold text-gray-900">{t('proJobs.hidden.title')}</p>
           <p className="mt-1 text-xs leading-relaxed text-gray-600">
             {t('proJobs.hidden.detailsHidden')}
@@ -260,7 +260,7 @@ function HiddenInquiryUpgradeCard({ resetLabel }: { resetLabel: string }) {
         </p>
         <Link
           href="/pro/settings"
-          className="mt-4 block rounded-lg bg-orange-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600"
+          className="mt-4 block rounded bg-sky-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-sky-600"
           style={dg}
         >
           {t('proJobs.hidden.cta')}
@@ -368,7 +368,7 @@ export default function JobsPage() {
               : t('proJobs.header.noPending')}
           </p>
           {!hasProPlan && obfuscatedCount > 0 && (
-            <p className="mt-2 max-w-2xl text-sm font-semibold text-orange-600">
+            <p className="mt-2 max-w-2xl text-sm font-semibold text-sky-600">
               {t(
                 clearInquiryCount === 1 ? 'proJobs.hidden.freeViewsSingular' : 'proJobs.hidden.freeViewsPlural',
                 { count: clearInquiryCount }
@@ -381,12 +381,12 @@ export default function JobsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <section className="lg:col-span-2">
             {/* Tabs */}
-            <div className="flex gap-1 mb-6 bg-white border border-gray-200 rounded-xl p-1 w-fit">
+            <div className="flex gap-1 mb-6 bg-white border border-gray-200 rounded-md p-1 w-fit">
               {tabs.map(t => (
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  className={`relative px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer border-none ${
+                  className={`relative px-4 py-1.5 rounded text-sm font-semibold transition-colors cursor-pointer border-none ${
                     tab === t.id ? 'bg-slate-800 text-white shadow-sm' : 'bg-transparent text-gray-600 hover:text-gray-900'
                   }`}
                   style={dg}
@@ -405,15 +405,15 @@ export default function JobsPage() {
             {loading ? (
               <div className="flex flex-col gap-3">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="bg-white rounded-2xl border border-gray-200 p-5 animate-pulse">
+                  <div key={i} className="bg-white rounded-lg border border-gray-200 p-5 animate-pulse">
                     <div className="flex gap-3 mb-3">
                       <div className="w-8 h-8 rounded-full bg-gray-100 flex-shrink-0" />
                       <div className="flex-1 space-y-2">
-                        <div className="h-3.5 bg-gray-100 rounded w-24" />
-                        <div className="h-3 bg-gray-100 rounded w-16" />
+                        <div className="h-3.5 bg-gray-100 rounded-sm w-24" />
+                        <div className="h-3 bg-gray-100 rounded-sm w-16" />
                       </div>
                     </div>
-                    <div className="h-14 bg-gray-50 rounded-xl" />
+                    <div className="h-14 bg-gray-50 rounded-md" />
                   </div>
                 ))}
               </div>
@@ -448,15 +448,15 @@ export default function JobsPage() {
           <aside className="lg:sticky lg:top-6 flex flex-col gap-4">
             <ProUpgradeCta />
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
               <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.briefKicker')}</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.sidebar.briefTitle')}</h2>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                <div className="rounded-md bg-slate-50 border border-slate-100 p-3">
                   <p className="text-2xl font-black text-slate-800" style={dg}>{pendingCount}</p>
                   <p className="text-xs text-slate-500">{t('proJobs.sidebar.needQuotes')}</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                <div className="rounded-md bg-slate-50 border border-slate-100 p-3">
                   <p className="text-2xl font-black text-slate-800" style={dg}>{acceptedCount}</p>
                   <p className="text-xs text-slate-500">{t('proJobs.sidebar.acceptedJobs')}</p>
                 </div>
@@ -476,18 +476,18 @@ export default function JobsPage() {
             </div>
 
             {nextRequest && (
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+              <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
                 <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.nextActionKicker')}</p>
                 <h2 className="font-black text-gray-900 text-2xl leading-none mb-2" style={dg}>{translateCategory(t, nextRequest.categoryName)}</h2>
                 <p className="text-sm text-gray-500 mb-3">
                   {districtCopy(t, nextRequest)} · {timeAgo(t, nextRequest.createdAt) || t('proJobs.time.justNow')}
                 </p>
-                <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-sm text-gray-700 leading-relaxed mb-3">
+                <div className="rounded-md bg-gray-50 border border-gray-100 p-3 text-sm text-gray-700 leading-relaxed mb-3">
                   {t('proJobs.sidebar.nextActionBody')}
                 </div>
                 <Link
                   href={`/pro/jobs/${nextRequest.id}`}
-                  className="block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-2.5 text-sm"
+                  className="block text-center bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-md py-2.5 text-sm"
                   style={dg}
                 >
                   {t('proJobs.sidebar.reviewRequest')}
@@ -495,7 +495,7 @@ export default function JobsPage() {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
               <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.beforeQuotesKicker')}</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.sidebar.askYourself')}</h2>
               <ul className="flex flex-col gap-2.5 text-sm text-gray-600">
@@ -508,13 +508,13 @@ export default function JobsPage() {
               </ul>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
               <p className="text-xs font-bold tracking-widest uppercase text-slate-700 mb-2">{t('proJobs.sidebar.workMixKicker')}</p>
               <h2 className="font-black text-gray-900 text-2xl leading-none mb-4" style={dg}>{t('proJobs.sidebar.commonRequests')}</h2>
               {categories.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {categories.map(category => (
-                    <div key={category.name} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm">
+                    <div key={category.name} className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm">
                       <span className="font-semibold text-gray-800">{translateCategory(t, category.name)}</span>
                       <span className="text-gray-400">{category.count}</span>
                     </div>

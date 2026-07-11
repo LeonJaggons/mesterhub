@@ -148,8 +148,8 @@ const buttonBase = {
 
 const primaryButton = {
   ...buttonBase,
-  border: '1px solid #f97316',
-  background: '#f97316',
+  border: '1px solid #0ea5e9',
+  background: '#0ea5e9',
   color: '#fff',
 } as const
 
@@ -303,7 +303,7 @@ export default function ProSettingsPage() {
             {profile.avatarUrl ? (
               <img src={profile.avatarUrl} alt="" style={{ width: 72, height: 72, borderRadius: 12, objectFit: 'cover' }} />
             ) : (
-              <div style={{ width: 72, height: 72, borderRadius: 12, background: '#f97316', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.25rem' }}>
+              <div style={{ width: 72, height: 72, borderRadius: 12, background: '#0ea5e9', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.25rem' }}>
                 {initials(profile.fullName)}
               </div>
             )}
@@ -318,7 +318,7 @@ export default function ProSettingsPage() {
                 {profile.categoryName ? translateCategory(t, profile.categoryName) : t('proSettings.profile.details')} · {statusCopy(t, profile.status)}
               </p>
               <div style={{ height: 8, borderRadius: 999, background: '#e5e7eb', overflow: 'hidden', marginBottom: '0.5rem' }}>
-                <div style={{ width: `${score}%`, height: '100%', background: '#f97316' }} />
+                <div style={{ width: `${score}%`, height: '100%', background: '#0ea5e9' }} />
               </div>
               <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280' }}>{t('proSettings.profile.complete', { score })}</p>
             </div>
@@ -398,8 +398,8 @@ export default function ProSettingsPage() {
             marginBottom: '1rem',
             padding: 0,
             overflow: 'hidden',
-            borderColor: hasProPlan ? '#bbf7d0' : '#fed7aa',
-            background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 42%, #f8fafc 100%)',
+            borderColor: hasProPlan ? '#bbf7d0' : '#bae6fd',
+            background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 42%, #f8fafc 100%)',
           }}
         >
           <section className={styles.helpSection} style={{ marginBottom: 0, padding: '1.25rem' }}>
@@ -415,15 +415,15 @@ export default function ProSettingsPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#fff',
-                    background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                    boxShadow: '0 10px 24px rgba(249, 115, 22, 0.18)',
+                    background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                    boxShadow: '0 10px 24px rgba(14, 165, 233, 0.18)',
                     flexShrink: 0,
                   }}
                 >
                   ✦
                 </span>
                 <div>
-                  <p style={{ margin: '0 0 0.25rem', color: '#f97316', fontSize: '0.72rem', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  <p style={{ margin: '0 0 0.25rem', color: '#0ea5e9', fontSize: '0.72rem', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                     {t('proSettings.billing.kicker')}
                   </p>
                   <h2 style={{ margin: 0 }}>{t('proSettings.billing.title')}</h2>
@@ -434,7 +434,7 @@ export default function ProSettingsPage() {
                   </p>
                 </div>
               </div>
-              <span style={{ borderRadius: 999, padding: '0.32rem 0.75rem', fontSize: '0.75rem', fontWeight: 900, background: hasProPlan ? '#dcfce7' : '#fff7ed', border: `1px solid ${hasProPlan ? '#bbf7d0' : '#fed7aa'}`, color: hasProPlan ? '#166534' : '#c2410c', textTransform: 'capitalize' }}>
+              <span style={{ borderRadius: 999, padding: '0.32rem 0.75rem', fontSize: '0.75rem', fontWeight: 900, background: hasProPlan ? '#dcfce7' : '#f0f9ff', border: `1px solid ${hasProPlan ? '#bbf7d0' : '#bae6fd'}`, color: hasProPlan ? '#166534' : '#0369a1', textTransform: 'capitalize' }}>
                 {t(`proSettings.billing.status.${subscriptionStatus.replaceAll('-', '_')}`, { defaultValue: subscriptionStatus.replaceAll('_', ' ') })}
               </span>
             </div>
@@ -449,7 +449,7 @@ export default function ProSettingsPage() {
                 t('proSettings.billing.features.messages'),
               ].map(feature => (
                 <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', color: '#374151', fontWeight: 750, background: 'rgba(255, 255, 255, 0.72)', border: '1px solid rgba(229, 231, 235, 0.85)', borderRadius: 12, padding: '0.55rem 0.65rem' }}>
-                  <span style={{ width: 20, height: 20, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: hasProPlan ? '#dcfce7' : '#ffedd5', color: hasProPlan ? '#15803d' : '#ea580c', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
+                  <span style={{ width: 20, height: 20, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: hasProPlan ? '#dcfce7' : '#e0f2fe', color: hasProPlan ? '#15803d' : '#0284c7', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
                     ✓
                   </span>
                   {feature}
@@ -467,7 +467,7 @@ export default function ProSettingsPage() {
                 onClick={() => openBilling(canManageBilling ? '/api/stripe/portal' : '/api/stripe/checkout')}
                 style={{
                   ...(canManageBilling ? secondaryButton : primaryButton),
-                  boxShadow: canManageBilling ? 'none' : '0 10px 22px rgba(249, 115, 22, 0.18)',
+                  boxShadow: canManageBilling ? 'none' : '0 10px 22px rgba(14, 165, 233, 0.18)',
                 }}
               >
                 {billingLoading ? t('proSettings.billing.opening') : canManageBilling ? t('proSettings.billing.manage') : t('proSettings.billing.subscribe')}

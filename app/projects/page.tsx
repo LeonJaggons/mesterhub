@@ -13,6 +13,7 @@ import districtsData from '@/public/districts.json'
 import servicesData from '@/public/services.json'
 import styles from '../account/account.module.css'
 import { dg, districtLabel, formatAnswers, nowTimestamp, timestampMillis, type TimestampLike } from '../requests/shared'
+import CustomerActivityTabs from '@/app/components/CustomerActivityTabs'
 import {
   CATEGORY_QUESTIONS,
   MAX_ATTACHMENT_SIZE,
@@ -214,7 +215,7 @@ function CreateProjectModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-y-auto"
+        className="w-full max-w-2xl rounded-lg bg-white shadow-2xl overflow-y-auto"
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
@@ -239,12 +240,12 @@ function CreateProjectModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-1.5">
-              {t('projects.create.category')} <span className="text-orange-500">*</span>
+              {t('projects.create.category')} <span className="text-sky-500">*</span>
             </label>
             <select
               value={form.categoryName}
               onChange={e => updateForm('categoryName', e.target.value)}
-              className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+              className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
             >
               <option value="">{t('projects.create.selectCategory')}</option>
               {servicesData.categories.map(category => (
@@ -256,12 +257,12 @@ function CreateProjectModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                {t('projects.create.district')} <span className="text-orange-500">*</span>
+                {t('projects.create.district')} <span className="text-sky-500">*</span>
               </label>
               <select
                 value={form.customerDistrict}
                 onChange={e => updateForm('customerDistrict', e.target.value)}
-                className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+                className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
               >
                 <option value="">{t('projects.create.selectDistrict')}</option>
                 {districtsData.districts.map(district => (
@@ -271,12 +272,12 @@ function CreateProjectModal({
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1.5">
-                {t('projects.create.urgency')} <span className="text-orange-500">*</span>
+                {t('projects.create.urgency')} <span className="text-sky-500">*</span>
               </label>
               <select
                 value={form.urgency}
                 onChange={e => updateForm('urgency', e.target.value)}
-                className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+                className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
               >
                 <option value="">{t('projects.create.selectUrgency')}</option>
                 {URGENCY_OPTIONS.map(option => (
@@ -295,7 +296,7 @@ function CreateProjectModal({
                     <select
                       value={answers[question.id] ?? ''}
                       onChange={e => setAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
-                      className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+                      className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
                     >
                       <option value="">{t('projects.create.selectAnswer')}</option>
                       {question.options?.map(option => (
@@ -308,7 +309,7 @@ function CreateProjectModal({
                       value={answers[question.id] ?? ''}
                       onChange={e => setAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
                       placeholder={question.placeholder ? t(`projects.questions.placeholders.${question.id}`, { defaultValue: question.placeholder }) : undefined}
-                      className="w-full border border-gray-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-orange-400 transition-colors"
+                      className="w-full border border-gray-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-sky-400 transition-colors"
                     />
                   )}
                 </div>
@@ -318,13 +319,13 @@ function CreateProjectModal({
 
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-1.5">
-              {t('projects.create.describeWork')} <span className="text-orange-500">*</span>
+              {t('projects.create.describeWork')} <span className="text-sky-500">*</span>
             </label>
             <textarea
               value={form.projectDetails}
               onChange={e => updateForm('projectDetails', e.target.value)}
               placeholder={t('projects.create.describePlaceholder')}
-              className="w-full min-h-32 resize-y border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-orange-400 transition-colors"
+              className="w-full min-h-32 resize-y border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-sky-400 transition-colors"
               required
             />
           </div>
@@ -334,7 +335,7 @@ function CreateProjectModal({
             <select
               value={form.preferredTiming}
               onChange={e => updateForm('preferredTiming', e.target.value)}
-              className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-orange-400 transition-colors"
+              className="w-full appearance-none border border-gray-200 rounded-sm px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-sky-400 transition-colors"
             >
               <option value="">{t('projects.create.selectTiming')}</option>
               {TIMING_OPTIONS.map(option => (
@@ -378,13 +379,13 @@ function CreateProjectModal({
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer">
+            <button type="button" onClick={onClose} className="rounded-md border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer">
               {t('projects.create.cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting || !form.categoryName || !form.customerDistrict || !form.urgency || !form.projectDetails.trim()}
-              className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-xl py-3 text-base transition-colors cursor-pointer disabled:cursor-not-allowed border-none"
+              className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black rounded-md py-3 text-base transition-colors cursor-pointer disabled:cursor-not-allowed border-none"
               style={dg}
             >
               {submitting ? t('projects.create.creating') : t('projects.create.submit')}
@@ -417,7 +418,7 @@ function ProjectCard({
   const marketplaceQuotes = project.marketplaceQuotes?.filter(quote => quote.status === 'submitted' || quote.status === 'accepted') ?? []
 
   return (
-    <article className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <article className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <div className="p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -455,7 +456,7 @@ function ProjectCard({
         {details.length > 0 && (
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {details.map(detail => (
-              <div key={detail.key} className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+              <div key={detail.key} className="rounded-md border border-gray-100 bg-gray-50 p-3">
                 <p className="mb-1 text-xs text-gray-400">{detail.key}</p>
                 <p className="text-sm font-semibold text-gray-900">{detail.value}</p>
               </div>
@@ -464,7 +465,7 @@ function ProjectCard({
         )}
 
         {marketplaceQuotes.length > 0 && (
-          <section className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div className="mb-3">
               <p className="text-xs font-black uppercase tracking-widest text-slate-500">{t('projects.card.marketplace.title')}</p>
               <p className="mt-1 text-sm text-slate-600">
@@ -473,7 +474,7 @@ function ProjectCard({
             </div>
             <div className="flex flex-col gap-3">
               {marketplaceQuotes.map(quote => (
-                <div key={quote.id} className="rounded-xl border border-white bg-white p-3 shadow-sm">
+                <div key={quote.id} className="rounded-md border border-white bg-white p-3 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="text-sm font-bold text-gray-900">{quote.proName || t('projects.card.marketplace.proFallback')}</p>
@@ -490,7 +491,7 @@ function ProjectCard({
                       {quote.status === 'accepted' ? t('projects.card.marketplace.accepted') : t('projects.card.marketplace.badge')}
                     </span>
                   </div>
-                  <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                  <div className="mt-3 rounded border border-gray-100 bg-gray-50 px-3 py-2">
                     <p className="text-sm font-bold text-gray-900">
                       {quote.quote.price}
                       {quote.quote.timeline && <span className="font-normal text-gray-600"> · {quote.quote.timeline}</span>}
@@ -507,7 +508,7 @@ function ProjectCard({
                         type="button"
                         onClick={() => onAcceptMarketplaceQuote(project, quote)}
                         disabled={busyQuoteId === quote.id}
-                        className="rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded bg-sky-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {busyQuoteId === quote.id ? t('projects.card.marketplace.working') : t('projects.card.marketplace.accept')}
                       </button>
@@ -515,7 +516,7 @@ function ProjectCard({
                         type="button"
                         onClick={() => onDeclineMarketplaceQuote(project, quote)}
                         disabled={busyQuoteId === quote.id}
-                        className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {t('projects.card.marketplace.decline')}
                       </button>
@@ -531,13 +532,13 @@ function ProjectCard({
       <div className="flex flex-col gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3 sm:flex-row">
         <Link
           href={`/instant-results?q=${encodeURIComponent(project.categoryName)}`}
-          className="rounded-lg bg-orange-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600"
+          className="rounded bg-sky-500 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-sky-600"
         >
           {t('projects.card.sendAnother')}
         </Link>
         <Link
           href={`/requests?projectId=${encodeURIComponent(project.id)}`}
-          className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          className="rounded border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50"
         >
           {t('projects.card.viewRelated')}
         </Link>
@@ -546,7 +547,7 @@ function ProjectCard({
             type="button"
             onClick={() => onDelete(project)}
             disabled={isDeleting}
-            className="rounded-lg border border-red-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            className="rounded border border-red-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {isDeleting ? t('projects.card.deleting') : t('projects.card.delete')}
           </button>
@@ -684,16 +685,17 @@ export default function ProjectsPage() {
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 cursor-pointer border-none"
+            className="rounded bg-sky-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-600 cursor-pointer border-none"
           >
             {t('projects.header.create')}
           </button>
         </div>
+        <CustomerActivityTabs />
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-56 bg-white rounded-2xl border border-gray-200" />
+              <div key={i} className="h-56 bg-white rounded-lg border border-gray-200" />
             ))}
           </div>
         ) : projects.length === 0 ? (
@@ -707,7 +709,7 @@ export default function ProjectsPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {deleteError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                 {deleteError}
               </div>
             )}

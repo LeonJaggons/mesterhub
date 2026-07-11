@@ -195,16 +195,16 @@ export function ServiceLanding({ entry, locale, district }: { entry: SeoServiceE
               { label: locale === 'hu' ? 'Szolgáltatások' : 'Services', href: canonicalPath },
             ]}
           />
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-orange-300">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-sky-300">
             {locale === 'hu' ? 'Budapesti szakemberkereső' : 'Budapest local services'}
           </p>
           <h1 className="max-w-3xl text-5xl font-black leading-none tracking-tight md:text-6xl">{headline}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">{intro}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href={instantResultsPath(locale, entry, district)} className="rounded-lg bg-orange-500 px-6 py-3 text-center text-sm font-bold text-white hover:bg-orange-600">
+            <Link href={instantResultsPath(locale, entry, district)} className="rounded bg-sky-500 px-6 py-3 text-center text-sm font-bold text-white hover:bg-sky-600">
               {locale === 'hu' ? 'Szakemberek megtekintése' : 'View available pros'}
             </Link>
-            <Link href={localizedPath(locale, '/instant-results')} className="rounded-lg bg-white px-6 py-3 text-center text-sm font-bold text-gray-900 hover:bg-gray-100">
+            <Link href={localizedPath(locale, '/instant-results')} className="rounded bg-white px-6 py-3 text-center text-sm font-bold text-gray-900 hover:bg-gray-100">
               {locale === 'hu' ? 'Összes szolgáltatás' : 'Browse all services'}
             </Link>
           </div>
@@ -223,7 +223,7 @@ export function ServiceLanding({ entry, locale, district }: { entry: SeoServiceE
                 locale === 'hu' ? 'Árak és értékelések' : 'Prices and reviews',
                 locale === 'hu' ? 'Gyors ajánlatkérés' : 'Fast quote requests',
               ].map(item => (
-                <div key={item} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div key={item} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                   <p className="font-bold text-gray-900">{item}</p>
                 </div>
               ))}
@@ -234,19 +234,19 @@ export function ServiceLanding({ entry, locale, district }: { entry: SeoServiceE
                 : `Whether you need a small repair, urgent help, or planned work, Mestermind shows Budapest professionals who handle ${lower(label, locale)} jobs.`}
             </p>
           </div>
-          <aside className="rounded-3xl bg-gray-50 p-6">
+          <aside className="rounded-xl bg-gray-50 p-6">
             <h2 className="text-xl font-black text-gray-900">{locale === 'hu' ? 'Népszerű munkák' : 'Popular jobs'}</h2>
             <ul className="mt-4 space-y-3">
               {entry.featuredServices.map(service => (
                 <li key={service}>
-                  <Link href={`${localizedPath(locale, '/instant-results')}?q=${encodeURIComponent(service)}`} className="text-sm font-semibold text-slate-700 hover:text-orange-600">
+                  <Link href={`${localizedPath(locale, '/instant-results')}?q=${encodeURIComponent(service)}`} className="text-sm font-semibold text-slate-700 hover:text-sky-600">
                     {translateSeoService(service, locale)}
                   </Link>
                 </li>
               ))}
             </ul>
             {entry.regulated && entry.licenceNote ? (
-              <p className="mt-5 rounded-xl bg-white p-4 text-sm leading-6 text-gray-600">
+              <p className="mt-5 rounded-md bg-white p-4 text-sm leading-6 text-gray-600">
                 {locale === 'hu'
                   ? 'Ehhez a kategóriához engedély vagy szakmai igazolás szükséges lehet. Mindig ellenőrizd a profil részleteit foglalás előtt.'
                   : 'This category may require licensing or professional credentials. Always check profile details before booking.'}
@@ -264,7 +264,7 @@ export function ServiceLanding({ entry, locale, district }: { entry: SeoServiceE
             </h2>
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {relatedDistricts.map(item => (
-                <Link key={item.id} href={districtServicePath(item, entry, locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                <Link key={item.id} href={districtServicePath(item, entry, locale)} className="rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-sky-300 hover:text-sky-600">
                   {districtLabel(item, locale)}
                 </Link>
               ))}
@@ -276,7 +276,7 @@ export function ServiceLanding({ entry, locale, district }: { entry: SeoServiceE
             </h2>
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {relatedServices.map(item => (
-                <Link key={item.id} href={district ? districtServicePath(district, item, locale) : servicePath(item, locale)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600">
+                <Link key={item.id} href={district ? districtServicePath(district, item, locale) : servicePath(item, locale)} className="rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-sky-300 hover:text-sky-600">
                   {item.labels[locale]}
                 </Link>
               ))}
@@ -290,7 +290,7 @@ export function ServiceLanding({ entry, locale, district }: { entry: SeoServiceE
           <h2 className="text-3xl font-black text-gray-900">
             {locale === 'hu' ? 'Gyakori kérdések' : 'Frequently asked questions'}
           </h2>
-          <div className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
+          <div className="mt-6 divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
             {faq.map(item => (
               <div key={item.question} className="p-6">
                 <h3 className="text-lg font-black text-gray-900">{item.question}</h3>
@@ -326,7 +326,7 @@ export function DistrictLanding({ district, locale }: { district: SeoDistrict; l
       <section className="bg-slate-950 px-4 py-20 text-white">
         <div className="mx-auto max-w-5xl">
           <Breadcrumbs locale={locale} items={[{ label: district.name, href: districtPath(district, locale) }]} />
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-orange-300">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-sky-300">
             {locale === 'hu' ? 'Budapest kerületei' : 'Budapest districts'}
           </p>
           <h1 className="max-w-3xl text-5xl font-black leading-none tracking-tight md:text-6xl">
@@ -336,7 +336,7 @@ export function DistrictLanding({ district, locale }: { district: SeoDistrict; l
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">{districtIntro(district, locale)}</p>
           <div className="mt-8">
-            <Link href={instantResultsPath(locale, undefined, district)} className="rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white hover:bg-orange-600">
+            <Link href={instantResultsPath(locale, undefined, district)} className="rounded bg-sky-500 px-6 py-3 text-sm font-bold text-white hover:bg-sky-600">
               {locale === 'hu' ? 'Szakemberek keresése' : 'Find local pros'}
             </Link>
           </div>
@@ -350,7 +350,7 @@ export function DistrictLanding({ district, locale }: { district: SeoDistrict; l
           </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {topServices.map(item => (
-              <Link key={item.id} href={districtServicePath(district, item, locale)} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:border-orange-300">
+              <Link key={item.id} href={districtServicePath(district, item, locale)} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm hover:border-sky-300">
                 <h3 className="text-xl font-black text-gray-900">{item.labels[locale]}</h3>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
                   {locale === 'hu'
@@ -368,7 +368,7 @@ export function DistrictLanding({ district, locale }: { district: SeoDistrict; l
           <h2 className="text-3xl font-black text-gray-900">
             {locale === 'hu' ? 'Gyakori kérdések' : 'Frequently asked questions'}
           </h2>
-          <div className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
+          <div className="mt-6 divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
             {faq.map(item => (
               <div key={item.question} className="p-6">
                 <h3 className="text-lg font-black text-gray-900">{item.question}</h3>

@@ -96,40 +96,40 @@ export default function AdminReportsPage() {
 
   return (
     <>
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-3xl font-black text-gray-950" style={dg}>User reports</h2>
         <p className="mt-1 text-sm text-gray-500">Review customer and pro safety reports from profiles, requests, and conversations.</p>
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
           <label className="text-sm font-semibold text-gray-700">
             Status
-            <select value={status} onChange={e => { setStatus(e.target.value); loadReports(e.target.value, targetRole) }} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900">
+            <select value={status} onChange={e => { setStatus(e.target.value); loadReports(e.target.value, targetRole) }} className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900">
               <option value="">All statuses</option>
               {statuses.map(item => <option key={item} value={item}>{statusLabel(item)}</option>)}
             </select>
           </label>
           <label className="text-sm font-semibold text-gray-700">
             Reported role
-            <select value={targetRole} onChange={e => { setTargetRole(e.target.value); loadReports(status, e.target.value) }} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-900">
+            <select value={targetRole} onChange={e => { setTargetRole(e.target.value); loadReports(status, e.target.value) }} className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900">
               <option value="">All roles</option>
               {targetRoles.map(item => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
           <label className="text-sm font-semibold text-gray-700">
             Admin note
-            <input value={note} onChange={e => setNote(e.target.value)} placeholder="Optional note for the next action" className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900" />
+            <input value={note} onChange={e => setNote(e.target.value)} placeholder="Optional note for the next action" className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900" />
           </label>
         </div>
         {error && <p className="mt-3 text-sm font-semibold text-red-600">{error}</p>}
       </section>
 
       {loading ? (
-        <div className="h-44 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+        <div className="h-44 animate-pulse rounded-lg border border-gray-200 bg-white" />
       ) : items.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500">No reports match these filters.</div>
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">No reports match these filters.</div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {items.map(item => (
-            <article key={item.id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <article key={item.id} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-red-500">{item.reason ?? 'Report'}</p>
@@ -156,17 +156,17 @@ export default function AdminReportsPage() {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {item.requestId && (
-                  <Link href="/admin/requests" className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-bold text-white hover:bg-slate-900">
+                  <Link href="/admin/requests" className="rounded-md bg-slate-800 px-3 py-2 text-sm font-bold text-white hover:bg-slate-900">
                     Open requests
                   </Link>
                 )}
                 {item.path && (
-                  <Link href={reportLink(item)} className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
+                  <Link href={reportLink(item)} className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
                     Open source
                   </Link>
                 )}
                 {item.targetRole === 'pro' && item.targetUid && (
-                  <Link href="/admin/pros" className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
+                  <Link href="/admin/pros" className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
                     Open pros
                   </Link>
                 )}
@@ -174,7 +174,7 @@ export default function AdminReportsPage() {
 
               <div className="mt-5 flex flex-wrap gap-2">
                 {statuses.map(nextStatus => (
-                  <button key={nextStatus} disabled={busyId === item.id || item.status === nextStatus} onClick={() => updateReport(item.id, nextStatus)} className="cursor-pointer rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold capitalize text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-orange-50 hover:text-orange-700">
+                  <button key={nextStatus} disabled={busyId === item.id || item.status === nextStatus} onClick={() => updateReport(item.id, nextStatus)} className="cursor-pointer rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-bold capitalize text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-sky-50 hover:text-sky-700">
                     {statusLabel(nextStatus)}
                   </button>
                 ))}

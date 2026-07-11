@@ -115,7 +115,7 @@ export default function ReportUserButton({
       <button
         type="button"
         onClick={openReport}
-        className={className ?? 'rounded-xl border border-red-100 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 cursor-pointer'}
+        className={className ?? 'rounded-md border border-red-100 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 cursor-pointer'}
       >
         {buttonLabel ?? t(`reports.button.${targetRole === 'pro' ? 'pro' : targetRole === 'customer' ? 'customer' : 'user'}`)}
       </button>
@@ -126,7 +126,7 @@ export default function ReportUserButton({
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl"
             onClick={event => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
@@ -155,7 +155,7 @@ export default function ReportUserButton({
                 <select
                   value={reason}
                   onChange={event => setReason(event.target.value as ReportReason)}
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                  className="mt-1 w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
                 >
                   {REPORT_REASONS.map(option => (
                     <option key={option.value} value={option.value}>{t(`reports.reasons.${option.labelKey}`)}</option>
@@ -172,11 +172,11 @@ export default function ReportUserButton({
                   rows={5}
                   maxLength={2000}
                   placeholder={t('reports.detailsPlaceholder')}
-                  className="mt-1 w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                  className="mt-1 w-full resize-none rounded-md border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
                 />
               </label>
 
-              <p className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+              <p className="rounded-md border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
                 {t('reports.emergency')}
               </p>
 
@@ -187,14 +187,14 @@ export default function ReportUserButton({
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+                  className="flex-1 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
                 >
                   {t('reports.close')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || details.trim().length < 10}
-                  className="flex-1 rounded-xl border-none bg-red-600 px-4 py-3 text-sm font-black text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                  className="flex-1 rounded-md border-none bg-red-600 px-4 py-3 text-sm font-black text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? t('reports.sending') : t('reports.submit')}
                 </button>

@@ -141,7 +141,7 @@ export default function ProfilePage() {
                 onClick={() => avatarInputRef.current?.click()}
                 style={{
                   width: 72, height: 72, borderRadius: '50%', flexShrink: 0, cursor: 'pointer',
-                  overflow: 'hidden', background: avatarPreview ? 'transparent' : '#f97316',
+                  overflow: 'hidden', background: avatarPreview ? 'transparent' : '#0ea5e9',
                   color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '1.5rem', fontWeight: 700, border: '2px solid #e5e7eb',
                 }}
@@ -260,7 +260,7 @@ export default function ProfilePage() {
                 return (
                 <label key={key} style={{ display: 'grid', gap: '0.375rem' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 700, color: '#374151' }}>
-                    <Icon size={15} color="#f97316" />
+                    <Icon size={15} color="#0ea5e9" />
                     {fieldLabel}
                   </span>
                   <input
@@ -298,7 +298,7 @@ export default function ProfilePage() {
                 ? <p className={styles.previewBio}>{bio}</p>
                 : <p className={styles.previewBio} style={{ color: '#d1d5db' }}>{t('proSignup.profile.bioPreview')}</p>}
               {pricingType !== 'quote' && hourlyRate && (
-                <p style={{ fontSize: '0.875rem', fontWeight: 700, color: '#f97316', marginTop: '0.75rem' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0ea5e9', marginTop: '0.75rem' }}>
                   {Number(hourlyRate).toLocaleString('hu-HU')} Ft {pricingType === 'hourly' ? t('proSignup.profile.perHour') : t('proSignup.profile.starting')}
                 </p>
               )}

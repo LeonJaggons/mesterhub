@@ -23,7 +23,7 @@ type Overview = {
 
 function StatCard({ label, value, href }: { label: string; value: number; href: string }) {
   return (
-    <Link href={href} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-orange-200 hover:shadow-md">
+    <Link href={href} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:border-sky-200 hover:shadow-md">
       <p className="text-sm font-semibold text-gray-500">{label}</p>
       <p className="mt-3 text-4xl font-black text-gray-950" style={dg}>{value}</p>
     </Link>
@@ -32,7 +32,7 @@ function StatCard({ label, value, href }: { label: string; value: number; href: 
 
 function Breakdown({ title, items }: { title: string; items: Record<string, number> }) {
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="text-2xl font-black text-gray-950" style={dg}>{title}</h2>
       <div className="mt-4 flex flex-col gap-3">
         {Object.entries(items).map(([label, value]) => (
@@ -48,7 +48,7 @@ function Breakdown({ title, items }: { title: string; items: Record<string, numb
 
 function RecentList({ title, items, empty }: { title: string; items: Array<Record<string, unknown>>; empty: string }) {
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="text-2xl font-black text-gray-950" style={dg}>{title}</h2>
       <div className="mt-4 flex flex-col divide-y divide-gray-100">
         {items.length === 0 ? (
@@ -96,7 +96,7 @@ function TestEmailCard() {
   }
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <h2 className="text-2xl font-black text-gray-950" style={dg}>Send test email</h2>
       <p className="mt-1 text-sm text-gray-500">
         Sends through Resend from <span className="font-semibold text-gray-700">hello@mestermind.com</span>.
@@ -110,7 +110,7 @@ function TestEmailCard() {
             onChange={e => setTo(e.target.value)}
             placeholder="you@example.com"
             required
-            className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
           />
         </label>
         <label className="text-sm font-semibold text-gray-700">
@@ -119,7 +119,7 @@ function TestEmailCard() {
             value={subject}
             onChange={e => setSubject(e.target.value)}
             required
-            className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-gray-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
           />
         </label>
         <label className="text-sm font-semibold text-gray-700">
@@ -129,7 +129,7 @@ function TestEmailCard() {
             onChange={e => setMessage(e.target.value)}
             rows={4}
             required
-            className="mt-1 w-full resize-none rounded-xl border border-gray-200 px-3 py-2 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+            className="mt-1 w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-gray-900 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
           />
         </label>
         {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
@@ -137,7 +137,7 @@ function TestEmailCard() {
         <button
           type="submit"
           disabled={sending}
-          className="rounded-xl border-none bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-60 cursor-pointer"
+          className="rounded-md border-none bg-sky-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-600 disabled:opacity-60 cursor-pointer"
         >
           {sending ? 'Sending...' : 'Send test email'}
         </button>
@@ -169,8 +169,8 @@ export default function AdminOverviewPage() {
     }
   }, [])
 
-  if (loading) return <div className="h-64 animate-pulse rounded-3xl border border-gray-200 bg-white" />
-  if (error) return <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-sm font-semibold text-red-700">{error}</div>
+  if (loading) return <div className="h-64 animate-pulse rounded-xl border border-gray-200 bg-white" />
+  if (error) return <div className="rounded-lg border border-red-100 bg-red-50 p-5 text-sm font-semibold text-red-700">{error}</div>
   if (!overview) return null
 
   return (

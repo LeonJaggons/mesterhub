@@ -15,6 +15,7 @@ import {
   type ProSummary,
   type ServiceRequest,
 } from '../requests/shared'
+import CustomerActivityTabs from '@/app/components/CustomerActivityTabs'
 import { useLocale, useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
 
@@ -77,7 +78,7 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
 
   return (
     <Link href={`/requests/${req.id}`} className="block group">
-      <article className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all group-hover:shadow-md ${
+      <article className={`bg-white rounded-lg border shadow-sm overflow-hidden transition-all group-hover:shadow-md ${
         isCancelled ? 'border-gray-300 opacity-80' : 'border-gray-200 group-hover:border-slate-300'
       }`}>
         <div className="p-5">
@@ -100,7 +101,7 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
             </span>
           </div>
 
-          <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 mb-3">
+          <div className="rounded-md bg-slate-50 border border-slate-100 p-4 mb-3">
             <p className="text-lg font-black text-gray-900" style={dg}>
               {formatAppointmentDateTime(appointment.date, appointment.time, locale, t)}
             </p>
@@ -108,18 +109,18 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl bg-gray-50 border border-gray-100 p-3">
+            <div className="rounded-md bg-gray-50 border border-gray-100 p-3">
               <p className="text-xs text-gray-400 mb-1">{t('appointments.card.location')}</p>
               <p className="font-semibold text-gray-900">{locationLabel(t, req, appointment)}</p>
             </div>
-            <div className="rounded-xl bg-gray-50 border border-gray-100 p-3">
+            <div className="rounded-md bg-gray-50 border border-gray-100 p-3">
               <p className="text-xs text-gray-400 mb-1">{t('appointments.card.price')}</p>
               <p className="font-semibold text-gray-900">{req.quote?.price ?? t('appointments.card.quoteAccepted')}</p>
             </div>
           </div>
 
           {isCancelled && (
-            <p className="text-sm text-gray-600 bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 mt-3">
+            <p className="text-sm text-gray-600 bg-gray-100 border border-gray-200 rounded-md px-3 py-2 mt-3">
               {req.cancelReason
                 ? t('appointments.card.cancelledWithReason', { reason: req.cancelReason })
                 : t('appointments.card.cancelled')}
@@ -127,7 +128,7 @@ function AppointmentCard({ req }: { req: ConfirmedAppointmentRequest }) {
           )}
 
           {appointment.notes && (
-            <p className="text-sm text-gray-600 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 mt-3 whitespace-pre-wrap">
+            <p className="text-sm text-gray-600 bg-slate-50 border border-slate-100 rounded-md px-3 py-2 mt-3 whitespace-pre-wrap">
               {appointment.notes}
             </p>
           )}
@@ -199,11 +200,12 @@ export default function AppointmentsPage() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         <h1 className={styles.title}>{t('appointments.header.title')}</h1>
         <p className={styles.subtitle}>{t('appointments.header.subtitle')}</p>
+        <CustomerActivityTabs />
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-52 bg-white rounded-2xl border border-gray-200" />
+              <div key={i} className="h-52 bg-white rounded-lg border border-gray-200" />
             ))}
           </div>
         ) : appointments.length === 0 ? (

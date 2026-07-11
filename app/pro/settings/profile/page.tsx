@@ -320,7 +320,7 @@ export default function EditProProfilePage() {
               {SOCIAL_FIELDS.map(({ key, labelKey, placeholder, Icon }) => (
                 <div className={styles.field} key={key}>
                   <label className={styles.label} htmlFor={key} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Icon size={15} color="#f97316" />
+                    <Icon size={15} color="#0ea5e9" />
                     {t(`proProfile.social.${labelKey}`)}
                   </label>
                   <input

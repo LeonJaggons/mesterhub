@@ -17,6 +17,7 @@ import {
   type ServiceRequest,
 } from './shared'
 import { ProListSnippet } from './components/ProCard'
+import CustomerActivityTabs from '@/app/components/CustomerActivityTabs'
 import { useTranslations } from '@/lib/i18n/client'
 import { translateCategory } from '@/lib/i18n/taxonomy'
 
@@ -133,7 +134,7 @@ function RequestCard({
   const canDelete = req.status !== 'completed' && !hasAppointment
 
   return (
-    <article className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-slate-300">
+    <article className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-slate-300">
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           {req.pro ? (
@@ -165,7 +166,7 @@ function RequestCard({
         </div>
 
         {req.quote && (req.status === 'quoted' || req.status === 'accepted') && (
-          <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+          <div className="bg-slate-50 border border-slate-200 rounded px-3 py-2">
             <p className="text-xs text-slate-800 font-semibold uppercase tracking-wide mb-0.5">{t('customerRequests.card.quote')}</p>
             <p className="text-sm font-bold text-gray-900">
               {req.quote.price}
@@ -182,22 +183,22 @@ function RequestCard({
           </p>
         )}
 
-        <div className={`mt-4 rounded-xl border px-4 py-3 ${
+        <div className={`mt-4 rounded-md border px-4 py-3 ${
           action.needsAction
-            ? 'border-orange-200 bg-orange-50 text-orange-900'
+            ? 'border-sky-200 bg-sky-50 text-sky-900'
             : 'border-gray-200 bg-gray-50 text-gray-700'
         }`}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className={`text-xs font-black uppercase tracking-widest ${
-                action.needsAction ? 'text-orange-600' : 'text-gray-400'
+                action.needsAction ? 'text-sky-600' : 'text-gray-400'
               }`}>
                 {action.label}
               </p>
               <p className="mt-1 text-sm font-semibold leading-5">{action.body}</p>
             </div>
             {action.needsAction && (
-              <span className="shrink-0 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
+              <span className="shrink-0 rounded-full bg-sky-500 px-2 py-0.5 text-xs font-bold text-white">
                 {t('customerRequests.card.now')}
               </span>
             )}
@@ -211,7 +212,7 @@ function RequestCard({
         </Link>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           {shouldOpenConversation && (
-            <Link href={`/messages/${req.id}`} className="rounded-lg bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-900">
+            <Link href={`/messages/${req.id}`} className="rounded bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-900">
               {t('customerRequests.card.openConversation')}
             </Link>
           )}
@@ -220,7 +221,7 @@ function RequestCard({
               type="button"
               onClick={() => onDelete(req)}
               disabled={isDeleting}
-              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-center text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+              className="rounded border border-red-200 bg-white px-3 py-2 text-center text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
               {isDeleting ? t('customerRequests.card.deleting') : t('customerRequests.card.delete')}
             </button>
@@ -325,11 +326,12 @@ function RequestsPageContent() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         <h1 className={styles.title}>{t('customerRequests.header.title')}</h1>
         <p className={styles.subtitle}>{t('customerRequests.header.subtitle')}</p>
+        <CustomerActivityTabs />
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-40 bg-white rounded-2xl border border-gray-200" />
+              <div key={i} className="h-40 bg-white rounded-lg border border-gray-200" />
             ))}
           </div>
         ) : requests.length === 0 ? (
@@ -343,13 +345,13 @@ function RequestsPageContent() {
         ) : (
           <>
             {deleteError && (
-              <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              <div className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                 {deleteError}
               </div>
             )}
 
             {projectId && (
-              <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-5 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <span className="font-semibold">{t('customerRequests.projectFilter.showing')}</span>
                   <Link href="/requests" className="font-bold text-slate-800 hover:underline">
@@ -393,8 +395,8 @@ function RequestsPageContent() {
                 {actionRequests.length > 0 && (
                   <>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-black uppercase tracking-widest text-orange-500">{t('customerRequests.sections.needsAction')}</span>
-                      <span className="h-px flex-1 bg-orange-100" />
+                      <span className="text-xs font-black uppercase tracking-widest text-sky-500">{t('customerRequests.sections.needsAction')}</span>
+                      <span className="h-px flex-1 bg-sky-100" />
                     </div>
                     {actionRequests.map(req => (
                       <RequestCard
@@ -441,9 +443,10 @@ function RequestsLoadingFallback() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         <h1 className={styles.title}>{t('customerRequests.header.title')}</h1>
         <p className={styles.subtitle}>{t('customerRequests.header.subtitle')}</p>
+        <CustomerActivityTabs />
         <div className="space-y-3 animate-pulse">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-40 bg-white rounded-2xl border border-gray-200" />
+            <div key={i} className="h-40 bg-white rounded-lg border border-gray-200" />
           ))}
         </div>
       </div>
